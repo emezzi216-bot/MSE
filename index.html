@@ -220,11 +220,10 @@
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-interface').style.display = 'block';
                 
-                // Set default date to today
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('doc-date').value = today;
                 
-                addItem(); // Add one empty row by default
+                addItem();
             } else {
                 alert("Code PIN incorrect");
                 document.getElementById('password-input').value = "";
@@ -294,7 +293,7 @@
         // --- 4. GÉNÉRATION DU DOCUMENT ---
         function generatePDF() {
             // Récupération des données
-            const type = document.getElementById('doc-type').value; // "DEVIS" ou "FACTURE"
+            const type = document.getElementById('doc-type').value;
             const num = document.getElementById('doc-num').value || "BROUILLON";
             const dateEmission = document.getElementById('doc-date').value;
             const obj = document.getElementById('doc-obj').value || "Intervention";
@@ -302,17 +301,13 @@
             const clientAddr = document.getElementById('client-address').value.replace(/\n/g, '<br>') || "";
             const hasTVA = document.getElementById('tva-switch').checked;
 
-            // Formatage date
             const d = new Date(dateEmission);
             const dateStr = d.toLocaleDateString('fr-FR');
-            
-            // Calcul date validité/échéance (+30 jours)
             d.setDate(d.getDate() + 30);
             const dateNext = d.toLocaleDateString('fr-FR');
-            
             const labelDateNext = type === "FACTURE" ? "Date d'échéance" : "Validité jusqu'au";
 
-            // Construction Lignes Tableau HTML
+            // Construction Lignes
             let rowsHTML = "";
             let totalHT = 0;
             document.querySelectorAll('.article-row').forEach(row => {
@@ -322,7 +317,6 @@
                 const lineTotal = (qty * pu).toFixed(2);
                 totalHT += parseFloat(lineTotal);
                 
-                // Si TVA off, on n'affiche pas les colonnes TVA
                 const tvaCols = hasTVA 
                     ? `<td class="center">20%</td><td class="right">${(lineTotal * 0.2).toFixed(2)} €</td>`
                     : `<td class="center">-</td><td class="right">-</td>`;
@@ -341,12 +335,10 @@
             const mtTVA = hasTVA ? totalHT * 0.2 : 0;
             const totalTTC = totalHT + mtTVA;
 
-            // HTML pour les totaux
             const tvaRowHTML = hasTVA 
-                ? `<tr><td>Total TVA (20%)</td><td>${mtTVA.toFixed(2)} €</td></tr>` 
+                ? <tr><td>Total TVA (20%)</td><td>${mtTVA.toFixed(2)} €</td></tr> 
                 : '';
             
-            // Logique Pied de page spécifique
             let footerSpecific = "";
             let legalTxt = `Sabri BENNACEUR EI - ${type} ${num}`;
             if (!hasTVA) legalTxt += " - TVA non applicable, art. 293 B du CGI.";
@@ -361,18 +353,18 @@
                 footerSpecific = `<div style="width: 40%; text-align: right;"></div>`;
             }
 
-            // Headers tableau dynamiques (TVA ou pas)
             const theadTva = `
                 <th class="center">TVA</th>
                 <th class="right">Montant TVA</th>
             `;
 
-            // --- TEMPLATE HTML COMPLET ---
+            // --- HTML PDF (AVEC LOGO FIXE ET BALISE BASE) ---
             const finalHTML = `<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>${type} - ${num}</title>
+    <base href="${window.location.href}">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
         body { font-family: 'Roboto', Arial, sans-serif; background-color: #555; margin: 0; padding: 20px; display: flex; justify-content: center; }
@@ -380,9 +372,6 @@
         .header-bg { background-color: #fff; color: #333; padding: 40px; display: flex; justify-content: space-between; border-bottom: 2px solid #eee; }
         .sender-col { width: 55%; }
         .logo-wrapper { margin-bottom: 20px; width: 280px; }
-        .logo-btn { display: block; width: 100%; height: 100px; border: 2px dashed #ccc; background-color: #f9f9f9; color: #666; text-align: center; line-height: 100px; cursor: pointer; font-size: 12px; border-radius: 4px; transition: 0.3s; font-weight: bold; }
-        .logo-btn:hover { border-color: #D32F2F; color: #D32F2F; background-color: #fff0f0; }
-        #display-logo { max-width: 280px; max-height: 150px; display: none; }
         .sender-txt { font-size: 13px; color: #555; line-height: 1.5; }
         .client-box { background-color: #f8f8f8; color: #000; padding: 20px; width: 35%; border-radius: 4px; border-left: 4px solid #333; }
         .content { padding: 40px; }
@@ -403,24 +392,15 @@
         .signature { border: 1px solid #ccc; height: 80px; width: 200px; margin-top: 10px; padding: 5px; }
         .legal-notice { margin-top: 20px; text-align: center; font-size: 11px; font-style: italic; color: #555; }
         .legal-tiny { text-align: center; font-size: 10px; color: #ccc; margin-top: 40px; }
-        @media print { body { background: none; padding: 0; } .page { width: 100%; box-shadow: none; margin: 0; } .logo-btn { display: none; } #display-logo { display: block !important; } }
+        @media print { body { background: none; padding: 0; } .page { width: 100%; box-shadow: none; margin: 0; } }
     </style>
-    <script>
-        function chargerLogo(event) {
-            var reader = new FileReader();
-            reader.onload = function(){ var img = document.getElementById('display-logo'); img.src = reader.result; img.style.display = 'block'; document.getElementById('zone-bouton').style.display = 'none'; };
-            reader.readAsDataURL(event.target.files[0]);
-        }
-    <\/script>
 </head>
 <body>
 <div class="page">
     <div class="header-bg">
         <div class="sender-col">
             <div class="logo-wrapper">
-                <input type="file" id="upload" accept="image/*" style="display:none" onchange="chargerLogo(event)">
-                <label for="upload" class="logo-btn" id="zone-bouton">➕ CLIQUEZ ICI POUR LE LOGO</label>
-                <img id="display-logo" alt="Logo">
+                <img src="logo.png" alt="Logo" style="max-width: 280px; max-height: 150px;">
             </div>
             <div class="sender-txt">
                 <strong>${USER_INFO.name}</strong><br>
