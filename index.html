@@ -3,77 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sabri App - Facturation</title>
+    <title>MSE Facturation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        :root {
-            --primary: #D32F2F;
-            --bg: #f4f4f4;
-            --text: #333;
-            --white: #ffffff;
-        }
-
+        :root { --primary: #D32F2F; --bg: #f4f4f4; --text: #333; --white: #ffffff; }
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); }
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif; background: var(--bg); color: var(--text); padding-bottom: 50px; }
 
-        /* --- ÉCRAN DE CONNEXION --- */
-        #login-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
+        /* --- LOGIN --- */
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         #login-screen h2 { color: var(--primary); margin-bottom: 20px; letter-spacing: 2px; }
-        #password-input {
-            padding: 15px; font-size: 18px; border: 2px solid #333; background: #222; color: #fff; text-align: center; border-radius: 8px; width: 200px; margin-bottom: 20px;
-        }
-        .btn-login {
-            background: var(--primary); color: white; border: none; padding: 12px 30px; font-size: 16px; border-radius: 50px; cursor: pointer; font-weight: bold;
-        }
+        #password-input { padding: 15px; font-size: 24px; border: 2px solid #333; background: #222; color: #fff; text-align: center; border-radius: 8px; width: 150px; margin-bottom: 20px; letter-spacing: 5px; }
+        .btn-login { background: var(--primary); color: white; border: none; padding: 12px 30px; font-size: 16px; border-radius: 50px; cursor: pointer; font-weight: bold; }
 
-        /* --- INTERFACE PRINCIPALE --- */
-        #app-interface { display: none; padding-bottom: 80px; }
-        
-        header { background: var(--white); padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; }
+        /* --- APP --- */
+        #app-interface { display: none; }
+        header { background: var(--white); padding: 15px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         header h1 { margin: 0; font-size: 18px; color: var(--primary); font-weight: 800; }
         .badge { background: #333; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; }
 
         .container { max-width: 600px; margin: 0 auto; padding: 10px; }
-
-        /* ACCORDÉONS */
-        details {
-            background: var(--white); margin-bottom: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden;
-        }
-        summary {
-            padding: 15px; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; background: #fff;
-        }
-        summary::-webkit-details-marker { display: none; }
+        
+        details { background: var(--white); margin-bottom: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
+        summary { padding: 15px; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
         summary::after { content: '+'; font-size: 20px; color: var(--primary); }
         details[open] summary::after { content: '-'; }
-        details[open] summary { border-bottom: 1px solid #eee; }
         .section-content { padding: 15px; }
 
-        /* FORMULAIRES */
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-size: 12px; color: #666; font-weight: 500; text-transform: uppercase; }
-        input, select, textarea {
-            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background: #fdfdfd; appearance: none;
-        }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background: #fdfdfd; }
         input:focus { border-color: var(--primary); }
 
-        /* TABLEAU ARTICLES */
-        .article-row { background: #f9f9f9; border: 1px solid #eee; padding: 10px; border-radius: 6px; margin-bottom: 10px; position: relative; }
+        /* Lignes articles */
+        .article-row { background: #f9f9f9; border: 1px solid #eee; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
         .row-top { display: flex; gap: 10px; margin-bottom: 5px; }
         .desc-input { flex: 1; font-weight: 500; }
         .row-bottom { display: flex; gap: 10px; align-items: center; }
         .qty-input { width: 60px; text-align: center; }
         .price-input { width: 90px; text-align: right; }
         .row-total { flex: 1; text-align: right; font-weight: bold; font-size: 14px; color: #555; }
-        .btn-del { background: #ffebee; color: #c62828; border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-del { background: #ffebee; color: #c62828; border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; }
+        .btn-add { width: 100%; padding: 12px; background: #333; color: white; border: none; border-radius: 6px; font-weight: bold; margin-top: 5px; cursor: pointer; }
 
-        .btn-add {
-            width: 100%; padding: 12px; background: #333; color: white; border: none; border-radius: 6px; font-weight: bold; margin-top: 5px; cursor: pointer;
-        }
-
-        /* SWITCH TVA */
         .switch-wrapper { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
         .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -82,25 +54,62 @@
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(22px); }
 
-        /* TOTAUX */
-        .totals-display { text-align: right; font-size: 14px; line-height: 1.6; }
+        .totals-display { text-align: right; font-size: 14px; }
         .big-total { font-size: 20px; color: var(--primary); font-weight: 800; margin-top: 5px; border-top: 1px solid #ddd; padding-top: 5px; }
 
-        /* ACTION BAR */
-        .action-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px; border-top: 1px solid #eee; display: flex; justify-content: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        /* BOUTON GENERER */
+        .action-bar { padding: 20px; text-align: center; }
+        .btn-generate { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 50px; font-size: 18px; font-weight: bold; width: 100%; max-width: 400px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+        /* --- PREVIEW OVERLAY (Pour éviter le blocage) --- */
+        #preview-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 10000; overflow-y: auto;
+            flex-direction: column; align-items: center; padding: 20px 10px;
         }
-        .btn-generate {
-            background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 50px; font-size: 18px; font-weight: bold; box-shadow: 0 4px 10px rgba(211, 47, 47, 0.4); width: 90%; max-width: 400px;
+        #preview-actions {
+            display: flex; gap: 10px; width: 100%; max-width: 210mm; margin-bottom: 15px;
         }
+        .btn-action { flex: 1; padding: 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; text-align: center; color: white; }
+        .btn-close { background: #555; }
+        .btn-download { background: #2ecc71; } /* Vert pour télécharger */
+        
+        /* Conteneur Papier A4 pour l'aperçu */
+        #paper-preview {
+            background: white; width: 210mm; min-height: 297mm; padding: 0; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            /* Échelle réduite sur mobile pour que ça rentre */
+            transform-origin: top center;
+        }
+        @media (max-width: 800px) {
+            #paper-preview { transform: scale(0.45); margin-bottom: -140mm; } 
+            #preview-actions { max-width: 100%; }
+        }
+
+        /* --- CSS DU DOCUMENT PDF (Interne) --- */
+        .pdf-page { padding: 40px; font-family: 'Roboto', Arial, sans-serif; color: #333; line-height: 1.4; }
+        .pdf-header { display: flex; justify-content: space-between; margin-bottom: 40px; border-bottom: 2px solid #eee; padding-bottom: 20px; }
+        .pdf-logo { max-width: 250px; max-height: 120px; object-fit: contain; }
+        .pdf-sender { font-size: 12px; color: #555; margin-top: 10px; }
+        .pdf-client { background: #f8f8f8; padding: 15px; border-left: 4px solid #333; width: 45%; font-size: 14px; }
+        .pdf-title-row { display: flex; justify-content: space-between; border-bottom: 3px solid #D32F2F; padding-bottom: 10px; margin-bottom: 20px; }
+        .pdf-title { font-size: 24px; font-weight: bold; color: #333; margin: 0; }
+        .pdf-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; }
+        .pdf-table th { background: #333; color: white; padding: 8px; text-align: left; }
+        .pdf-table td { border-bottom: 1px solid #eee; padding: 8px; }
+        .pdf-totals { float: right; width: 300px; }
+        .pdf-totals td { text-align: right; padding: 4px; }
+        .pdf-ttc { font-size: 16px; font-weight: bold; color: #D32F2F; border-top: 1px solid #000; }
+        .pdf-footer { margin-top: 50px; font-size: 10px; color: #666; border-top: 1px solid #ddd; padding-top: 10px; clear: both; }
+        .pdf-bank { background: #f0f0f0; padding: 10px; margin-top: 10px; font-family: monospace; }
+        .pdf-signature { border: 1px solid #ccc; height: 60px; width: 150px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <h2>SABRI APP</h2>
-        <input type="tel" id="password-input" placeholder="Code PIN" maxlength="4">
-        <button class="btn-login" onclick="checkLogin()">ENTRER</button>
+        <input type="tel" id="password-input" placeholder="PIN" maxlength="4">
+        <button class="btn-login" onclick="checkLogin()">OK</button>
     </div>
 
     <div id="app-interface">
@@ -110,355 +119,222 @@
         </header>
 
         <div class="container">
-            <form id="doc-form">
-                
-                <details open>
-                    <summary>Informations Document</summary>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label>Type de document</label>
-                            <select id="doc-type" onchange="updateUI()">
-                                <option value="DEVIS">DEVIS</option>
-                                <option value="FACTURE">FACTURE</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Numéro</label>
-                            <input type="text" id="doc-num" placeholder="ex: 2025-001">
-                        </div>
-                        <div class="form-group">
-                            <label>Date d'émission</label>
-                            <input type="date" id="doc-date">
-                        </div>
-                        <div class="form-group">
-                            <label>Objet</label>
-                            <input type="text" id="doc-obj" placeholder="ex: Remplacement serrure">
-                        </div>
+            <details open><summary>Infos</summary>
+                <div class="section-content">
+                    <div class="form-group"><label>Type</label><select id="doc-type" onchange="updateUI()"><option value="DEVIS">DEVIS</option><option value="FACTURE">FACTURE</option></select></div>
+                    <div class="form-group"><label>Numéro</label><input type="text" id="doc-num" placeholder="2025-001"></div>
+                    <div class="form-group"><label>Date</label><input type="date" id="doc-date"></div>
+                    <div class="form-group"><label>Objet</label><input type="text" id="doc-obj" placeholder="Objet de l'intervention"></div>
+                </div>
+            </details>
+
+            <details><summary>Client</summary>
+                <div class="section-content">
+                    <div class="form-group"><label>Nom</label><input type="text" id="client-name" list="clients-list" placeholder="Nom du client"></div>
+                    <div class="form-group"><label>Adresse</label><textarea id="client-address" rows="3" placeholder="Adresse complète"></textarea></div>
+                    <datalist id="clients-list"><option value="COMMUNE DE CRETEIL - CCAS"><option value="Particulier"></datalist>
+                </div>
+            </details>
+
+            <details><summary>Articles</summary>
+                <div class="section-content">
+                    <div id="items-container"></div>
+                    <button type="button" class="btn-add" onclick="addItem()">+ LIGNE</button>
+                    <datalist id="desc-list">
+                        <option value="Main d'œuvre"><option value="Déplacement"><option value="Serrure 3 points"><option value="Ouverture de porte">
+                    </datalist>
+                </div>
+            </details>
+
+            <details open><summary>Total</summary>
+                <div class="section-content">
+                    <div class="switch-wrapper"><span>TVA (20%)</span><label class="switch"><input type="checkbox" id="tva-switch" checked onchange="calculate()"><span class="slider"></span></label></div>
+                    <div class="totals-display">
+                        <div>HT : <span id="disp-ht">0.00 €</span></div>
+                        <div id="row-tva">TVA : <span id="disp-tva">0.00 €</span></div>
+                        <div class="big-total">TTC : <span id="disp-ttc">0.00 €</span></div>
                     </div>
-                </details>
+                </div>
+            </details>
 
-                <details>
-                    <summary>Client</summary>
-                    <div class="section-content">
-                        <div class="form-group">
-                            <label>Nom du client</label>
-                            <input type="text" id="client-name" list="clients-list" placeholder="Rechercher ou saisir...">
-                            <datalist id="clients-list">
-                                <option value="COMMUNE DE CRETEIL - CCAS">
-                                <option value="Particulier">
-                                <option value="Agence Immobilière">
-                            </datalist>
-                        </div>
-                        <div class="form-group">
-                            <label>Adresse complète</label>
-                            <textarea id="client-address" rows="3" placeholder="Adresse, Code Postal, Ville"></textarea>
-                        </div>
-                    </div>
-                </details>
-
-                <details>
-                    <summary>Articles & Prestations</summary>
-                    <div class="section-content">
-                        <div id="items-container">
-                            </div>
-                        <button type="button" class="btn-add" onclick="addItem()">+ AJOUTER LIGNE</button>
-                        
-                        <datalist id="desc-list">
-                            <option value="Main d'œuvre">
-                            <option value="Déplacement">
-                            <option value="Serrure 3 points">
-                            <option value="Ouverture de porte claquée">
-                            <option value="Forfait blindage">
-                        </datalist>
-                    </div>
-                </details>
-
-                <details open>
-                    <summary>Totaux & TVA</summary>
-                    <div class="section-content">
-                        <div class="switch-wrapper">
-                            <span>Appliquer TVA (20%)</span>
-                            <label class="switch">
-                                <input type="checkbox" id="tva-switch" checked onchange="calculate()">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        
-                        <div class="totals-display">
-                            <div>Total HT : <span id="disp-ht">0.00 €</span></div>
-                            <div id="row-tva">TVA (20%) : <span id="disp-tva">0.00 €</span></div>
-                            <div class="big-total">TOTAL TTC : <span id="disp-ttc">0.00 €</span></div>
-                        </div>
-                    </div>
-                </details>
-
-            </form>
-        </div>
-
-        <div class="action-bar">
-            <button class="btn-generate" onclick="generatePDF()">GÉNÉRER LE PDF</button>
+            <div class="action-bar">
+                <button class="btn-generate" onclick="preparePreview()">VISUALISER & TÉLÉCHARGER</button>
+            </div>
         </div>
     </div>
 
-    <script>
-        // --- DONNÉES FIXES ---
-        const USER_INFO = {
-            name: "Sabri BENNACEUR EI",
-            address: "2 Résidence des Rosiers, 92800 Puteaux, FR",
-            email: "serruremse@gmail.com",
-            siret: "943032755",
-            rc: "RC décennale TETRIS police n° SV75018041T37384",
-            iban: "FR76 1695 8000 0159 6810 0824 765",
-            bic: "ONTO FR P1 XXX"
-        };
+    <div id="preview-overlay">
+        <div id="preview-actions">
+            <button class="btn-action btn-close" onclick="closePreview()">✖ FERMER</button>
+            <button class="btn-action btn-download" onclick="downloadPDF()">⬇️ TÉLÉCHARGER PDF</button>
+        </div>
+        <div id="paper-preview"></div>
+    </div>
 
-        // --- 1. SÉCURITÉ ---
+    <script>
+        const USER = { name: "Sabri BENNACEUR EI", address: "2 Résidence des Rosiers, 92800 Puteaux, FR", email: "serruremse@gmail.com", siret: "943032755", iban: "FR76 1695 8000 0159 6810 0824 765" };
+
         function checkLogin() {
-            const p = document.getElementById('password-input').value;
-            // Code PIN fixé à 1984
-            if (p === "1984") {
+            if(document.getElementById('password-input').value === "1984") {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-interface').style.display = 'block';
-                
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('doc-date').value = today;
-                
+                document.getElementById('doc-date').value = new Date().toISOString().split('T')[0];
                 addItem();
-            } else {
-                alert("Code PIN incorrect");
-                document.getElementById('password-input').value = "";
-            }
+            } else { alert("Code faux"); }
         }
 
-        // --- 2. LOGIQUE UI ---
-        function updateUI() {
-            const type = document.getElementById('doc-type').value;
-            document.getElementById('header-type').innerText = type;
-        }
+        function updateUI() { document.getElementById('header-type').innerText = document.getElementById('doc-type').value; }
 
         function addItem() {
-            const container = document.getElementById('items-container');
             const id = Date.now();
-            const html = `
-                <div class="article-row" id="row-${id}">
-                    <div class="row-top">
-                        <input type="text" class="desc-input" placeholder="Description" list="desc-list">
-                        <button type="button" class="btn-del" onclick="removeRow('${id}')">✕</button>
-                    </div>
-                    <div class="row-bottom">
-                        <input type="number" class="qty-input" value="1" min="1" oninput="calculate()" placeholder="Qté">
-                        <input type="number" class="price-input" step="0.01" oninput="calculate()" placeholder="Prix HT">
-                        <span class="row-total">0.00 €</span>
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', html);
+            const div = document.createElement('div');
+            div.className = 'article-row';
+            div.id = 'row-' + id;
+            div.innerHTML = `
+                <div class="row-top"><input class="desc-input" placeholder="Description" list="desc-list"><button class="btn-del" onclick="removeRow('${id}')">✕</button></div>
+                <div class="row-bottom"><input type="number" class="qty-input" value="1" oninput="calculate()"><input type="number" class="price-input" placeholder="Prix" oninput="calculate()"><span class="row-total">0.00 €</span></div>`;
+            document.getElementById('items-container').appendChild(div);
         }
 
-        function removeRow(id) {
-            document.getElementById(`row-${id}`).remove();
-            calculate();
-        }
+        function removeRow(id) { document.getElementById('row-' + id).remove(); calculate(); }
 
-        // --- 3. CALCULS ---
         function calculate() {
-            let totalHT = 0;
-            const rows = document.querySelectorAll('.article-row');
-            
-            rows.forEach(row => {
-                const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
-                const price = parseFloat(row.querySelector('.price-input').value) || 0;
-                const lineTotal = qty * price;
-                
-                row.querySelector('.row-total').innerText = lineTotal.toFixed(2) + ' €';
-                totalHT += lineTotal;
+            let total = 0;
+            document.querySelectorAll('.article-row').forEach(row => {
+                const q = parseFloat(row.querySelector('.qty-input').value) || 0;
+                const p = parseFloat(row.querySelector('.price-input').value) || 0;
+                const t = q * p;
+                row.querySelector('.row-total').innerText = t.toFixed(2) + ' €';
+                total += t;
             });
-
-            const hasTVA = document.getElementById('tva-switch').checked;
-            const montantTVA = hasTVA ? totalHT * 0.20 : 0;
-            const totalTTC = totalHT + montantTVA;
-
-            document.getElementById('disp-ht').innerText = totalHT.toFixed(2) + ' €';
-            
-            if(hasTVA) {
-                document.getElementById('row-tva').style.display = 'block';
-                document.getElementById('disp-tva').innerText = montantTVA.toFixed(2) + ' €';
-            } else {
-                document.getElementById('row-tva').style.display = 'none';
-            }
-            
-            document.getElementById('disp-ttc').innerText = totalTTC.toFixed(2) + ' €';
+            const tva = document.getElementById('tva-switch').checked ? total * 0.2 : 0;
+            document.getElementById('disp-ht').innerText = total.toFixed(2) + ' €';
+            document.getElementById('disp-tva').innerText = tva.toFixed(2) + ' €';
+            document.getElementById('row-tva').style.display = document.getElementById('tva-switch').checked ? 'block' : 'none';
+            document.getElementById('disp-ttc').innerText = (total + tva).toFixed(2) + ' €';
         }
 
-        // --- 4. GÉNÉRATION DU DOCUMENT ---
-        function generatePDF() {
-            // Récupération des données
+        // --- GÉNÉRATION HTML ---
+        function getDocHTML() {
             const type = document.getElementById('doc-type').value;
-            const num = document.getElementById('doc-num').value || "BROUILLON";
-            const dateEmission = document.getElementById('doc-date').value;
-            const obj = document.getElementById('doc-obj').value || "Intervention";
-            const clientName = document.getElementById('client-name').value || "Client";
-            const clientAddr = document.getElementById('client-address').value.replace(/\n/g, '<br>') || "";
-            const hasTVA = document.getElementById('tva-switch').checked;
-
-            const d = new Date(dateEmission);
-            const dateStr = d.toLocaleDateString('fr-FR');
+            const num = document.getElementById('doc-num').value || "Brouillon";
+            const date = new Date(document.getElementById('doc-date').value).toLocaleDateString('fr-FR');
+            
+            // Calcul date échéance
+            const d = new Date(document.getElementById('doc-date').value);
             d.setDate(d.getDate() + 30);
-            const dateNext = d.toLocaleDateString('fr-FR');
-            const labelDateNext = type === "FACTURE" ? "Date d'échéance" : "Validité jusqu'au";
-
-            // Construction Lignes
-            let rowsHTML = "";
+            const dateFin = d.toLocaleDateString('fr-FR');
+            
+            const hasTVA = document.getElementById('tva-switch').checked;
+            
+            // Lignes du tableau
+            let rows = "";
             let totalHT = 0;
             document.querySelectorAll('.article-row').forEach(row => {
                 const desc = row.querySelector('.desc-input').value;
                 const qty = row.querySelector('.qty-input').value;
-                const pu = parseFloat(row.querySelector('.price-input').value).toFixed(2);
-                const lineTotal = (qty * pu).toFixed(2);
-                totalHT += parseFloat(lineTotal);
+                const pu = parseFloat(row.querySelector('.price-input').value) || 0;
+                const tot = qty * pu;
+                totalHT += tot;
                 
-                const tvaCols = hasTVA 
-                    ? `<td class="center">20%</td><td class="right">${(lineTotal * 0.2).toFixed(2)} €</td>`
-                    : `<td class="center">-</td><td class="right">-</td>`;
-
-                rowsHTML += `
-                    <tr>
-                        <td>${desc}</td>
-                        <td class="center">${qty}</td>
-                        <td class="right">${pu} €</td>
-                        <td class="right">${lineTotal} €</td>
-                        ${tvaCols}
-                    </tr>
-                `;
+                rows += `<tr>
+                    <td>${desc}</td>
+                    <td style="text-align:center">${qty}</td>
+                    <td style="text-align:right">${pu.toFixed(2)} €</td>
+                    <td style="text-align:right">${tot.toFixed(2)} €</td>
+                    ${hasTVA ? '<td style="text-align:center">20%</td>' : ''}
+                </tr>`;
             });
 
             const mtTVA = hasTVA ? totalHT * 0.2 : 0;
-            const totalTTC = totalHT + mtTVA;
+            const ttc = totalHT + mtTVA;
 
-            const tvaRowHTML = hasTVA 
-                ? <tr><td>Total TVA (20%)</td><td>${mtTVA.toFixed(2)} €</td></tr> 
-                : '';
+            // HTML DU PAPIER
+            return `
+            <div class="pdf-page">
+                <div class="pdf-header">
+                    <div style="width:50%">
+                        <img src="logo.png" class="pdf-logo" alt="Logo"><br>
+                        <div class="pdf-sender">
+                            <strong>${USER.name}</strong><br>${USER.address}<br>SIRET: ${USER.siret}<br>Email: ${USER.email}
+                        </div>
+                    </div>
+                    <div class="pdf-client">
+                        <strong>FACTURER À :</strong><br>
+                        ${document.getElementById('client-name').value}<br>
+                        ${document.getElementById('client-address').value.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+
+                <div class="pdf-title-row">
+                    <div>
+                        <h1 class="pdf-title">${type} N° ${num}</h1>
+                        <div style="color:#D32F2F;margin-top:5px">Objet : ${document.getElementById('doc-obj').value}</div>
+                    </div>
+                    <div style="text-align:right; font-size:12px;">
+                        Date : ${date}<br>
+                        ${type === 'DEVIS' ? 'Validité' : 'Échéance'} : ${dateFin}
+                    </div>
+                </div>
+
+                <table class="pdf-table">
+                    <thead><tr><th width="40%">Désignation</th><th>Qté</th><th style="text-align:right">PU HT</th><th style="text-align:right">Total HT</th>${hasTVA ? '<th>TVA</th>' : ''}</tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+
+                <div class="pdf-totals">
+                    <table style="width:100%">
+                        <tr><td>Total HT :</td><td>${totalHT.toFixed(2)} €</td></tr>
+                        ${hasTVA ? `<tr><td>TVA (20%) :</td><td>${mtTVA.toFixed(2)} €</td></tr>` : ''}
+                        <tr><td class="pdf-ttc">NET À PAYER :</td><td class="pdf-ttc">${ttc.toFixed(2)} €</td></tr>
+                    </table>
+                </div>
+
+                <div class="pdf-footer">
+                    <div style="display:flex; justify-content:space-between">
+                        <div style="width:60%">
+                            <strong>Conditions :</strong> Paiement à 30 jours.<br>
+                            <div class="pdf-bank">IBAN : ${USER.iban}</div>
+                        </div>
+                        <div style="width:35%; text-align:right">
+                            ${type === 'DEVIS' ? 'Bon pour accord (Date & Signature)' : ''}
+                            ${type === 'DEVIS' ? '<div class="pdf-signature"></div>' : ''}
+                        </div>
+                    </div>
+                    <div style="text-align:center; margin-top:20px; color:#aaa">
+                        ${USER.name} - ${type} ${num} ${!hasTVA ? '- TVA non applicable, art. 293 B du CGI.' : ''}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function preparePreview() {
+            // Insère le HTML dans la zone d'aperçu
+            document.getElementById('paper-preview').innerHTML = getDocHTML();
+            // Affiche l'overlay
+            document.getElementById('preview-overlay').style.display = 'flex';
+        }
+
+        function closePreview() {
+            document.getElementById('preview-overlay').style.display = 'none';
+        }
+
+        function downloadPDF() {
+            // Utilise la bibliothèque html2pdf
+            const element = document.getElementById('paper-preview');
+            const type = document.getElementById('doc-type').value;
+            const num = document.getElementById('doc-num').value || "doc";
             
-            let footerSpecific = "";
-            let legalTxt = `Sabri BENNACEUR EI - ${type} ${num}`;
-            if (!hasTVA) legalTxt += " - TVA non applicable, art. 293 B du CGI.";
+            const opt = {
+                margin: 0,
+                filename: `${type}_${num}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
 
-            if (type === "DEVIS") {
-                footerSpecific = `
-                    <div style="width: 40%; text-align: right;">
-                        <strong>Validation :</strong>
-                        <div class="signature">Mention "Bon pour accord",<br>Date et Signature :</div>
-                    </div>`;
-            } else {
-                footerSpecific = `<div style="width: 40%; text-align: right;"></div>`;
-            }
-
-            const theadTva = `
-                <th class="center">TVA</th>
-                <th class="right">Montant TVA</th>
-            `;
-
-            // --- HTML PDF (AVEC LOGO FIXE ET BALISE BASE) ---
-            const finalHTML = `<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>${type} - ${num}</title>
-    <base href="${window.location.href}">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-        body { font-family: 'Roboto', Arial, sans-serif; background-color: #555; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .page { width: 210mm; min-height: 297mm; background-color: white; box-shadow: 0 0 15px rgba(0,0,0,0.5); position: relative; box-sizing: border-box; }
-        .header-bg { background-color: #fff; color: #333; padding: 40px; display: flex; justify-content: space-between; border-bottom: 2px solid #eee; }
-        .sender-col { width: 55%; }
-        .logo-wrapper { margin-bottom: 20px; width: 280px; }
-        .sender-txt { font-size: 13px; color: #555; line-height: 1.5; }
-        .client-box { background-color: #f8f8f8; color: #000; padding: 20px; width: 35%; border-radius: 4px; border-left: 4px solid #333; }
-        .content { padding: 40px; }
-        .title-row { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #D32F2F; padding-bottom: 15px; margin-bottom: 30px; }
-        h1 { margin: 0; font-size: 32px; color: #333; }
-        .dates { text-align: right; font-size: 13px; color: #555; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 30px; }
-        th { background-color: #333; color: #fff; padding: 10px; text-align: left; text-transform: uppercase; font-weight: bold; }
-        td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: top; }
-        .right { text-align: right; }
-        .center { text-align: center; }
-        .totals-box { display: flex; justify-content: flex-end; }
-        .totals-table { width: 300px; }
-        .totals-table td { text-align: right; padding: 5px 0; font-size: 14px; }
-        .ttc-row td { font-size: 18px; font-weight: bold; color: #D32F2F; border-top: 2px solid #000; padding-top: 10px; margin-top: 5px; }
-        .footer { margin-top: 50px; border-top: 1px solid #ddd; padding-top: 20px; display: flex; justify-content: space-between; font-size: 12px; color: #555; }
-        .bank { background: #f9f9f9; padding: 10px; border-left: 3px solid #D32F2F; font-family: monospace; margin-top: 10px; }
-        .signature { border: 1px solid #ccc; height: 80px; width: 200px; margin-top: 10px; padding: 5px; }
-        .legal-notice { margin-top: 20px; text-align: center; font-size: 11px; font-style: italic; color: #555; }
-        .legal-tiny { text-align: center; font-size: 10px; color: #ccc; margin-top: 40px; }
-        @media print { body { background: none; padding: 0; } .page { width: 100%; box-shadow: none; margin: 0; } }
-    </style>
-</head>
-<body>
-<div class="page">
-    <div class="header-bg">
-        <div class="sender-col">
-            <div class="logo-wrapper">
-                <img src="logo.png" alt="Logo" style="max-width: 280px; max-height: 150px;">
-            </div>
-            <div class="sender-txt">
-                <strong>${USER_INFO.name}</strong><br>
-                ${USER_INFO.address}<br>
-                Email : ${USER_INFO.email}<br>
-                SIRET : ${USER_INFO.siret}<br>
-                ${USER_INFO.rc}
-            </div>
-        </div>
-        <div class="client-box">
-            <strong style="color:#D32F2F; font-size:10px; text-transform:uppercase;">Facturer à :</strong><br><br>
-            <strong style="font-size:16px;">${clientName}</strong><br>
-            ${clientAddr}
-        </div>
-    </div>
-    <div class="content">
-        <div class="title-row">
-            <div><h1>${type} N° ${num}</h1><div style="color:#D32F2F; font-weight:bold; margin-top:5px;">Objet : ${obj}</div></div>
-            <div class="dates"><strong>Date d'émission :</strong> ${dateStr}<br><strong>${labelDateNext} :</strong> ${dateNext}</div>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 45%;">Désignation</th>
-                    <th class="center">Qté</th>
-                    <th class="right">P.U. HT</th>
-                    <th class="right">Total HT</th>
-                    ${theadTva}
-                </tr>
-            </thead>
-            <tbody>
-                ${rowsHTML}
-            </tbody>
-        </table>
-        <div class="totals-box">
-            <table class="totals-table">
-                <tr><td>Total HT</td><td>${totalHT.toFixed(2)} €</td></tr>
-                ${tvaRowHTML}
-                <tr class="ttc-row"><td>NET À PAYER TTC</td><td>${totalTTC.toFixed(2)} €</td></tr>
-            </table>
-        </div>
-        <div class="footer">
-            <div style="width: 55%;">
-                <strong>Conditions de règlement :</strong><br>Paiement à 30 jours (réception).<br>Retard : Pénalités légales + 40€. Pas d'escompte.<br>
-                <div class="bank">IBAN : ${USER_INFO.iban}<br>BIC : ${USER_INFO.bic}</div>
-            </div>
-            ${footerSpecific}
-        </div>
-        ${type === 'FACTURE' ? '<div class="legal-notice">Cette facture concerne uniquement de la prestation de service.</div>' : ''}
-        <div class="legal-tiny">${legalTxt}</div>
-    </div>
-</div>
-</body>
-</html>`;
-
-            const win = window.open('', '_blank');
-            win.document.write(finalHTML);
-            win.document.close();
+            // Lance le téléchargement
+            html2pdf().set(opt).from(element).save();
         }
     </script>
 </body>
