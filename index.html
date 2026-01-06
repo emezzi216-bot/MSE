@@ -7,8 +7,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root { 
-            --gold: #C5A059; /* Or Mat */
-            --gold-bright: #E6C878; /* Or Brillant */
+            --gold: #C5A059; 
+            --gold-bright: #E6C878; 
             --red: #D32F2F; 
             --bg-dark: #121212;
             --text: #333;
@@ -16,98 +16,59 @@
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif; background: #f4f4f4; color: var(--text); height: 100vh; overflow: hidden; }
 
-        /* --- 1. ÉCRAN DE CONNEXION (LUXE) --- */
+        /* --- ICONS SVG (Vectoriels) --- */
+        .icon-sm { width: 18px; height: 18px; fill: currentColor; }
+        .icon-white { fill: white; }
+
+        /* --- LOGIN --- */
         #login-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: radial-gradient(circle at center, #2a2a2a 0%, #000000 100%);
             z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; 
             padding: 20px;
         }
-
-        /* Logo Entreprise */
-        .login-brand-logo {
-            max-width: 85%;
-            height: auto;
-            max-height: 220px;
-            margin-bottom: 50px;
-            /* Ombre portée dorée subtile */
-            filter: drop-shadow(0 0 25px rgba(197, 160, 89, 0.2)); 
-        }
-        
-        /* Champ PIN */
+        .login-brand-logo { max-width: 85%; height: auto; max-height: 220px; margin-bottom: 50px; filter: drop-shadow(0 0 25px rgba(197, 160, 89, 0.2)); }
         #password-input { 
             padding: 15px; font-size: 28px; 
             border: 3px solid var(--gold); background: rgba(255,255,255,0.05); 
             color: var(--gold-bright); text-align: center; border-radius: 12px; width: 180px; 
-            margin-bottom: 40px; letter-spacing: 8px; font-weight:bold;
+            margin-bottom: 30px; letter-spacing: 8px; font-weight:bold;
             box-shadow: 0 0 20px rgba(197, 160, 89, 0.2);
         }
+        .btn-login-gold {
+            background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #000; border: none;
+            padding: 15px 60px; font-size: 16px; border-radius: 50px; cursor: pointer; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;
+            box-shadow: 0 5px 20px rgba(197, 160, 89, 0.4); transition: transform 0.2s;
+        }
+        .btn-login-gold:active { transform: scale(0.95); }
 
-        /* Bouton Clé Géante */
-        .btn-key-unlock { 
-            background: transparent; border: none; cursor: pointer; 
-            padding: 10px;
-            transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
-            /* Effet 3D lumineux */
-            filter: drop-shadow(0 5px 15px rgba(197, 160, 89, 0.4));
-        }
-        .btn-key-unlock:active {
-             transform: scale(0.92);
-             filter: drop-shadow(0 2px 5px rgba(197, 160, 89, 0.8));
-        }
-
-        /* Icône Vectorielle HD */
-        .key-icon-svg {
-            width: 150px; /* Taille optimale Mobile */
-            height: 150px;
-            display: block;
-        }
-        @media (min-width: 768px) {
-            .key-icon-svg { width: 180px; height: 180px; } /* Plus grand sur PC */
-        }
-
-        /* --- 2. HOME SCREEN (LE HUB) --- */
+        /* --- HOME --- */
         #view-home { 
             display: none; height: 100vh; background: var(--bg-dark); 
             flex-direction: column; align-items: center; justify-content: center; padding: 20px;
         }
-        .home-logo-container { margin-bottom: 50px; text-align: center; }
-        .home-logo { max-width: 80%; max-height: 200px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(255,255,255,0.1)); }
-        
+        .home-logo { max-width: 80%; max-height: 200px; object-fit: contain; margin-bottom: 50px; }
         .big-btn {
-            width: 100%; max-width: 350px; height: 80px; margin-bottom: 20px;
-            border: none; border-radius: 12px;
-            font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+            width: 100%; max-width: 350px; height: 70px; margin-bottom: 20px;
+            border: none; border-radius: 12px; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
             cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             display: flex; align-items: center; justify-content: center; gap: 15px;
-            transition: transform 0.1s;
         }
-        .big-btn:active { transform: scale(0.98); }
-        
         .btn-gold { background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #000; }
         .btn-red { background: linear-gradient(135deg, #FF5252, #D32F2F); color: white; }
-        
-        .btn-history {
-            margin-top: 30px; background: transparent; border: 1px solid #444; color: #888;
-            padding: 10px 20px; border-radius: 30px; font-size: 14px; cursor: pointer;
-        }
+        .btn-history { margin-top: 20px; background: transparent; border: 1px solid #444; color: #888; padding: 10px 25px; border-radius: 30px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; }
 
-        /* --- 3. EDITOR SCREEN --- */
+        /* --- EDITOR --- */
         #view-editor { display: none; height: 100vh; overflow-y: auto; background: #f4f4f4; padding-bottom: 40px; }
-        
         header { 
-            padding: 15px; position: sticky; top: 0; z-index: 100; 
-            display: flex; align-items: center; justify-content: space-between; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
-            color: white; transition: background 0.3s;
+            padding: 15px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: white; transition: background 0.3s;
         }
-        .header-left { display: flex; align-items: center; gap: 15px; }
-        .btn-home { background: rgba(0,0,0,0.2); border: none; color: white; width: 35px; height: 35px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        header h1 { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: 1px; }
-
+        .btn-icon { background: rgba(0,0,0,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        header h1 { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+        
         .container { max-width: 600px; margin: 0 auto; padding: 15px; }
-
-        details { background: white; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; }
+        details { background: white; margin-bottom: 12px; border-radius: 8px; overflow: hidden; }
         summary { padding: 15px; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
         .section-content { padding: 15px; }
         
@@ -115,46 +76,47 @@
         label { display: block; margin-bottom: 5px; font-size: 11px; color: #888; font-weight: 700; text-transform: uppercase; }
         input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background: #fafafa; }
         
-        .article-row { background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 6px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .row-top { display: flex; gap: 10px; margin-bottom: 5px; }
+        .article-row { background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 6px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px; }
+        .row-top { display: flex; gap: 10px; align-items: center; }
         .desc-input { flex: 1; font-weight: 500; }
         .row-bottom { display: flex; gap: 10px; align-items: center; }
         .qty-input { width: 60px; text-align: center; }
         .price-input { width: 90px; text-align: right; }
-        .row-total { flex: 1; text-align: right; font-weight: bold; font-size: 14px; color: #555; }
         
-        .btn-add { width: 100%; padding: 12px; background: #333; color: white; border: none; border-radius: 6px; font-weight: bold; margin-top: 5px; cursor: pointer; }
-        .btn-del { background: #ffebee; color: #c62828; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; }
+        .btn-trash { background: #ffebee; color: #c62828; border: none; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .btn-add { 
+            width: 100%; padding: 15px; background: #333; color: white; border: none; border-radius: 6px; font-weight: bold; margin-top: 5px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
         
         .action-bar { padding: 20px; text-align: center; }
-        .btn-generate { 
-            color: white; border: none; padding: 16px 40px; border-radius: 50px; 
-            font-size: 18px; font-weight: bold; width: 100%; max-width: 400px; 
-            cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
-        }
+        .btn-generate { color: white; border: none; padding: 16px 40px; border-radius: 50px; font-size: 16px; font-weight: bold; width: 100%; max-width: 400px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* --- 4. HISTORY SCREEN --- */
+        /* --- HISTORY --- */
         #view-history { display: none; height: 100vh; overflow-y: auto; background: #f4f4f4; }
         .history-header { background: #333; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; }
-        .history-card { background: white; padding: 15px; border-radius: 8px; margin: 10px 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 5px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .history-card { background: white; padding: 15px; border-radius: 8px; margin: 10px 15px; border-left: 5px solid #333; display: flex; justify-content: space-between; align-items: center; }
 
-        /* --- PREVIEW --- */
+        /* --- PDF PREVIEW --- */
         #preview-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 20000; flex-direction: column; align-items: center; padding: 20px 10px; overflow-y: auto; }
         #preview-actions { display: flex; gap: 10px; width: 100%; max-width: 210mm; margin-bottom: 15px; }
-        .btn-action { flex: 1; padding: 15px; border-radius: 8px; border: none; font-weight: bold; color: white; cursor: pointer; }
+        .btn-action { flex: 1; padding: 15px; border-radius: 8px; border: none; font-weight: bold; color: white; cursor: pointer; text-transform: uppercase; }
         .btn-close { background: #555; }
         .btn-download { background: #2ecc71; }
         #paper-preview { background: white; width: 210mm; min-height: 297mm; transform-origin: top center; }
         @media (max-width: 800px) { #paper-preview { transform: scale(0.45); margin-bottom: -150mm; } }
 
-        /* PDF STYLES */
+        /* PDF GENERATED STYLES - STRICT CHARTE SABRI */
         .pdf-page { padding: 40px; font-family: 'Roboto', Arial, sans-serif; color: #333; line-height: 1.4; }
         .pdf-logo { max-width: 250px; max-height: 120px; }
         .pdf-header { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px; }
-        .pdf-title { font-size: 28px; font-weight: bold; text-transform: uppercase; margin: 0; }
+        .pdf-title { font-size: 28px; font-weight: bold; text-transform: uppercase; margin: 0; color: #333; }
         .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
-        .pdf-table th { color: white; padding: 10px; text-align: left; }
+        /* Têtes de tableau toujours NOIRES #333 */
+        .pdf-table th { background-color: #333; color: white; padding: 12px 10px; text-align: left; font-weight: bold; text-transform: uppercase; }
         .pdf-table td { border-bottom: 1px solid #eee; padding: 10px; }
+        .pdf-ttc-row td { color: #D32F2F; font-weight: bold; font-size: 16px; border-top: 2px solid #333; }
+        .pdf-bank { background: #f9f9f9; padding: 10px; border-left: 3px solid #D32F2F; font-family: monospace; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -163,21 +125,8 @@
 
     <div id="login-screen">
         <img src="logo.png" class="login-brand-logo" alt="MSE" onerror="this.style.display='none'">
-        
         <input type="tel" id="password-input" placeholder="••••" maxlength="4">
-        
-        <button class="btn-key-unlock" onclick="checkLogin()" aria-label="Déverrouiller">
-            <svg class="key-icon-svg" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <linearGradient id="gold-grad-icon" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#F0E68C;stop-opacity:1" />
-                        <stop offset="50%" style="stop-color:#C5A059;stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:#B8860B;stop-opacity:1" />
-                    </linearGradient>
-                </defs>
-                <path fill="url(#gold-grad-icon)" d="M336 0c-88.37 0-160 71.63-160 160 0 32.22 9.77 62.17 26.55 87.45L9.36 380.64c-12.48 12.48-12.48 32.72 0 45.2l45.25 45.25c12.48 12.48 32.72 12.48 45.2 0l25.55-25.55 45.25 45.25c12.48 12.48 32.72 12.48 45.2 0l45.25-45.25c12.48-12.48 12.48-32.72 0-45.2l-25.55-25.55 133.19-193.19C394.17 188.77 424.11 198.54 456.33 198.54c88.37 0 160-71.63 160-160C616.33 71.63 544.7 0 456.33 0H336zm0 64h120.33c53.02 0 96 42.98 96 96s-42.98 96-96 96c-19.33 0-37.31-5.86-52.44-15.93l-10.45-6.97-142.12 206.09 36.27 36.27c12.48 12.48 12.48 32.72 0 45.2l-22.62 22.62-67.88-67.88 22.62-22.62c12.48-12.48 32.72-12.48 45.2 0l36.27 36.27 186.06-186.06-6.97-10.45C373.31 101.31 392.64 64 336 64zm64 48c-17.67 0-32 14.33-32 32s14.33 32 32 32 32-14.33 32-32-14.33-32-32-32z"/>
-            </svg>
-        </button>
+        <button class="btn-login-gold" onclick="checkLogin()">ENTRER</button>
     </div>
 
     <div id="view-home">
@@ -185,33 +134,26 @@
             <img src="logo.png" class="home-logo" onerror="this.style.display='none'; document.getElementById('txt-logo').style.display='block'">
             <h1 id="txt-logo" style="display:none; color:var(--gold); font-size:40px; margin:0;">MSE</h1>
         </div>
-        
-        <button class="big-btn btn-gold" onclick="openJourney('FACTURE')">
-            <span>💶</span> Facture
-        </button>
-        
-        <button class="big-btn btn-red" onclick="openJourney('DEVIS')">
-            <span>📜</span> Devis
-        </button>
-
-        <button class="btn-history" onclick="openHistory()">
-            Voir l'historique
-        </button>
+        <button class="big-btn btn-gold" onclick="openJourney('FACTURE')">FACTURE</button>
+        <button class="big-btn btn-red" onclick="openJourney('DEVIS')">DEVIS</button>
+        <button class="btn-history" onclick="openHistory()">HISTORIQUE</button>
     </div>
 
     <div id="view-editor">
         <header id="editor-header">
             <div class="header-left">
-                <button class="btn-home" onclick="goHome()">🏠</button>
-                <h1 id="header-title">FACTURE</h1>
+                <button class="btn-icon" onclick="goHome()">
+                    <svg class="icon-white icon-sm" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                </button>
+                <h1 id="header-title" style="margin-left:15px">FACTURE</h1>
             </div>
-            <div id="header-num" style="font-size:12px; opacity:0.8;">N° ---</div>
+            <div id="header-num" style="font-size:12px; opacity:0.8; font-weight:normal">MODE ÉDITION</div>
         </header>
 
         <div class="container">
             <input type="hidden" id="current-type" value="FACTURE">
 
-            <details open><summary>Informations</summary>
+            <details open><summary>INFORMATIONS</summary>
                 <div class="section-content">
                     <div class="form-group"><label>Numéro</label><input type="text" id="doc-num" placeholder="Auto ou 2026-01"></div>
                     <div class="form-group"><label>Date d'émission</label><input type="date" id="doc-date"></div>
@@ -219,7 +161,7 @@
                 </div>
             </details>
 
-            <details><summary>Client</summary>
+            <details><summary>CLIENT</summary>
                 <div class="section-content">
                     <div class="form-group"><label>Nom du client</label><input type="text" id="client-name" list="clients-list" placeholder="Nom ou Société"></div>
                     <div class="form-group"><label>Adresse</label><textarea id="client-address" rows="3" placeholder="Adresse complète"></textarea></div>
@@ -227,17 +169,20 @@
                 </div>
             </details>
 
-            <details open><summary>Prestations</summary>
+            <details open><summary>PRESTATIONS</summary>
                 <div class="section-content">
                     <div id="items-container"></div>
-                    <button type="button" class="btn-add" onclick="addItem()">+ AJOUTER LIGNE</button>
+                    <button type="button" class="btn-add" onclick="addItem()">
+                        <svg class="icon-white icon-sm" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                        AJOUTER UNE LIGNE
+                    </button>
                     <datalist id="desc-list">
                         <option value="Main d'œuvre"><option value="Déplacement"><option value="Serrure 3 points"><option value="Ouverture de porte claquée"><option value="Blindage">
                     </datalist>
                 </div>
             </details>
 
-            <details open><summary>Paiement & Totaux</summary>
+            <details open><summary>TOTAL</summary>
                 <div class="section-content">
                     <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center">
                         <label>Appliquer TVA (20%)</label>
@@ -246,7 +191,7 @@
                     <div style="text-align:right; line-height:1.6">
                         <div>Total HT : <strong id="disp-ht">0.00 €</strong></div>
                         <div id="row-tva">TVA (20%) : <strong id="disp-tva">0.00 €</strong></div>
-                        <div style="font-size:22px; font-weight:800; color:#333; margin-top:10px; border-top:1px solid #ddd; padding-top:5px;">
+                        <div style="font-size:20px; font-weight:800; color:#333; margin-top:10px; border-top:1px solid #ddd; padding-top:5px;">
                             NET À PAYER : <span id="disp-ttc">0.00 €</span>
                         </div>
                     </div>
@@ -261,16 +206,18 @@
 
     <div id="view-history">
         <div class="history-header">
-            <button class="btn-home" onclick="goHome()">🏠</button>
-            <h1>HISTORIQUE</h1>
+            <button class="btn-icon" onclick="goHome()">
+                <svg class="icon-white icon-sm" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            </button>
+            <h1 style="margin-left:15px">HISTORIQUE</h1>
         </div>
-        <div id="history-container"></div>
+        <div id="history-container" style="padding:15px;"></div>
     </div>
 
     <div id="preview-overlay">
         <div id="preview-actions">
-            <button class="btn-action btn-close" onclick="closePreview()">✖ RETOUR</button>
-            <button class="btn-action btn-download" onclick="downloadPDF()">⬇️ TÉLÉCHARGER</button>
+            <button class="btn-action btn-close" onclick="closePreview()">RETOUR</button>
+            <button class="btn-action btn-download" onclick="downloadPDF()">TÉLÉCHARGER</button>
         </div>
         <div id="paper-preview"></div>
     </div>
@@ -306,13 +253,11 @@
             title.innerText = type;
 
             if (type === 'FACTURE') {
-                header.style.background = '#C5A059';
+                header.style.background = '#C5A059'; // OR
                 btnGen.style.background = '#C5A059';
-                document.getElementById('header-num').innerText = "Mode Facturation";
             } else {
-                header.style.background = '#D32F2F';
+                header.style.background = '#D32F2F'; // ROUGE
                 btnGen.style.background = '#D32F2F';
-                document.getElementById('header-num').innerText = "Mode Devis";
             }
             if(document.getElementById('items-container').children.length === 0) addItem();
         }
@@ -329,8 +274,16 @@
             div.className = 'article-row';
             div.id = 'row-' + id;
             div.innerHTML = `
-                <div class="row-top"><input class="desc-input" placeholder="Description" list="desc-list" value="${desc}"><button class="btn-del" onclick="removeRow('${id}')">✕</button></div>
-                <div class="row-bottom"><input type="number" class="qty-input" value="${qty}" oninput="calculate()"><input type="number" class="price-input" placeholder="Prix HT" value="${price}" oninput="calculate()"><span class="row-total">0.00 €</span></div>`;
+                <div class="row-top">
+                    <input class="desc-input" placeholder="Description" list="desc-list" value="${desc}">
+                    <button class="btn-trash" onclick="removeRow('${id}')">
+                        <svg class="icon-sm" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    </button>
+                </div>
+                <div class="row-bottom">
+                    <input type="number" class="qty-input" value="${qty}" oninput="calculate()" placeholder="Qté">
+                    <input type="number" class="price-input" placeholder="Prix HT" value="${price}" oninput="calculate()">
+                </div>`;
             document.getElementById('items-container').appendChild(div);
             calculate();
         }
@@ -343,7 +296,6 @@
                 const q = parseFloat(row.querySelector('.qty-input').value) || 0;
                 const p = parseFloat(row.querySelector('.price-input').value) || 0;
                 const t = q * p;
-                row.querySelector('.row-total').innerText = t.toFixed(2) + ' €';
                 total += t;
             });
             const tvaOn = document.getElementById('tva-switch').checked;
@@ -425,8 +377,8 @@
             const d = new Date(document.getElementById('doc-date').value); d.setDate(d.getDate() + 30);
             const dateFin = d.toLocaleDateString('fr-FR');
             const labelFin = type === 'FACTURE' ? "Date d'échéance" : "Validité";
-            const themeColor = type === 'FACTURE' ? '#C5A059' : '#D32F2F';
             const hasTVA = document.getElementById('tva-switch').checked;
+            
             let rows = ""; let totalHT = 0;
             document.querySelectorAll('.article-row').forEach(row => {
                 const desc = row.querySelector('.desc-input').value;
@@ -436,15 +388,35 @@
                 rows += `<tr><td>${desc}</td><td style="text-align:center">${qty}</td><td style="text-align:right">${pu.toFixed(2)} €</td><td style="text-align:right">${tot.toFixed(2)} €</td></tr>`;
             });
             const mtTVA = hasTVA ? totalHT * 0.2 : 0; const ttc = totalHT + mtTVA;
+            
             let logoHTML = customLogoData ? `<img src="${customLogoData}" class="pdf-logo">` : `<img src="logo.png" id="pdf-logo-img" class="pdf-logo" onerror="onLogoError(this)"><div id="fallback-logo-btn" style="display:none; border:2px dashed #ccc; padding:10px; text-align:center; cursor:pointer" onclick="triggerUpload()">AJOUTER LOGO</div>`;
+            
             return `
             <div class="pdf-page">
                 <div class="pdf-header"><div style="width:50%">${logoHTML}</div><div style="width:45%; text-align:right"><div style="font-size:14px"><strong>${USER.name}</strong></div><div style="font-size:11px; color:#555">${USER.address}<br>SIRET: ${USER.siret}<br>${USER.email}</div></div></div>
-                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:30px; border-bottom:3px solid ${themeColor}; padding-bottom:10px;"><div><h1 class="pdf-title" style="color:${themeColor}">${type} N° ${num}</h1><div style="font-size:14px; margin-top:5px">Objet : ${document.getElementById('doc-obj').value}</div></div><div style="text-align:right; font-size:12px"><div>Date d'émission : ${date}</div><div>${labelFin} : ${dateFin}</div></div></div>
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:30px; border-bottom:3px solid #D32F2F; padding-bottom:10px;">
+                    <div><h1 class="pdf-title">${type} N° ${num}</h1><div style="font-size:14px; margin-top:5px">Objet : ${document.getElementById('doc-obj').value}</div></div>
+                    <div style="text-align:right; font-size:12px"><div>Date d'émission : ${date}</div><div>${labelFin} : ${dateFin}</div></div>
+                </div>
                 <div style="background:#f8f8f8; padding:15px; border-left:4px solid #333; margin-bottom:30px; font-size:14px;"><strong>CLIENT :</strong><br>${document.getElementById('client-name').value}<br>${document.getElementById('client-address').value.replace(/\n/g, '<br>')}</div>
-                <table class="pdf-table"><thead><tr style="background:${themeColor}"><th>DESIGNATION</th><th style="text-align:center">QTE</th><th style="text-align:right">PU HT</th><th style="text-align:right">TOTAL HT</th></tr></thead><tbody>${rows}</tbody></table>
-                <div style="display:flex; justify-content:flex-end"><table style="width:40%; border-collapse:collapse; font-size:13px"><tr><td style="text-align:right; padding:5px">Total HT :</td><td style="text-align:right; padding:5px">${totalHT.toFixed(2)} €</td></tr>${hasTVA ? `<tr><td style="text-align:right; padding:5px">TVA (20%) :</td><td style="text-align:right; padding:5px">${mtTVA.toFixed(2)} €</td></tr>` : ''}<tr style="font-size:16px; font-weight:bold; color:${themeColor}; border-top:2px solid #ddd"><td style="text-align:right; padding:10px">NET À PAYER :</td><td style="text-align:right; padding:10px">${ttc.toFixed(2)} €</td></tr></table></div>
-                <div style="margin-top:50px; font-size:11px; color:#555; border-top:1px solid #eee; padding-top:15px"><div style="display:flex; justify-content:space-between"><div style="width:60%"><strong>CONDITIONS :</strong> Paiement à 30 jours.<br><div style="background:#f0f0f0; padding:8px; margin-top:5px; font-family:monospace">IBAN : ${USER.iban}</div></div><div style="width:30%; text-align:right">${type === 'DEVIS' ? 'Bon pour accord<br>(Date & Signature)' : ''}</div></div><div style="text-align:center; margin-top:30px; color:#aaa">${USER.name} - ${type} ${num} ${!hasTVA ? '- TVA non applicable, art. 293 B du CGI.' : ''}</div></div>
+                <table class="pdf-table">
+                    <thead><tr><th>DESIGNATION</th><th style="text-align:center">QTE</th><th style="text-align:right">PU HT</th><th style="text-align:right">TOTAL HT</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                <div style="display:flex; justify-content:flex-end">
+                    <table style="width:40%; border-collapse:collapse; font-size:13px">
+                        <tr><td style="text-align:right; padding:5px">Total HT :</td><td style="text-align:right; padding:5px">${totalHT.toFixed(2)} €</td></tr>
+                        ${hasTVA ? `<tr><td style="text-align:right; padding:5px">TVA (20%) :</td><td style="text-align:right; padding:5px">${mtTVA.toFixed(2)} €</td></tr>` : ''}
+                        <tr class="pdf-ttc-row"><td style="text-align:right; padding:10px">NET À PAYER :</td><td style="text-align:right; padding:10px">${ttc.toFixed(2)} €</td></tr>
+                    </table>
+                </div>
+                <div style="margin-top:50px; font-size:11px; color:#555; border-top:1px solid #eee; padding-top:15px">
+                    <div style="display:flex; justify-content:space-between">
+                        <div style="width:60%"><strong>CONDITIONS :</strong> Paiement à 30 jours.<br><div class="pdf-bank">IBAN : ${USER.iban}</div></div>
+                        <div style="width:30%; text-align:right">${type === 'DEVIS' ? 'Bon pour accord<br>(Date & Signature)' : ''}</div>
+                    </div>
+                    <div style="text-align:center; margin-top:30px; color:#aaa">${USER.name} - ${type} ${num} ${!hasTVA ? '- TVA non applicable, art. 293 B du CGI.' : ''}</div>
+                </div>
             </div>`;
         }
 
