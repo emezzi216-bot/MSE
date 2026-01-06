@@ -3,39 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MSE Facturation</title>
+    <title>MSE Gestion</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        :root { --primary: #D32F2F; --bg: #f4f4f4; --text: #333; --white: #ffffff; }
+        :root { --primary: #D32F2F; --secondary: #1976D2; --bg: #f4f4f4; --text: #333; --white: #ffffff; }
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif; background: var(--bg); color: var(--text); padding-bottom: 50px; }
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif; background: var(--bg); color: var(--text); padding-bottom: 80px; }
 
-        /* --- LOGIN --- */
+        /* LOGIN */
         #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         #login-screen h2 { color: var(--primary); margin-bottom: 20px; letter-spacing: 2px; }
         #password-input { padding: 15px; font-size: 24px; border: 2px solid #333; background: #222; color: #fff; text-align: center; border-radius: 8px; width: 150px; margin-bottom: 20px; letter-spacing: 5px; }
         .btn-login { background: var(--primary); color: white; border: none; padding: 12px 30px; font-size: 16px; border-radius: 50px; cursor: pointer; font-weight: bold; }
 
-        /* --- APP --- */
-        #app-interface { display: none; }
+        /* NAVIGATION BAR */
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #ddd; display: flex; justify-content: space-around; padding: 10px 0; z-index: 900; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-item { border: none; background: none; display: flex; flex-direction: column; align-items: center; font-size: 10px; color: #777; width: 33%; cursor: pointer; }
+        .nav-item span { font-size: 20px; margin-bottom: 3px; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+        .nav-item.active-blue { color: var(--secondary); font-weight: bold; }
+
+        /* VIEWS */
+        .view-section { display: none; padding-top: 10px; }
+        .view-section.active { display: block; }
+
+        /* HEADER & FORM */
         header { background: var(--white); padding: 15px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         header h1 { margin: 0; font-size: 18px; color: var(--primary); font-weight: 800; }
         .badge { background: #333; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; }
-
-        .container { max-width: 600px; margin: 0 auto; padding: 10px; }
         
+        /* LISTE HISTORIQUE */
+        .history-list { padding: 15px; }
+        .history-card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 5px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .card-info h3 { margin: 0 0 5px 0; font-size: 16px; }
+        .card-info p { margin: 0; font-size: 12px; color: #666; }
+        .card-price { font-weight: bold; font-size: 16px; }
+        .card-actions { margin-left: 10px; display: flex; gap: 10px; }
+        .btn-mini { border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        .btn-load { background: #e3f2fd; color: #1976D2; }
+        .btn-trash { background: #ffebee; color: #c62828; }
+
+        /* Container & Forms */
+        .container { max-width: 600px; margin: 0 auto; padding: 10px; }
         details { background: var(--white); margin-bottom: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
         summary { padding: 15px; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
-        summary::after { content: '+'; font-size: 20px; color: var(--primary); }
-        details[open] summary::after { content: '-'; }
         .section-content { padding: 15px; }
-
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-size: 12px; color: #666; font-weight: 500; text-transform: uppercase; }
         input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background: #fdfdfd; }
-        input:focus { border-color: var(--primary); }
-
-        /* Lignes articles */
+        
         .article-row { background: #f9f9f9; border: 1px solid #eee; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
         .row-top { display: flex; gap: 10px; margin-bottom: 5px; }
         .desc-input { flex: 1; font-weight: 500; }
@@ -50,45 +66,29 @@
         .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(22px); }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
 
         .totals-display { text-align: right; font-size: 14px; }
         .big-total { font-size: 20px; color: var(--primary); font-weight: 800; margin-top: 5px; border-top: 1px solid #ddd; padding-top: 5px; }
-
-        /* BOUTON GENERER */
         .action-bar { padding: 20px; text-align: center; }
         .btn-generate { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 50px; font-size: 18px; font-weight: bold; width: 100%; max-width: 400px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
-        /* --- PREVIEW OVERLAY (Pour éviter le blocage) --- */
-        #preview-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 10000; overflow-y: auto;
-            flex-direction: column; align-items: center; padding: 20px 10px;
-        }
-        #preview-actions {
-            display: flex; gap: 10px; width: 100%; max-width: 210mm; margin-bottom: 15px;
-        }
+        /* PREVIEW */
+        #preview-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; overflow-y: auto; flex-direction: column; align-items: center; padding: 20px 10px; }
+        #preview-actions { display: flex; gap: 10px; width: 100%; max-width: 210mm; margin-bottom: 15px; }
         .btn-action { flex: 1; padding: 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; text-align: center; color: white; }
         .btn-close { background: #555; }
-        .btn-download { background: #2ecc71; } /* Vert pour télécharger */
-        
-        /* Conteneur Papier A4 pour l'aperçu */
-        #paper-preview {
-            background: white; width: 210mm; min-height: 297mm; padding: 0; box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            /* Échelle réduite sur mobile pour que ça rentre */
-            transform-origin: top center;
-        }
-        @media (max-width: 800px) {
-            #paper-preview { transform: scale(0.45); margin-bottom: -140mm; } 
-            #preview-actions { max-width: 100%; }
-        }
+        .btn-download { background: #2ecc71; }
+        #paper-preview { background: white; width: 210mm; min-height: 297mm; padding: 0; box-shadow: 0 0 20px rgba(0,0,0,0.5); transform-origin: top center; }
+        @media (max-width: 800px) { #paper-preview { transform: scale(0.45); margin-bottom: -140mm; } #preview-actions { max-width: 100%; } }
 
-        /* --- CSS DU DOCUMENT PDF (Interne) --- */
+        /* PDF CSS */
         .pdf-page { padding: 40px; font-family: 'Roboto', Arial, sans-serif; color: #333; line-height: 1.4; }
         .pdf-header { display: flex; justify-content: space-between; margin-bottom: 40px; border-bottom: 2px solid #eee; padding-bottom: 20px; }
         .pdf-logo { max-width: 250px; max-height: 120px; object-fit: contain; }
+        .logo-fallback { width: 100%; height: 80px; border: 2px dashed #ccc; background: #f9f9f9; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #666; cursor: pointer; font-weight: bold; border-radius: 4px; }
         .pdf-sender { font-size: 12px; color: #555; margin-top: 10px; }
         .pdf-client { background: #f8f8f8; padding: 15px; border-left: 4px solid #333; width: 45%; font-size: 14px; }
         .pdf-title-row { display: flex; justify-content: space-between; border-bottom: 3px solid #D32F2F; padding-bottom: 10px; margin-bottom: 20px; }
@@ -106,20 +106,22 @@
 </head>
 <body>
 
+    <input type="file" id="manual-logo-input" accept="image/*" style="display:none" onchange="previewManualLogo(this)">
+
     <div id="login-screen">
         <h2>SABRI APP</h2>
         <input type="tel" id="password-input" placeholder="PIN" maxlength="4">
         <button class="btn-login" onclick="checkLogin()">OK</button>
     </div>
 
-    <div id="app-interface">
-        <header>
+    <div id="view-editor" class="view-section active">
+        <header id="header-bar">
             <h1>MA SERRURE EXPRESS</h1>
             <span class="badge" id="header-type">DEVIS</span>
         </header>
 
         <div class="container">
-            <details open><summary>Infos</summary>
+            <details open><summary>Infos Document</summary>
                 <div class="section-content">
                     <div class="form-group"><label>Type</label><select id="doc-type" onchange="updateUI()"><option value="DEVIS">DEVIS</option><option value="FACTURE">FACTURE</option></select></div>
                     <div class="form-group"><label>Numéro</label><input type="text" id="doc-num" placeholder="2025-001"></div>
@@ -151,49 +153,103 @@
                     <div class="switch-wrapper"><span>TVA (20%)</span><label class="switch"><input type="checkbox" id="tva-switch" checked onchange="calculate()"><span class="slider"></span></label></div>
                     <div class="totals-display">
                         <div>HT : <span id="disp-ht">0.00 €</span></div>
-                        <div id="row-tva">TVA : <span id="disp-tva">0.00 €</span></div>
+                        <div>TVA : <span id="disp-tva">0.00 €</span></div>
                         <div class="big-total">TTC : <span id="disp-ttc">0.00 €</span></div>
                     </div>
                 </div>
             </details>
 
             <div class="action-bar">
-                <button class="btn-generate" onclick="preparePreview()">VISUALISER & TÉLÉCHARGER</button>
+                <button class="btn-generate" onclick="saveAndPreview()">VISUALISER & ENREGISTRER</button>
             </div>
         </div>
+    </div>
+
+    <div id="view-devis" class="view-section">
+        <header style="background:#e3f2fd; border-bottom:1px solid #1976D2;">
+            <h1 style="color:#1976D2;">MES DEVIS</h1>
+        </header>
+        <div class="container history-list" id="list-devis"></div>
+    </div>
+
+    <div id="view-factures" class="view-section">
+        <header>
+            <h1>MES FACTURES</h1>
+        </header>
+        <div class="container history-list" id="list-factures"></div>
+    </div>
+
+    <div class="nav-bar">
+        <button class="nav-item active" onclick="switchView('view-editor', this)">
+            <span>➕</span>Nouveau
+        </button>
+        <button class="nav-item" onclick="switchView('view-devis', this); renderHistory('DEVIS')">
+            <span>📜</span>Devis
+        </button>
+        <button class="nav-item" onclick="switchView('view-factures', this); renderHistory('FACTURE')">
+            <span>💶</span>Factures
+        </button>
     </div>
 
     <div id="preview-overlay">
         <div id="preview-actions">
             <button class="btn-action btn-close" onclick="closePreview()">✖ FERMER</button>
-            <button class="btn-action btn-download" onclick="downloadPDF()">⬇️ TÉLÉCHARGER PDF</button>
+            <button class="btn-action btn-download" onclick="downloadPDF()">⬇️ PDF</button>
         </div>
         <div id="paper-preview"></div>
     </div>
 
     <script>
         const USER = { name: "Sabri BENNACEUR EI", address: "2 Résidence des Rosiers, 92800 Puteaux, FR", email: "serruremse@gmail.com", siret: "943032755", iban: "FR76 1695 8000 0159 6810 0824 765" };
+        let customLogoData = null;
 
         function checkLogin() {
             if(document.getElementById('password-input').value === "1984") {
                 document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('app-interface').style.display = 'block';
                 document.getElementById('doc-date').value = new Date().toISOString().split('T')[0];
                 addItem();
             } else { alert("Code faux"); }
         }
 
-        function updateUI() { document.getElementById('header-type').innerText = document.getElementById('doc-type').value; }
+        // --- NAVIGATION ---
+        function switchView(viewId, btn) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'active-blue'));
+            if(viewId === 'view-devis') btn.classList.add('active-blue');
+            else btn.classList.add('active');
+        }
 
-        function addItem() {
-            const id = Date.now();
+        // --- CORE LOGIC ---
+        function updateUI() {
+            const type = document.getElementById('doc-type').value;
+            const h = document.getElementById('header-bar');
+            const t = document.getElementById('header-type');
+            const btn = document.querySelector('.btn-generate');
+            
+            t.innerText = type;
+            if(type === 'DEVIS') {
+                h.querySelector('h1').style.color = '#1976D2'; // Bleu
+                t.style.background = '#1976D2';
+                btn.style.background = '#1976D2';
+            } else {
+                h.querySelector('h1').style.color = '#D32F2F'; // Rouge
+                t.style.background = '#333';
+                btn.style.background = '#D32F2F';
+            }
+        }
+
+        function addItem(desc='', qty=1, price='') {
+            const id = Date.now() + Math.random();
             const div = document.createElement('div');
             div.className = 'article-row';
             div.id = 'row-' + id;
             div.innerHTML = `
-                <div class="row-top"><input class="desc-input" placeholder="Description" list="desc-list"><button class="btn-del" onclick="removeRow('${id}')">✕</button></div>
-                <div class="row-bottom"><input type="number" class="qty-input" value="1" oninput="calculate()"><input type="number" class="price-input" placeholder="Prix" oninput="calculate()"><span class="row-total">0.00 €</span></div>`;
+                <div class="row-top"><input class="desc-input" placeholder="Description" list="desc-list" value="${desc}"><button class="btn-del" onclick="removeRow('${id}')">✕</button></div>
+                <div class="row-bottom"><input type="number" class="qty-input" value="${qty}" oninput="calculate()"><input type="number" class="price-input" placeholder="Prix" value="${price}" oninput="calculate()"><span class="row-total">0.00 €</span></div>`;
             document.getElementById('items-container').appendChild(div);
+            calculate();
         }
 
         function removeRow(id) { document.getElementById('row-' + id).remove(); calculate(); }
@@ -210,24 +266,129 @@
             const tva = document.getElementById('tva-switch').checked ? total * 0.2 : 0;
             document.getElementById('disp-ht').innerText = total.toFixed(2) + ' €';
             document.getElementById('disp-tva').innerText = tva.toFixed(2) + ' €';
-            document.getElementById('row-tva').style.display = document.getElementById('tva-switch').checked ? 'block' : 'none';
             document.getElementById('disp-ttc').innerText = (total + tva).toFixed(2) + ' €';
         }
 
-        // --- GÉNÉRATION HTML ---
+        // --- HISTORIQUE & SAUVEGARDE ---
+        function saveAndPreview() {
+            saveToHistory();
+            preparePreview();
+        }
+
+        function saveToHistory() {
+            const docData = {
+                id: Date.now(),
+                type: document.getElementById('doc-type').value,
+                num: document.getElementById('doc-num').value || 'Sans N°',
+                date: document.getElementById('doc-date').value,
+                client: document.getElementById('client-name').value || 'Client Inconnu',
+                obj: document.getElementById('doc-obj').value,
+                address: document.getElementById('client-address').value,
+                tva: document.getElementById('tva-switch').checked,
+                total: document.getElementById('disp-ttc').innerText,
+                items: []
+            };
+
+            document.querySelectorAll('.article-row').forEach(row => {
+                docData.items.push({
+                    desc: row.querySelector('.desc-input').value,
+                    qty: row.querySelector('.qty-input').value,
+                    price: row.querySelector('.price-input').value
+                });
+            });
+
+            const history = JSON.parse(localStorage.getItem('mse_docs') || '[]');
+            // Check if already exists (simple update based on Num if needed, here we just push new)
+            history.unshift(docData);
+            localStorage.setItem('mse_docs', JSON.stringify(history));
+        }
+
+        function renderHistory(filterType) {
+            const history = JSON.parse(localStorage.getItem('mse_docs') || '[]');
+            const container = filterType === 'DEVIS' ? document.getElementById('list-devis') : document.getElementById('list-factures');
+            container.innerHTML = '';
+
+            const filtered = history.filter(d => d.type === filterType);
+
+            if(filtered.length === 0) {
+                container.innerHTML = '<p style="text-align:center;color:#999;margin-top:20px">Aucun document.</p>';
+                return;
+            }
+
+            filtered.forEach((doc, index) => {
+                const div = document.createElement('div');
+                div.className = 'history-card';
+                if(filterType === 'DEVIS') div.style.borderLeftColor = '#1976D2';
+                else div.style.borderLeftColor = '#D32F2F';
+
+                div.innerHTML = `
+                    <div class="card-info">
+                        <h3>${doc.num} - ${doc.client}</h3>
+                        <p>${new Date(doc.date).toLocaleDateString('fr-FR')} • ${doc.obj}</p>
+                    </div>
+                    <div class="card-price" style="color:${filterType==='DEVIS'?'#1976D2':'#D32F2F'}">${doc.total}</div>
+                    <div class="card-actions">
+                        <button class="btn-mini btn-load" onclick='loadDoc(${JSON.stringify(doc)})'>📂</button>
+                        <button class="btn-mini btn-trash" onclick="deleteDoc(${doc.id}, '${filterType}')">🗑️</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function loadDoc(doc) {
+            // Switch to editor
+            document.querySelector('.nav-item').click(); // Click "Nouveau" tab
+            
+            // Fill fields
+            document.getElementById('doc-type').value = doc.type;
+            document.getElementById('doc-num').value = doc.num;
+            document.getElementById('doc-date').value = doc.date;
+            document.getElementById('client-name').value = doc.client;
+            document.getElementById('client-address').value = doc.address;
+            document.getElementById('doc-obj').value = doc.obj;
+            document.getElementById('tva-switch').checked = doc.tva;
+            
+            updateUI(); // Update colors
+
+            // Fill items
+            document.getElementById('items-container').innerHTML = '';
+            doc.items.forEach(item => addItem(item.desc, item.qty, item.price));
+            
+            calculate();
+        }
+
+        function deleteDoc(id, type) {
+            if(!confirm("Supprimer ce document ?")) return;
+            let history = JSON.parse(localStorage.getItem('mse_docs') || '[]');
+            history = history.filter(d => d.id !== id);
+            localStorage.setItem('mse_docs', JSON.stringify(history));
+            renderHistory(type);
+        }
+
+        // --- LOGO & PDF ---
+        function onLogoError(img) { img.style.display = 'none'; document.getElementById('fallback-btn').style.display = 'flex'; }
+        function triggerLogoUpload() { document.getElementById('manual-logo-input').click(); }
+        function previewManualLogo(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    customLogoData = e.target.result;
+                    const img = document.getElementById('preview-img-tag');
+                    if(img) { img.src = customLogoData; img.style.display = 'block'; document.getElementById('fallback-btn').style.display = 'none'; }
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
         function getDocHTML() {
             const type = document.getElementById('doc-type').value;
             const num = document.getElementById('doc-num').value || "Brouillon";
             const date = new Date(document.getElementById('doc-date').value).toLocaleDateString('fr-FR');
-            
-            // Calcul date échéance
-            const d = new Date(document.getElementById('doc-date').value);
-            d.setDate(d.getDate() + 30);
+            const d = new Date(document.getElementById('doc-date').value); d.setDate(d.getDate() + 30);
             const dateFin = d.toLocaleDateString('fr-FR');
-            
             const hasTVA = document.getElementById('tva-switch').checked;
             
-            // Lignes du tableau
             let rows = "";
             let totalHT = 0;
             document.querySelectorAll('.article-row').forEach(row => {
@@ -236,105 +397,43 @@
                 const pu = parseFloat(row.querySelector('.price-input').value) || 0;
                 const tot = qty * pu;
                 totalHT += tot;
-                
-                rows += `<tr>
-                    <td>${desc}</td>
-                    <td style="text-align:center">${qty}</td>
-                    <td style="text-align:right">${pu.toFixed(2)} €</td>
-                    <td style="text-align:right">${tot.toFixed(2)} €</td>
-                    ${hasTVA ? '<td style="text-align:center">20%</td>' : ''}
-                </tr>`;
+                rows += `<tr><td>${desc}</td><td style="text-align:center">${qty}</td><td style="text-align:right">${pu.toFixed(2)} €</td><td style="text-align:right">${tot.toFixed(2)} €</td>${hasTVA ? '<td style="text-align:center">20%</td>' : ''}</tr>`;
             });
 
             const mtTVA = hasTVA ? totalHT * 0.2 : 0;
             const ttc = totalHT + mtTVA;
+            const color = type === 'DEVIS' ? '#1976D2' : '#D32F2F';
 
-            // HTML DU PAPIER
+            let logoHTML = customLogoData ? `<img src="${customLogoData}" class="pdf-logo" id="preview-img-tag">` : `<img src="logo.png" class="pdf-logo" id="preview-img-tag" onerror="onLogoError(this)"><div id="fallback-btn" class="logo-fallback" style="display:none" onclick="triggerLogoUpload()">➕ LOGO</div>`;
+
             return `
             <div class="pdf-page">
                 <div class="pdf-header">
-                    <div style="width:50%">
-                        <img src="logo.png" class="pdf-logo" alt="Logo"><br>
-                        <div class="pdf-sender">
-                            <strong>${USER.name}</strong><br>${USER.address}<br>SIRET: ${USER.siret}<br>Email: ${USER.email}
-                        </div>
-                    </div>
-                    <div class="pdf-client">
-                        <strong>FACTURER À :</strong><br>
-                        ${document.getElementById('client-name').value}<br>
-                        ${document.getElementById('client-address').value.replace(/\n/g, '<br>')}
-                    </div>
+                    <div style="width:50%">${logoHTML}<div class="pdf-sender"><strong>${USER.name}</strong><br>${USER.address}<br>SIRET: ${USER.siret}<br>Email: ${USER.email}</div></div>
+                    <div class="pdf-client"><strong>FACTURER À :</strong><br>${document.getElementById('client-name').value}<br>${document.getElementById('client-address').value.replace(/\n/g, '<br>')}</div>
                 </div>
-
-                <div class="pdf-title-row">
-                    <div>
-                        <h1 class="pdf-title">${type} N° ${num}</h1>
-                        <div style="color:#D32F2F;margin-top:5px">Objet : ${document.getElementById('doc-obj').value}</div>
-                    </div>
-                    <div style="text-align:right; font-size:12px;">
-                        Date : ${date}<br>
-                        ${type === 'DEVIS' ? 'Validité' : 'Échéance'} : ${dateFin}
-                    </div>
+                <div class="pdf-title-row" style="border-bottom-color:${color}">
+                    <div><h1 class="pdf-title" style="color:${color}">${type} N° ${num}</h1><div style="color:${color};margin-top:5px">Objet : ${document.getElementById('doc-obj').value}</div></div>
+                    <div style="text-align:right; font-size:12px;">Date : ${date}<br>${type === 'DEVIS' ? 'Validité' : 'Échéance'} : ${dateFin}</div>
                 </div>
-
                 <table class="pdf-table">
-                    <thead><tr><th width="40%">Désignation</th><th>Qté</th><th style="text-align:right">PU HT</th><th style="text-align:right">Total HT</th>${hasTVA ? '<th>TVA</th>' : ''}</tr></thead>
+                    <thead><tr><th width="40%" style="background:${color}">Désignation</th><th style="background:${color}">Qté</th><th style="background:${color};text-align:right">PU HT</th><th style="background:${color};text-align:right">Total HT</th>${hasTVA ? `<th style="background:${color}">TVA</th>` : ''}</tr></thead>
                     <tbody>${rows}</tbody>
                 </table>
-
-                <div class="pdf-totals">
-                    <table style="width:100%">
-                        <tr><td>Total HT :</td><td>${totalHT.toFixed(2)} €</td></tr>
-                        ${hasTVA ? `<tr><td>TVA (20%) :</td><td>${mtTVA.toFixed(2)} €</td></tr>` : ''}
-                        <tr><td class="pdf-ttc">NET À PAYER :</td><td class="pdf-ttc">${ttc.toFixed(2)} €</td></tr>
-                    </table>
-                </div>
-
-                <div class="pdf-footer">
-                    <div style="display:flex; justify-content:space-between">
-                        <div style="width:60%">
-                            <strong>Conditions :</strong> Paiement à 30 jours.<br>
-                            <div class="pdf-bank">IBAN : ${USER.iban}</div>
-                        </div>
-                        <div style="width:35%; text-align:right">
-                            ${type === 'DEVIS' ? 'Bon pour accord (Date & Signature)' : ''}
-                            ${type === 'DEVIS' ? '<div class="pdf-signature"></div>' : ''}
-                        </div>
-                    </div>
-                    <div style="text-align:center; margin-top:20px; color:#aaa">
-                        ${USER.name} - ${type} ${num} ${!hasTVA ? '- TVA non applicable, art. 293 B du CGI.' : ''}
-                    </div>
-                </div>
+                <div class="pdf-totals"><table style="width:100%"><tr><td>Total HT :</td><td>${totalHT.toFixed(2)} €</td></tr>${hasTVA ? `<tr><td>TVA (20%) :</td><td>${mtTVA.toFixed(2)} €</td></tr>` : ''}<tr><td class="pdf-ttc" style="color:${color}">NET À PAYER :</td><td class="pdf-ttc" style="color:${color}">${ttc.toFixed(2)} €</td></tr></table></div>
+                <div class="pdf-footer"><div style="display:flex; justify-content:space-between"><div style="width:60%"><strong>Conditions :</strong> Paiement à 30 jours.<br><div class="pdf-bank" style="border-left:3px solid ${color}">IBAN : ${USER.iban}</div></div><div style="width:35%; text-align:right">${type === 'DEVIS' ? 'Bon pour accord' : ''}${type === 'DEVIS' ? '<div class="pdf-signature"></div>' : ''}</div></div><div style="text-align:center; margin-top:20px; color:#aaa">${USER.name} - ${type} ${num} ${!hasTVA ? '- TVA non applicable, art. 293 B du CGI.' : ''}</div></div>
             </div>`;
         }
 
-        function preparePreview() {
-            // Insère le HTML dans la zone d'aperçu
-            document.getElementById('paper-preview').innerHTML = getDocHTML();
-            // Affiche l'overlay
-            document.getElementById('preview-overlay').style.display = 'flex';
-        }
-
-        function closePreview() {
-            document.getElementById('preview-overlay').style.display = 'none';
-        }
-
+        function preparePreview() { document.getElementById('paper-preview').innerHTML = getDocHTML(); document.getElementById('preview-overlay').style.display = 'flex'; }
+        function closePreview() { document.getElementById('preview-overlay').style.display = 'none'; }
         function downloadPDF() {
-            // Utilise la bibliothèque html2pdf
-            const element = document.getElementById('paper-preview');
+            const el = document.getElementById('paper-preview');
+            const fallback = document.getElementById('fallback-btn');
+            if(fallback) fallback.style.display = 'none';
             const type = document.getElementById('doc-type').value;
             const num = document.getElementById('doc-num').value || "doc";
-            
-            const opt = {
-                margin: 0,
-                filename: `${type}_${num}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            // Lance le téléchargement
-            html2pdf().set(opt).from(element).save();
+            html2pdf().set({ margin: 0, filename: `${type}_${num}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(el).save().then(() => { if(fallback && document.getElementById('preview-img-tag').style.display === 'none') fallback.style.display = 'flex'; });
         }
     </script>
 </body>
