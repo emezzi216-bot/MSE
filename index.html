@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sabri App - Facturation</title>
+    <style>
+        :root {
+            --primary: #D32F2F;
+            --bg: #f4f4f4;
+            --text: #333;
+            --white: #ffffff;
+        }
+
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); }
+
+        /* --- ÉCRAN DE CONNEXION --- */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        #login-screen h2 { color: var(--primary); margin-bottom: 20px; letter-spacing: 2px; }
+        #password-input {
+            padding: 15px; font-size: 18px; border: 2px solid #333; background: #222; color: #fff; text-align: center; border-radius: 8px; width: 200px; margin-bottom: 20px;
+        }
+        .btn-login {
+            background: var(--primary); color: white; border: none; padding: 12px 30px; font-size: 16px; border-radius: 50px; cursor: pointer; font-weight: bold;
+        }
+
+        /* --- INTERFACE PRINCIPALE --- */
+        #app-interface { display: none; padding-bottom: 80px; }
+        
+        header { background: var(--white); padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; }
+        header h1 { margin: 0; font-size: 18px; color: var(--primary); font-weight: 800; }
+        .badge { background: #333; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; }
+
+        .container { max-width: 600px; margin: 0 auto; padding: 10px; }
+
+        /* ACCORDÉONS */
+        details {
+            background: var(--white); margin-bottom: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden;
+        }
+        summary {
+            padding: 15px; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; background: #fff;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary::after { content: '+'; font-size: 20px; color: var(--primary); }
+        details[open] summary::after { content: '-'; }
+        details[open] summary { border-bottom: 1px solid #eee; }
+        .section-content { padding: 15px; }
+
+        /* FORMULAIRES */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 12px; color: #666; font-weight: 500; text-transform: uppercase; }
+        input, select, textarea {
+            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; background: #fdfdfd; appearance: none;
+        }
+        input:focus { border-color: var(--primary); }
+
+        /* TABLEAU ARTICLES */
+        .article-row { background: #f9f9f9; border: 1px solid #eee; padding: 10px; border-radius: 6px; margin-bottom: 10px; position: relative; }
+        .row-top { display: flex; gap: 10px; margin-bottom: 5px; }
+        .desc-input { flex: 1; font-weight: 500; }
+        .row-bottom { display: flex; gap: 10px; align-items: center; }
+        .qty-input { width: 60px; text-align: center; }
+        .price-input { width: 90px; text-align: right; }
+        .row-total { flex: 1; text-align: right; font-weight: bold; font-size: 14px; color: #555; }
+        .btn-del { background: #ffebee; color: #c62828; border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        .btn-add {
+            width: 100%; padding: 12px; background: #333; color: white; border: none; border-radius: 6px; font-weight: bold; margin-top: 5px; cursor: pointer;
+        }
+
+        /* SWITCH TVA */
+        .switch-wrapper { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* TOTAUX */
+        .totals-display { text-align: right; font-size: 14px; line-height: 1.6; }
+        .big-total { font-size: 20px; color: var(--primary); font-weight: 800; margin-top: 5px; border-top: 1px solid #ddd; padding-top: 5px; }
+
+        /* ACTION BAR */
+        .action-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px; border-top: 1px solid #eee; display: flex; justify-content: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+        .btn-generate {
+            background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 50px; font-size: 18px; font-weight: bold; box-shadow: 0 4px 10px rgba(211, 47, 47, 0.4); width: 90%; max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <h2>SABRI APP</h2>
+        <input type="tel" id="password-input" placeholder="Code PIN" maxlength="4">
+        <button class="btn-login" onclick="checkLogin()">ENTRER</button>
+    </div>
+
+    <div id="app-interface">
+        <header>
+            <h1>MA SERRURE EXPRESS</h1>
+            <span class="badge" id="header-type">DEVIS</span>
+        </header>
+
+        <div class="container">
+            <form id="doc-form">
+                
+                <details open>
+                    <summary>Informations Document</summary>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label>Type de document</label>
+                            <select id="doc-type" onchange="updateUI()">
+                                <option value="DEVIS">DEVIS</option>
+                                <option value="FACTURE">FACTURE</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Numéro</label>
+                            <input type="text" id="doc-num" placeholder="ex: 2025-001">
+                        </div>
+                        <div class="form-group">
+                            <label>Date d'émission</label>
+                            <input type="date" id="doc-date">
+                        </div>
+                        <div class="form-group">
+                            <label>Objet</label>
+                            <input type="text" id="doc-obj" placeholder="ex: Remplacement serrure">
+                        </div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Client</summary>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label>Nom du client</label>
+                            <input type="text" id="client-name" list="clients-list" placeholder="Rechercher ou saisir...">
+                            <datalist id="clients-list">
+                                <option value="COMMUNE DE CRETEIL - CCAS">
+                                <option value="Particulier">
+                                <option value="Agence Immobilière">
+                            </datalist>
+                        </div>
+                        <div class="form-group">
+                            <label>Adresse complète</label>
+                            <textarea id="client-address" rows="3" placeholder="Adresse, Code Postal, Ville"></textarea>
+                        </div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Articles & Prestations</summary>
+                    <div class="section-content">
+                        <div id="items-container">
+                            </div>
+                        <button type="button" class="btn-add" onclick="addItem()">+ AJOUTER LIGNE</button>
+                        
+                        <datalist id="desc-list">
+                            <option value="Main d'œuvre">
+                            <option value="Déplacement">
+                            <option value="Serrure 3 points">
+                            <option value="Ouverture de porte claquée">
+                            <option value="Forfait blindage">
+                        </datalist>
+                    </div>
+                </details>
+
+                <details open>
+                    <summary>Totaux & TVA</summary>
+                    <div class="section-content">
+                        <div class="switch-wrapper">
+                            <span>Appliquer TVA (20%)</span>
+                            <label class="switch">
+                                <input type="checkbox" id="tva-switch" checked onchange="calculate()">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="totals-display">
+                            <div>Total HT : <span id="disp-ht">0.00 €</span></div>
+                            <div id="row-tva">TVA (20%) : <span id="disp-tva">0.00 €</span></div>
+                            <div class="big-total">TOTAL TTC : <span id="disp-ttc">0.00 €</span></div>
+                        </div>
+                    </div>
+                </details>
+
+            </form>
+        </div>
+
+        <div class="action-bar">
+            <button class="btn-generate" onclick="generatePDF()">GÉNÉRER LE PDF</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DONNÉES FIXES ---
+        const USER_INFO = {
+            name: "Sabri BENNACEUR EI",
+            address: "2 Résidence des Rosiers, 92800 Puteaux, FR",
+            email: "serruremse@gmail.com",
+            siret: "943032755",
+            rc: "RC décennale TETRIS police n° SV75018041T37384",
+            iban: "FR76 1695 8000 0159 6810 0824 765",
+            bic: "ONTO FR P1 XXX"
+        };
+
+        // --- 1. SÉCURITÉ ---
+        function checkLogin() {
+            const p = document.getElementById('password-input').value;
+            // Code PIN fixé à 1984
+            if (p === "1984") {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-interface').style.display = 'block';
+                
+                // Set default date to today
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('doc-date').value = today;
+                
+                addItem(); // Add one empty row by default
+            } else {
+                alert("Code PIN incorrect");
+                document.getElementById('password-input').value = "";
+            }
+        }
+
+        // --- 2. LOGIQUE UI ---
+        function updateUI() {
+            const type = document.getElementById('doc-type').value;
+            document.getElementById('header-type').innerText = type;
+        }
+
+        function addItem() {
+            const container = document.getElementById('items-container');
+            const id = Date.now();
+            const html = `
+                <div class="article-row" id="row-${id}">
+                    <div class="row-top">
+                        <input type="text" class="desc-input" placeholder="Description" list="desc-list">
+                        <button type="button" class="btn-del" onclick="removeRow('${id}')">✕</button>
+                    </div>
+                    <div class="row-bottom">
+                        <input type="number" class="qty-input" value="1" min="1" oninput="calculate()" placeholder="Qté">
+                        <input type="number" class="price-input" step="0.01" oninput="calculate()" placeholder="Prix HT">
+                        <span class="row-total">0.00 €</span>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function removeRow(id) {
+            document.getElementById(`row-${id}`).remove();
+            calculate();
+        }
+
+        // --- 3. CALCULS ---
+        function calculate() {
+            let totalHT = 0;
+            const rows = document.querySelectorAll('.article-row');
+            
+            rows.forEach(row => {
+                const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+                const price = parseFloat(row.querySelector('.price-input').value) || 0;
+                const lineTotal = qty * price;
+                
+                row.querySelector('.row-total').innerText = lineTotal.toFixed(2) + ' €';
+                totalHT += lineTotal;
+            });
+
+            const hasTVA = document.getElementById('tva-switch').checked;
+            const montantTVA = hasTVA ? totalHT * 0.20 : 0;
+            const totalTTC = totalHT + montantTVA;
+
+            document.getElementById('disp-ht').innerText = totalHT.toFixed(2) + ' €';
+            
+            if(hasTVA) {
+                document.getElementById('row-tva').style.display = 'block';
+                document.getElementById('disp-tva').innerText = montantTVA.toFixed(2) + ' €';
+            } else {
+                document.getElementById('row-tva').style.display = 'none';
+            }
+            
+            document.getElementById('disp-ttc').innerText = totalTTC.toFixed(2) + ' €';
+        }
+
+        // --- 4. GÉNÉRATION DU DOCUMENT ---
+        function generatePDF() {
+            // Récupération des données
+            const type = document.getElementById('doc-type').value; // "DEVIS" ou "FACTURE"
+            const num = document.getElementById('doc-num').value || "BROUILLON";
+            const dateEmission = document.getElementById('doc-date').value;
+            const obj = document.getElementById('doc-obj').value || "Intervention";
+            const clientName = document.getElementById('client-name').value || "Client";
+            const clientAddr = document.getElementById('client-address').value.replace(/\n/g, '<br>') || "";
+            const hasTVA = document.getElementById('tva-switch').checked;
+
+            // Formatage date
+            const d = new Date(dateEmission);
+            const dateStr = d.toLocaleDateString('fr-FR');
+            
+            // Calcul date validité/échéance (+30 jours)
+            d.setDate(d.getDate() + 30);
+            const dateNext = d.toLocaleDateString('fr-FR');
+            
+            const labelDateNext = type === "FACTURE" ? "Date d'échéance" : "Validité jusqu'au";
+
+            // Construction Lignes Tableau HTML
+            let rowsHTML = "";
+            let totalHT = 0;
+            document.querySelectorAll('.article-row').forEach(row => {
+                const desc = row.querySelector('.desc-input').value;
+                const qty = row.querySelector('.qty-input').value;
+                const pu = parseFloat(row.querySelector('.price-input').value).toFixed(2);
+                const lineTotal = (qty * pu).toFixed(2);
+                totalHT += parseFloat(lineTotal);
+                
+                // Si TVA off, on n'affiche pas les colonnes TVA
+                const tvaCols = hasTVA 
+                    ? `<td class="center">20%</td><td class="right">${(lineTotal * 0.2).toFixed(2)} €</td>`
+                    : `<td class="center">-</td><td class="right">-</td>`;
+
+                rowsHTML += `
+                    <tr>
+                        <td>${desc}</td>
+                        <td class="center">${qty}</td>
+                        <td class="right">${pu} €</td>
+                        <td class="right">${lineTotal} €</td>
+                        ${tvaCols}
+                    </tr>
+                `;
+            });
+
+            const mtTVA = hasTVA ? totalHT * 0.2 : 0;
+            const totalTTC = totalHT + mtTVA;
+
+            // HTML pour les totaux
+            const tvaRowHTML = hasTVA 
+                ? `<tr><td>Total TVA (20%)</td><td>${mtTVA.toFixed(2)} €</td></tr>` 
+                : '';
+            
+            // Logique Pied de page spécifique
+            let footerSpecific = "";
+            let legalTxt = `Sabri BENNACEUR EI - ${type} ${num}`;
+            if (!hasTVA) legalTxt += " - TVA non applicable, art. 293 B du CGI.";
+
+            if (type === "DEVIS") {
+                footerSpecific = `
+                    <div style="width: 40%; text-align: right;">
+                        <strong>Validation :</strong>
+                        <div class="signature">Mention "Bon pour accord",<br>Date et Signature :</div>
+                    </div>`;
+            } else {
+                footerSpecific = `<div style="width: 40%; text-align: right;"></div>`;
+            }
+
+            // Headers tableau dynamiques (TVA ou pas)
+            const theadTva = `
+                <th class="center">TVA</th>
+                <th class="right">Montant TVA</th>
+            `;
+
+            // --- TEMPLATE HTML COMPLET ---
+            const finalHTML = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>${type} - ${num}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        body { font-family: 'Roboto', Arial, sans-serif; background-color: #555; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .page { width: 210mm; min-height: 297mm; background-color: white; box-shadow: 0 0 15px rgba(0,0,0,0.5); position: relative; box-sizing: border-box; }
+        .header-bg { background-color: #fff; color: #333; padding: 40px; display: flex; justify-content: space-between; border-bottom: 2px solid #eee; }
+        .sender-col { width: 55%; }
+        .logo-wrapper { margin-bottom: 20px; width: 280px; }
+        .logo-btn { display: block; width: 100%; height: 100px; border: 2px dashed #ccc; background-color: #f9f9f9; color: #666; text-align: center; line-height: 100px; cursor: pointer; font-size: 12px; border-radius: 4px; transition: 0.3s; font-weight: bold; }
+        .logo-btn:hover { border-color: #D32F2F; color: #D32F2F; background-color: #fff0f0; }
+        #display-logo { max-width: 280px; max-height: 150px; display: none; }
+        .sender-txt { font-size: 13px; color: #555; line-height: 1.5; }
+        .client-box { background-color: #f8f8f8; color: #000; padding: 20px; width: 35%; border-radius: 4px; border-left: 4px solid #333; }
+        .content { padding: 40px; }
+        .title-row { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #D32F2F; padding-bottom: 15px; margin-bottom: 30px; }
+        h1 { margin: 0; font-size: 32px; color: #333; }
+        .dates { text-align: right; font-size: 13px; color: #555; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 30px; }
+        th { background-color: #333; color: #fff; padding: 10px; text-align: left; text-transform: uppercase; font-weight: bold; }
+        td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+        .right { text-align: right; }
+        .center { text-align: center; }
+        .totals-box { display: flex; justify-content: flex-end; }
+        .totals-table { width: 300px; }
+        .totals-table td { text-align: right; padding: 5px 0; font-size: 14px; }
+        .ttc-row td { font-size: 18px; font-weight: bold; color: #D32F2F; border-top: 2px solid #000; padding-top: 10px; margin-top: 5px; }
+        .footer { margin-top: 50px; border-top: 1px solid #ddd; padding-top: 20px; display: flex; justify-content: space-between; font-size: 12px; color: #555; }
+        .bank { background: #f9f9f9; padding: 10px; border-left: 3px solid #D32F2F; font-family: monospace; margin-top: 10px; }
+        .signature { border: 1px solid #ccc; height: 80px; width: 200px; margin-top: 10px; padding: 5px; }
+        .legal-notice { margin-top: 20px; text-align: center; font-size: 11px; font-style: italic; color: #555; }
+        .legal-tiny { text-align: center; font-size: 10px; color: #ccc; margin-top: 40px; }
+        @media print { body { background: none; padding: 0; } .page { width: 100%; box-shadow: none; margin: 0; } .logo-btn { display: none; } #display-logo { display: block !important; } }
+    </style>
+    <script>
+        function chargerLogo(event) {
+            var reader = new FileReader();
+            reader.onload = function(){ var img = document.getElementById('display-logo'); img.src = reader.result; img.style.display = 'block'; document.getElementById('zone-bouton').style.display = 'none'; };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    <\/script>
+</head>
+<body>
+<div class="page">
+    <div class="header-bg">
+        <div class="sender-col">
+            <div class="logo-wrapper">
+                <input type="file" id="upload" accept="image/*" style="display:none" onchange="chargerLogo(event)">
+                <label for="upload" class="logo-btn" id="zone-bouton">➕ CLIQUEZ ICI POUR LE LOGO</label>
+                <img id="display-logo" alt="Logo">
+            </div>
+            <div class="sender-txt">
+                <strong>${USER_INFO.name}</strong><br>
+                ${USER_INFO.address}<br>
+                Email : ${USER_INFO.email}<br>
+                SIRET : ${USER_INFO.siret}<br>
+                ${USER_INFO.rc}
+            </div>
+        </div>
+        <div class="client-box">
+            <strong style="color:#D32F2F; font-size:10px; text-transform:uppercase;">Facturer à :</strong><br><br>
+            <strong style="font-size:16px;">${clientName}</strong><br>
+            ${clientAddr}
+        </div>
+    </div>
+    <div class="content">
+        <div class="title-row">
+            <div><h1>${type} N° ${num}</h1><div style="color:#D32F2F; font-weight:bold; margin-top:5px;">Objet : ${obj}</div></div>
+            <div class="dates"><strong>Date d'émission :</strong> ${dateStr}<br><strong>${labelDateNext} :</strong> ${dateNext}</div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 45%;">Désignation</th>
+                    <th class="center">Qté</th>
+                    <th class="right">P.U. HT</th>
+                    <th class="right">Total HT</th>
+                    ${theadTva}
+                </tr>
+            </thead>
+            <tbody>
+                ${rowsHTML}
+            </tbody>
+        </table>
+        <div class="totals-box">
+            <table class="totals-table">
+                <tr><td>Total HT</td><td>${totalHT.toFixed(2)} €</td></tr>
+                ${tvaRowHTML}
+                <tr class="ttc-row"><td>NET À PAYER TTC</td><td>${totalTTC.toFixed(2)} €</td></tr>
+            </table>
+        </div>
+        <div class="footer">
+            <div style="width: 55%;">
+                <strong>Conditions de règlement :</strong><br>Paiement à 30 jours (réception).<br>Retard : Pénalités légales + 40€. Pas d'escompte.<br>
+                <div class="bank">IBAN : ${USER_INFO.iban}<br>BIC : ${USER_INFO.bic}</div>
+            </div>
+            ${footerSpecific}
+        </div>
+        ${type === 'FACTURE' ? '<div class="legal-notice">Cette facture concerne uniquement de la prestation de service.</div>' : ''}
+        <div class="legal-tiny">${legalTxt}</div>
+    </div>
+</div>
+</body>
+</html>`;
+
+            const win = window.open('', '_blank');
+            win.document.write(finalHTML);
+            win.document.close();
+        }
+    </script>
+</body>
+</html>
