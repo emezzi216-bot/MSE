@@ -16,50 +16,61 @@
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif; background: #f4f4f4; color: var(--text); height: 100vh; overflow: hidden; }
 
-        /* --- 1. NOUVEL ÉCRAN DE CONNEXION (Visuel) --- */
+        /* --- 1. NOUVEL ÉCRAN DE CONNEXION (Optimisé) --- */
         #login-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%); /* Fond noir profond */
+            background: radial-gradient(circle at center, #2a2a2a 0%, #000000 100%);
             z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; 
             padding: 20px;
         }
 
-        /* Le logo géant de l'entreprise au-dessus du PIN */
         .login-brand-logo {
-            max-width: 80%;
+            max-width: 85%;
             height: auto;
-            max-height: 220px;
-            margin-bottom: 50px;
-            /* Effet d'ombre portée dorée subtile pour le faire ressortir du fond noir */
-            filter: drop-shadow(0 0 20px rgba(197, 160, 89, 0.2)); 
+            max-height: 200px;
+            margin-bottom: 40px;
+            filter: drop-shadow(0 0 25px rgba(197, 160, 89, 0.3)); 
         }
         
-        /* Champ PIN stylisé */
         #password-input { 
             padding: 15px; font-size: 28px; 
             border: 3px solid var(--gold); background: rgba(255,255,255,0.05); 
             color: var(--gold-bright); text-align: center; border-radius: 12px; width: 180px; 
-            margin-bottom: 40px; letter-spacing: 8px; font-weight:bold;
-            box-shadow: 0 0 15px rgba(197, 160, 89, 0.3); /* Halo doré */
+            margin-bottom: 30px; letter-spacing: 8px; font-weight:bold;
+            box-shadow: 0 0 20px rgba(197, 160, 89, 0.2);
         }
 
-        /* Le bouton Clé Géante */
+        /* Bouton Clé Géante Optimisé */
         .btn-key-unlock { 
-            background: none; border: none; cursor: pointer; padding: 10px;
+            background: transparent; border: none; cursor: pointer; 
+            padding: 20px; /* Zone de clic plus large */
             border-radius: 50%;
-            transition: transform 0.2s, filter 0.2s;
-             /* Grosse ombre portée dorée pour l'effet "précieux" */
-            filter: drop-shadow(0 0 30px rgba(197, 160, 89, 0.6));
+            transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
+            /* Ombre portée dorée intense pour l'effet 3D */
+            filter: drop-shadow(0 5px 15px rgba(197, 160, 89, 0.5));
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .btn-key-unlock:active {
-             transform: scale(0.9); /* Effet de clic */
-             filter: drop-shadow(0 0 15px rgba(197, 160, 89, 0.9));
+             transform: scale(0.92);
+             filter: drop-shadow(0 2px 5px rgba(197, 160, 89, 0.8));
         }
-        /* Style de l'icône SVG de la clé */
+
+        /* Style de l'icône SVG Ultra-Nette */
         .key-icon-svg {
-            width: 130px; /* Taille GÉANTE */
-            height: 130px;
+            width: 140px; /* Taille optimisée Mobile/PC */
+            height: 140px;
+            display: block;
+            /* S'assure que le dégradé est bien appliqué */
+            fill: url(#gold-gradient);
         }
+        
+        /* Ajustement pour très grands écrans PC si nécessaire */
+        @media (min-width: 1024px) {
+             .key-icon-svg { width: 160px; height: 160px; }
+        }
+
 
         /* --- 2. HOME SCREEN (LE HUB) --- */
         #view-home { 
@@ -155,10 +166,10 @@
 <body>
     
     <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
-      <linearGradient id="gold-gradient" x2="1" y2="1">
-        <stop offset="0%" stop-color="#E6C878" />
-        <stop offset="50%" stop-color="#C5A059" />
-        <stop offset="100%" stop-color="#9A7B3E" />
+      <linearGradient id="gold-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#E6C878;stop-opacity:1" />
+        <stop offset="50%" style="stop-color:#C5A059;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#F0E68C;stop-opacity:1" />
       </linearGradient>
     </svg>
 
@@ -171,7 +182,7 @@
         
         <button class="btn-key-unlock" onclick="checkLogin()" aria-label="Déverrouiller">
             <svg class="key-icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path fill="url(#gold-gradient)" d="M7 14c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm5.6-9.3c.8-1.5 2.4-2.7 4.4-2.7 2.8 0 5 2.2 5 5 0 1.5-.7 3-2 3.8l-1 1V15h-3v3h-3v-3l-5-5c-.1.3-.2.6-.2 1 0 3.3-2.7 6-6 6s-6-2.7-6-6 2.7-6 6-6c1.2 0 2.4.4 3.3 1l1.5-1.5z"/>
+                <path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
             </svg>
         </button>
     </div>
