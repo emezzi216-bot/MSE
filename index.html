@@ -9,14 +9,12 @@
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="MSE">
     <meta name="theme-color" content="#000000">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* --- DESIGN DE L'APPLICATION (MOBILE - MODE LUXE) --- */
-        :root { --gold: #C5A059; --gold-bright: #E6C878; --red: #D32F2F; --bg-dark: #121212; --text: #333; }
+        /* --- 1. DESIGN APPLICATION (Mobile) --- */
+        :root { --gold: #C5A059; --gold-bright: #E6C878; --red: #D32F2F; --bg-dark: #000000; --text: #333; }
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif; background: #f4f4f4; color: var(--text); height: 100vh; overflow: hidden; }
 
@@ -24,39 +22,37 @@
         .icon-sm { width: 18px; height: 18px; fill: currentColor; }
         .icon-white { fill: white; }
 
-        /* Login Screen */
+        /* Login Screen - FOND NOIR PUR pour fondre le logo */
         #login-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: radial-gradient(circle at center, #000000 0%, #1a1a1a 120%);
+            background-color: #000000; /* NOIR PUR */
             z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; 
             padding: 20px;
         }
         .login-brand-logo { 
             max-width: 80%; height: auto; max-height: 220px; margin-bottom: 50px; 
             display: block; margin-left: auto; margin-right: auto;
-            filter: drop-shadow(0 0 20px rgba(197, 160, 89, 0.15)); 
+            /* Plus de filtre ombre qui crée des bords, juste le noir sur noir */
         }
         #password-input { 
             padding: 15px; font-size: 28px; 
-            border: 3px solid var(--gold); background: rgba(255,255,255,0.05); 
+            border: 2px solid var(--gold); background: #111; 
             color: var(--gold-bright); text-align: center; border-radius: 12px; width: 180px; 
             margin-bottom: 30px; letter-spacing: 8px; font-weight:bold;
-            box-shadow: 0 0 20px rgba(197, 160, 89, 0.2); 
         }
         .btn-login-gold { 
             background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #000; border: none; 
             padding: 15px 60px; font-size: 16px; border-radius: 50px; cursor: pointer; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; 
-            box-shadow: 0 5px 20px rgba(197, 160, 89, 0.4); transition: transform 0.2s; 
+            box-shadow: 0 5px 20px rgba(197, 160, 89, 0.3); 
         }
-        .btn-login-gold:active { transform: scale(0.95); }
 
-        /* Home Screen */
-        #view-home { display: none; height: 100vh; background: var(--bg-dark); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .home-logo { max-width: 80%; max-height: 200px; object-fit: contain; margin-bottom: 50px; display: block; margin-left: auto; margin-right: auto; }
-        .big-btn { width: 100%; max-width: 350px; height: 70px; margin-bottom: 20px; border: none; border-radius: 12px; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; gap: 15px; }
+        /* Home Screen - FOND NOIR PUR */
+        #view-home { display: none; height: 100vh; background-color: #000000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .home-logo { max-width: 80%; max-height: 200px; object-fit: contain; margin-bottom: 60px; display: block; margin-left: auto; margin-right: auto; }
+        .big-btn { width: 100%; max-width: 350px; height: 75px; margin-bottom: 25px; border: none; border-radius: 12px; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; gap: 15px; }
         .btn-gold { background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #000; }
         .btn-red { background: linear-gradient(135deg, #FF5252, #D32F2F); color: white; }
-        .btn-history { margin-top: 20px; background: transparent; border: 1px solid #444; color: #888; padding: 10px 25px; border-radius: 30px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; }
+        .btn-history { margin-top: 30px; background: transparent; border: 1px solid #333; color: #666; padding: 10px 25px; border-radius: 30px; font-size: 12px; text-transform: uppercase; cursor: pointer; }
 
         /* Editor Screen */
         #view-editor { display: none; height: 100vh; overflow-y: auto; background: #f4f4f4; padding-bottom: 40px; }
@@ -81,39 +77,73 @@
         .action-bar { padding: 20px; text-align: center; }
         .btn-generate { color: white; border: none; padding: 16px 40px; border-radius: 50px; font-size: 16px; font-weight: bold; width: 100%; max-width: 400px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* History Screen */
+        /* History & Preview UI */
         #view-history { display: none; height: 100vh; overflow-y: auto; background: #f4f4f4; }
         .history-header { background: #333; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; }
         .history-card { background: white; padding: 15px; border-radius: 8px; margin: 10px 15px; border-left: 5px solid #333; display: flex; justify-content: space-between; align-items: center; }
-
-        /* Preview Overlay */
-        #preview-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 20000; flex-direction: column; align-items: center; padding: 20px 10px; overflow-y: auto; }
-        #preview-actions { display: flex; gap: 10px; width: 100%; max-width: 210mm; margin-bottom: 15px; }
-        .btn-action { flex: 1; padding: 15px; border-radius: 8px; border: none; font-weight: bold; color: white; cursor: pointer; text-transform: uppercase; }
+        
+        #preview-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 20000; flex-direction: column; align-items: center; padding: 10px; overflow-y: auto; }
+        #preview-actions { display: flex; gap: 10px; width: 100%; max-width: 210mm; margin-bottom: 10px; }
+        .btn-action { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; color: white; cursor: pointer; text-transform: uppercase; font-size: 12px; }
         .btn-close { background: #555; }
         .btn-download { background: #2ecc71; }
-        #paper-preview { background: white; width: 210mm; min-height: 297mm; transform-origin: top center; }
-        @media (max-width: 800px) { #paper-preview { transform: scale(0.45); margin-bottom: -150mm; } }
+        
+        /* Conteneur PDF (A4) - Doit être invisible mais présent pour la génération */
+        #paper-preview { 
+            background: white; 
+            width: 210mm; /* Largeur fixe A4 */
+            min-height: 297mm; 
+            margin: 0 auto;
+            transform-origin: top center; 
+        }
+        /* Ajustement affichage mobile pour l'aperçu seulement */
+        @media (max-width: 800px) { 
+            #paper-preview { transform: scale(0.45); margin-bottom: -150mm; margin-top: 10px; } 
+        }
 
-        /* --- STYLES DU DOCUMENT PDF (CONFORME ORIGINAL) --- */
-        .pdf-page { padding: 40px; font-family: 'Roboto', Arial, sans-serif; color: #333; line-height: 1.5; background:white; }
-        .pdf-header { display: flex; justify-content: space-between; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px; align-items: flex-start; }
-        .pdf-sender-col { width: 55%; }
-        .pdf-logo { max-width: 250px; max-height: 120px; display: block; margin-bottom: 15px; }
-        .pdf-sender-txt { font-size: 13px; color: #555; line-height: 1.6; }
-        .pdf-client-col { width: 40%; background-color: #f8f8f8; padding: 20px; border-radius: 4px; border-left: 4px solid #333; font-size: 14px; color: #000; }
-        .pdf-title-row { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #D32F2F; padding-bottom: 15px; margin-bottom: 30px; }
-        .pdf-title { font-size: 28px; font-weight: bold; text-transform: uppercase; margin: 0; color: #333; }
-        .pdf-dates { text-align: right; font-size: 13px; color: #555; }
-        .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
-        .pdf-table th { background-color: #333; color: white; padding: 10px; text-align: left; font-weight: bold; text-transform: uppercase; }
-        .pdf-table td { border-bottom: 1px solid #eee; padding: 10px; vertical-align: top; }
-        .pdf-totals-box { display: flex; justify-content: flex-end; }
-        .pdf-totals-table { width: 300px; border-collapse: collapse; font-size: 14px; }
-        .pdf-totals-table td { text-align: right; padding: 5px 0; }
-        .pdf-ttc-row td { font-size: 18px; font-weight: bold; color: #D32F2F; border-top: 2px solid #000; padding-top: 10px; margin-top: 5px; }
-        .pdf-footer { margin-top: 50px; font-size: 12px; color: #555; border-top: 1px solid #eee; padding-top: 20px; display: flex; justify-content: space-between; }
-        .pdf-bank { background: #f9f9f9; padding: 10px; border-left: 3px solid #D32F2F; font-family: monospace; margin-top: 10px; }
+        /* --- 2. STYLES PDF (DESIGN PAPIER STRICT) --- */
+        .pdf-page { padding: 40px; font-family: 'Arial', sans-serif; color: #000; font-size: 12px; line-height: 1.4; }
+        
+        /* En-tête : Flex pour séparer Gauche/Droite */
+        .pdf-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
+        
+        /* Gauche : Logo + Infos MSE */
+        .pdf-sender-col { width: 50%; }
+        .pdf-logo { width: 200px; display: block; margin-bottom: 15px; }
+        .pdf-sender-txt { font-size: 11px; color: #333; line-height: 1.5; }
+        
+        /* Droite : Cadre Gris Client */
+        .pdf-client-col { 
+            width: 40%; 
+            background-color: #f0f0f0; 
+            padding: 15px; 
+            border-left: 5px solid #333; 
+            font-size: 13px;
+        }
+        
+        /* Titre Document */
+        .pdf-title-row { 
+            display: flex; justify-content: space-between; align-items: flex-end; 
+            border-bottom: 3px solid #D32F2F; /* Ligne Rouge */
+            padding-bottom: 10px; margin-bottom: 20px; 
+        }
+        .pdf-title { font-size: 24px; font-weight: bold; margin: 0; color: #000; text-transform: uppercase; }
+        .pdf-dates { text-align: right; font-size: 12px; }
+
+        /* Tableau */
+        .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .pdf-table th { background-color: #000; color: #fff; padding: 8px; text-align: left; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+        .pdf-table td { border-bottom: 1px solid #ccc; padding: 8px; vertical-align: top; }
+        
+        /* Totaux */
+        .pdf-totals-section { display: flex; justify-content: flex-end; }
+        .pdf-totals-table { width: 250px; border-collapse: collapse; }
+        .pdf-totals-table td { text-align: right; padding: 5px; font-size: 13px; }
+        .pdf-ttc { font-size: 16px; font-weight: bold; color: #D32F2F; border-top: 2px solid #000; padding-top: 5px; }
+
+        /* Footer */
+        .pdf-footer { margin-top: 40px; font-size: 10px; color: #444; border-top: 1px solid #ddd; padding-top: 10px; }
+        .pdf-bank { background: #eee; padding: 8px; margin-top: 5px; font-family: monospace; border-left: 3px solid #D32F2F; }
     </style>
 </head>
 <body>
@@ -127,10 +157,9 @@
     </div>
 
     <div id="view-home">
-        <div class="home-logo-container">
-            <img src="logo.png" class="home-logo" onerror="this.style.display='none'; document.getElementById('txt-logo').style.display='block'">
-            <h1 id="txt-logo" style="display:none; color:var(--gold); font-size:40px; margin:0;">MSE</h1>
-        </div>
+        <img src="logo.png" class="home-logo" onerror="this.style.display='none'; document.getElementById('txt-logo').style.display='block'">
+        <h1 id="txt-logo" style="display:none; color:var(--gold); font-size:40px; margin:0;">MSE</h1>
+        
         <button class="big-btn btn-gold" onclick="openJourney('FACTURE')">FACTURE</button>
         <button class="big-btn btn-red" onclick="openJourney('DEVIS')">DEVIS</button>
         <button class="btn-history" onclick="openHistory()">HISTORIQUE</button>
@@ -138,13 +167,13 @@
 
     <div id="view-editor">
         <header id="editor-header">
-            <div class="header-left">
+            <div style="display:flex; align-items:center;">
                 <button class="btn-icon" onclick="goHome()">
                     <svg class="icon-white icon-sm" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
                 </button>
                 <h1 id="header-title" style="margin-left:15px">FACTURE</h1>
             </div>
-            <div id="header-num" style="font-size:12px; opacity:0.8; font-weight:normal">MODE ÉDITION</div>
+            <div id="header-num" style="font-size:12px; opacity:0.8;">MODE ÉDITION</div>
         </header>
 
         <div class="container">
@@ -152,18 +181,18 @@
 
             <details open><summary>INFORMATIONS</summary>
                 <div class="section-content">
-                    <div class="form-group"><label>Numéro</label><input type="text" id="doc-num" placeholder="Auto ou 2026-01"></div>
-                    <div class="form-group"><label>Date d'émission</label><input type="date" id="doc-date" onchange="updateDueDate()"></div>
-                    <div class="form-group"><label id="label-date-fin">Date d'échéance</label><input type="date" id="doc-date-end"></div>
-                    <div class="form-group"><label>Objet / Référence</label><input type="text" id="doc-obj" placeholder="Ex: Remplacement serrure"></div>
+                    <div class="form-group"><label>Numéro</label><input type="text" id="doc-num" placeholder="Ex: 2026-001"></div>
+                    <div class="form-group"><label>Date Émission</label><input type="date" id="doc-date" onchange="updateDueDate()"></div>
+                    <div class="form-group"><label id="label-date-fin">Date Échéance</label><input type="date" id="doc-date-end"></div>
+                    <div class="form-group"><label>Objet</label><input type="text" id="doc-obj" placeholder="Remplacement serrure..."></div>
                 </div>
             </details>
 
             <details><summary>CLIENT</summary>
                 <div class="section-content">
-                    <div class="form-group"><label>Nom du client</label><input type="text" id="client-name" list="clients-list" placeholder="Nom ou Société"></div>
-                    <div class="form-group"><label>Adresse</label><textarea id="client-address" rows="3" placeholder="Adresse complète"></textarea></div>
-                    <div class="form-group"><label>SIRET Client (Optionnel)</label><input type="text" id="client-siret" placeholder="14 chiffres"></div>
+                    <div class="form-group"><label>Nom / Société</label><input type="text" id="client-name" list="clients-list"></div>
+                    <div class="form-group"><label>Adresse</label><textarea id="client-address" rows="3"></textarea></div>
+                    <div class="form-group"><label>SIRET Client (Optionnel)</label><input type="text" id="client-siret"></div>
                     <datalist id="clients-list"><option value="COMMUNE DE CRETEIL - CCAS"><option value="Particulier"></datalist>
                 </div>
             </details>
@@ -173,7 +202,7 @@
                     <div id="items-container"></div>
                     <button type="button" class="btn-add" onclick="addItem()">
                         <svg class="icon-white icon-sm" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                        AJOUTER UNE LIGNE
+                        AJOUTER LIGNE
                     </button>
                     <datalist id="desc-list">
                         <option value="Main d'œuvre"><option value="Déplacement"><option value="Serrure 3 points"><option value="Ouverture de porte claquée"><option value="Blindage">
@@ -183,30 +212,28 @@
 
             <details open><summary>TOTAL & RÈGLEMENT</summary>
                 <div class="section-content">
-                    <div class="form-group"><label>Délai de Paiement</label>
+                    <div class="form-group"><label>Paiement</label>
                         <select id="payment-terms">
-                            <option value="Paiement à réception">Paiement à réception</option>
-                            <option value="Paiement immédiat">Paiement immédiat</option>
-                            <option value="Paiement à 30 jours (réception)" selected>Paiement à 30 jours</option>
-                            <option value="Paiement à 60 jours">Paiement à 60 jours</option>
+                            <option value="Paiement à réception">À réception</option>
+                            <option value="Paiement immédiat">Immédiat</option>
+                            <option value="Paiement à 30 jours (réception)" selected>30 jours</option>
+                            <option value="Paiement à 60 jours">60 jours</option>
                         </select>
                     </div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center; border-top:1px solid #eee; padding-top:15px;">
-                        <label>Appliquer TVA (20%)</label>
+                    <div style="display:flex; justify-content:space-between; margin:15px 0; border-top:1px solid #eee; padding-top:15px;">
+                        <label>TVA (20%)</label>
                         <input type="checkbox" id="tva-switch" checked onchange="calculate()" style="width:20px; height:20px;">
                     </div>
-                    <div style="text-align:right; line-height:1.6">
+                    <div style="text-align:right;">
                         <div>Total HT : <strong id="disp-ht">0.00 €</strong></div>
                         <div id="row-tva">TVA (20%) : <strong id="disp-tva">0.00 €</strong></div>
-                        <div style="font-size:20px; font-weight:800; color:#333; margin-top:10px; border-top:1px solid #ddd; padding-top:5px;">
-                            NET À PAYER : <span id="disp-ttc">0.00 €</span>
-                        </div>
+                        <div style="font-size:20px; font-weight:800; color:#333; margin-top:10px;">NET À PAYER : <span id="disp-ttc">0.00 €</span></div>
                     </div>
                 </div>
             </details>
 
             <div class="action-bar">
-                <button class="btn-generate" id="btn-gen" onclick="saveAndPreview()">GÉNÉRER LE DOCUMENT</button>
+                <button class="btn-generate" id="btn-gen" onclick="saveAndPreview()">GÉNÉRER PDF</button>
             </div>
         </div>
     </div>
@@ -261,7 +288,7 @@
             
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('doc-date').value = today;
-            updateDueDate(); // Set default due date
+            updateDueDate(); 
 
             const header = document.getElementById('editor-header');
             const btnGen = document.getElementById('btn-gen');
@@ -271,13 +298,13 @@
             title.innerText = type;
 
             if (type === 'FACTURE') {
-                header.style.background = '#C5A059'; // OR
+                header.style.background = '#C5A059'; 
                 btnGen.style.background = '#C5A059';
-                labelFin.innerText = "Date d'échéance";
+                labelFin.innerText = "Date Échéance";
             } else {
-                header.style.background = '#D32F2F'; // ROUGE
+                header.style.background = '#D32F2F'; 
                 btnGen.style.background = '#D32F2F';
-                labelFin.innerText = "Date de validité";
+                labelFin.innerText = "Date Validité";
             }
             if(document.getElementById('items-container').children.length === 0) addItem();
         }
@@ -305,9 +332,7 @@
             div.innerHTML = `
                 <div class="row-top">
                     <input class="desc-input" placeholder="Description" list="desc-list" value="${desc}">
-                    <button class="btn-trash" onclick="removeRow('${id}')">
-                        <svg class="icon-sm" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                    </button>
+                    <button class="btn-trash" onclick="removeRow('${id}')"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
                 </div>
                 <div class="row-bottom">
                     <input type="number" class="qty-input" value="${qty}" oninput="calculate()" placeholder="Qté">
@@ -324,8 +349,7 @@
             document.querySelectorAll('.article-row').forEach(row => {
                 const q = parseFloat(row.querySelector('.qty-input').value) || 0;
                 const p = parseFloat(row.querySelector('.price-input').value) || 0;
-                const t = q * p;
-                total += t;
+                total += q * p;
             });
             const tvaOn = document.getElementById('tva-switch').checked;
             const tva = tvaOn ? total * 0.2 : 0;
@@ -344,9 +368,9 @@
                 dateFin: document.getElementById('doc-date-end').value,
                 client: document.getElementById('client-name').value || 'Client',
                 address: document.getElementById('client-address').value,
+                siret_client: document.getElementById('client-siret').value,
                 obj: document.getElementById('doc-obj').value,
                 tva: document.getElementById('tva-switch').checked,
-                siret_client: document.getElementById('client-siret').value,
                 payment: document.getElementById('payment-terms').value,
                 items: []
             };
@@ -395,12 +419,10 @@
             doc.items.forEach(i => addItem(i.desc, i.qty, i.price));
         }
 
-        function onLogoError(img) { img.style.display='none'; document.getElementById('fallback-logo-btn').style.display='block'; }
-        function triggerUpload() { document.getElementById('manual-logo-input').click(); }
         function previewManualLogo(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) { customLogoData = e.target.result; const img = document.getElementById('pdf-logo-img'); if(img) { img.src=customLogoData; img.style.display='block'; document.getElementById('fallback-logo-btn').style.display='none'; } };
+                reader.onload = function(e) { customLogoData = e.target.result; };
                 reader.readAsDataURL(input.files[0]);
             }
         }
@@ -410,17 +432,11 @@
             const num = document.getElementById('doc-num').value || "Brouillon";
             const date = new Date(document.getElementById('doc-date').value).toLocaleDateString('fr-FR');
             
-            // Date fin manuelle ou auto
             let dateFinRaw = document.getElementById('doc-date-end').value;
-            if(!dateFinRaw) {
-                // Securité si vide
-                const d = new Date(document.getElementById('doc-date').value); 
-                d.setDate(d.getDate() + 30);
-                dateFinRaw = d.toISOString().split('T')[0];
-            }
+            if(!dateFinRaw) { const d = new Date(document.getElementById('doc-date').value); d.setDate(d.getDate() + 30); dateFinRaw = d.toISOString().split('T')[0]; }
             const dateFin = new Date(dateFinRaw).toLocaleDateString('fr-FR');
 
-            const labelFin = type === 'FACTURE' ? "Date d'échéance" : "Validité";
+            const labelFin = type === 'FACTURE' ? "Échéance" : "Validité";
             const hasTVA = document.getElementById('tva-switch').checked;
             const clientSiret = document.getElementById('client-siret').value;
             const paymentTerms = document.getElementById('payment-terms').value;
@@ -435,9 +451,8 @@
             });
             const mtTVA = hasTVA ? totalHT * 0.2 : 0; const ttc = totalHT + mtTVA;
             
-            let logoHTML = customLogoData ? `<img src="${customLogoData}" class="pdf-logo">` : `<img src="logo.png" id="pdf-logo-img" class="pdf-logo" onerror="onLogoError(this)"><div id="fallback-logo-btn" style="display:none; border:2px dashed #ccc; padding:10px; text-align:center; cursor:pointer" onclick="triggerUpload()">AJOUTER LOGO</div>`;
+            let logoHTML = customLogoData ? `<img src="${customLogoData}" class="pdf-logo">` : `<img src="logo.png" class="pdf-logo" onerror="this.style.display='none'">`;
             
-            /* --- PDF HTML --- */
             return `
             <div class="pdf-page">
                 <div class="pdf-header">
@@ -452,63 +467,77 @@
                         </div>
                     </div>
                     <div class="pdf-client-col">
-                        <strong style="color:#D32F2F; font-size:10px; text-transform:uppercase;">Facturer à :</strong><br><br>
-                        <strong style="font-size:16px;">${document.getElementById('client-name').value}</strong><br>
+                        <strong style="color:#D32F2F;">FACTURER À :</strong><br><br>
+                        <strong>${document.getElementById('client-name').value}</strong><br>
                         ${document.getElementById('client-address').value.replace(/\n/g, '<br>')}
-                        ${clientSiret ? `<br><br>SIRET : ${clientSiret}` : ''}
+                        ${clientSiret ? `<br>SIRET : ${clientSiret}` : ''}
                     </div>
                 </div>
 
                 <div class="pdf-title-row">
                     <div>
                         <h1 class="pdf-title">${type} N° ${num}</h1>
-                        <div style="font-size:14px; margin-top:5px; color:#D32F2F; font-weight:bold;">Objet : ${document.getElementById('doc-obj').value}</div>
+                        <div style="font-size:13px; margin-top:5px; color:#D32F2F;">Objet : ${document.getElementById('doc-obj').value}</div>
                     </div>
                     <div class="pdf-dates">
-                        <strong>Date d'émission :</strong> ${date}<br>
-                        <strong>${labelFin} :</strong> ${dateFin}
+                        Date : ${date}<br>
+                        ${labelFin} : ${dateFin}
                     </div>
                 </div>
 
                 <table class="pdf-table">
-                    <thead><tr><th style="width: 45%;">Désignation</th><th style="text-align: center;">Qté</th><th style="text-align: right;">P.U. HT</th><th style="text-align: right;">Total HT</th></tr></thead>
+                    <thead><tr><th style="width:50%">DÉSIGNATION</th><th style="text-align:center">QTÉ</th><th style="text-align:right">P.U. HT</th><th style="text-align:right">TOTAL HT</th></tr></thead>
                     <tbody>${rows}</tbody>
                 </table>
 
-                <div class="pdf-totals-box">
+                <div class="pdf-totals-section">
                     <table class="pdf-totals-table">
-                        <tr><td>Total HT</td><td>${totalHT.toFixed(2)} €</td></tr>
-                        ${hasTVA ? `<tr><td>Total TVA (20%)</td><td>${mtTVA.toFixed(2)} €</td></tr>` : ''}
-                        <tr class="pdf-ttc-row"><td>NET À PAYER TTC</td><td>${ttc.toFixed(2)} €</td></tr>
+                        <tr><td>Total HT :</td><td>${totalHT.toFixed(2)} €</td></tr>
+                        ${hasTVA ? `<tr><td>TVA (20%) :</td><td>${mtTVA.toFixed(2)} €</td></tr>` : ''}
+                        <tr><td class="pdf-ttc">NET À PAYER :</td><td class="pdf-ttc">${ttc.toFixed(2)} €</td></tr>
                     </table>
                 </div>
 
                 <div class="pdf-footer">
-                    <div style="width: 55%;">
-                        <strong>Conditions de règlement :</strong><br>
-                        ${paymentTerms}<br>
-                        Retard : Pénalités légales + 40€. Pas d'escompte.<br>
-                        <div class="pdf-bank">
-                            IBAN : ${USER.iban}
+                    <div style="display:flex; justify-content:space-between;">
+                        <div style="width:60%">
+                            <strong>Règlement :</strong> ${paymentTerms}<br>
+                            <span style="font-size:10px">Pas d'escompte pour paiement anticipé. Retard : taux légal en vigueur + 40€ indemnité.</span>
+                            <div class="pdf-bank">IBAN : ${USER.iban}</div>
+                        </div>
+                        <div style="width:30%; text-align:right;">
+                            ${type === 'DEVIS' ? '<div style="border:1px solid #ccc; height:60px; padding:5px; font-size:10px;">Bon pour accord (Date & Signature)</div>' : ''}
                         </div>
                     </div>
-                    <div style="width: 40%; text-align: right;">
-                        ${type === 'DEVIS' ? '<strong>Validation :</strong><div style="border: 1px solid #ccc; height: 80px; width: 200px; margin-top: 10px; padding: 5px;">Mention "Bon pour accord",<br>Date et Signature :</div>' : ''}
+                    <div style="text-align:center; margin-top:20px; color:#999; font-size:10px;">
+                        ${USER.name} - ${type} ${num} ${!hasTVA ? '- TVA non applicable, art. 293 B du CGI.' : ''}
                     </div>
-                </div>
-                <div style="text-align: center; font-size: 10px; color: #ccc; margin-top: 40px;">
-                    ${USER.name} - ${type} ${num} ${!hasTVA ? '- TVA non applicable, art. 293 B du CGI.' : ''}
                 </div>
             </div>`;
         }
 
-        function preparePreview() { document.getElementById('paper-preview').innerHTML = getDocHTML(); document.getElementById('preview-overlay').style.display = 'flex'; }
+        function preparePreview() { 
+            document.getElementById('paper-preview').innerHTML = getDocHTML(); 
+            document.getElementById('preview-overlay').style.display = 'flex'; 
+        }
         function closePreview() { document.getElementById('preview-overlay').style.display = 'none'; }
+        
         function downloadPDF() {
-            const el = document.getElementById('paper-preview'); const btn = document.getElementById('fallback-logo-btn'); if(btn) btn.style.display='none';
-            const type = document.getElementById('current-type').value; const num = document.getElementById('doc-num').value || "doc";
-            html2pdf().set({ margin:0, filename: `${type}_${num}.pdf`, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2, useCORS:true}, jsPDF:{unit:'mm',format:'a4',orientation:'portrait'} }).from(el).save().then(() => { if(btn && document.getElementById('pdf-logo-img').style.display=='none') btn.style.display='block'; });
+            const el = document.getElementById('paper-preview');
+            const type = document.getElementById('current-type').value; 
+            const num = document.getElementById('doc-num').value || "doc";
+            
+            // CONFIGURATION HTML2PDF STRICTE A4
+            const opt = {
+                margin: 0,
+                filename: `${type}_${num}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(el).save();
         }
     </script>
 </body>
 </html>
+
