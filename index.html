@@ -13,7 +13,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* --- 1. UI APPLICATION (MOBILE) --- */
+        /* --- 1. UI APPLICATION (SOMBRE/LUXE) --- */
         :root { --gold: #C5A059; --gold-bright: #E6C878; --red: #D32F2F; --bg-dark: #000000; --text: #333; }
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif; background: #f4f4f4; color: var(--text); height: 100vh; overflow: hidden; }
@@ -42,7 +42,6 @@
         .btn-icon { background: rgba(0,0,0,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .icon-sm { width: 18px; height: 18px; fill: currentColor; }
         .icon-white { fill: white; }
-        
         .container { max-width: 600px; margin: 0 auto; padding: 15px; }
         details { background: white; margin-bottom: 12px; border-radius: 8px; overflow: hidden; }
         summary { padding: 15px; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
@@ -66,58 +65,65 @@
         .history-header { background: #333; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; }
         .history-card { background: white; padding: 15px; border-radius: 8px; margin: 10px 15px; border-left: 5px solid #333; display: flex; justify-content: space-between; align-items: center; }
 
-        /* --- PREVIEW SYSTEME (CORRECTIF) --- */
+        /* --- PREVIEW UI (CORRIGÉ POUR MOBILE) --- */
         #preview-overlay { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: #222; z-index: 20000; flex-direction: column; 
         }
         #preview-actions { 
             display: flex; gap: 10px; padding: 10px; background: #000; 
-            width: 100%; z-index: 20001; 
+            width: 100%; z-index: 20001; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
         .btn-action { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; color: white; cursor: pointer; text-transform: uppercase; font-size: 12px; }
         .btn-close { background: #555; }
         .btn-download { background: #2ecc71; }
 
-        /* Zone de scroll qui contient le papier */
+        /* CONTAINER SCROLLABLE */
         #preview-scroll-area {
-            flex: 1; width: 100%; overflow: auto; 
-            display: flex; justify-content: center; padding: 20px; 
-            background: #333;
+            flex: 1; width: 100%; overflow-y: auto; 
+            background: #555; /* Fond gris neutre */
+            padding: 10px;
         }
 
-        /* --- PAPIER A4 FIXE (794px x 1123px) --- */
+        /* --- DOCUMENT RESPONSIVE (MAGIE ICI) --- */
         #paper-preview { 
             background: white; 
-            width: 794px; 
-            min-height: 1123px; 
-            max-height: 1123px; /* Empêche tout débordement page 2 */
-            padding: 0; 
+            /* SUR MOBILE : PREND TOUTE LA LARGEUR (Responsive) */
+            width: 100%; 
+            max-width: 800px; /* Max pour PC */
             margin: 0 auto;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            /* Important pour le zoom mobile */
-            transform-origin: top center; 
-            overflow: hidden; 
+            padding: 0;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            /* Important : Hauteur automatique pour l'aperçu */
+            height: auto; 
+            min-height: 500px;
         }
 
-        /* --- STYLES INTERNES DU PDF --- */
-        .pdf-page { width: 100%; height: 100%; padding: 40px; box-sizing: border-box; font-family: Arial, sans-serif; color: #000; font-size: 12px; line-height: 1.4; position: relative; }
-        .pdf-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
-        .pdf-logo { width: 220px; display: block; margin-bottom: 10px; } /* Pas de blend mode ici */
-        .pdf-sender-txt { font-size: 12px; color: #333; }
-        .pdf-client-col { width: 300px; background-color: #f0f0f0; padding: 15px; border-left: 5px solid #333; font-size: 13px; }
-        .pdf-title-row { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #D32F2F; padding-bottom: 10px; margin-bottom: 20px; }
-        .pdf-title { font-size: 24px; font-weight: bold; margin: 0; text-transform: uppercase; }
-        .pdf-dates { text-align: right; font-size: 12px; }
+        /* --- STYLES INTERNES DU DOCUMENT --- */
+        .pdf-page { width: 100%; padding: 20px; box-sizing: border-box; font-family: Arial, sans-serif; color: #000; font-size: 12px; line-height: 1.4; }
+        
+        /* Flexbox Responsive : Colonnes s'adaptent */
+        .pdf-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 20px; }
+        .pdf-sender-col { flex: 1; min-width: 200px; }
+        .pdf-logo { width: 180px; display: block; margin-bottom: 10px; } 
+        .pdf-sender-txt { font-size: 11px; color: #333; }
+        
+        .pdf-client-col { flex: 1; min-width: 200px; background-color: #f0f0f0; padding: 15px; border-left: 5px solid #333; font-size: 13px; }
+        
+        .pdf-title-row { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #D32F2F; padding-bottom: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .pdf-title { font-size: 20px; font-weight: bold; margin: 0; text-transform: uppercase; }
+        .pdf-dates { text-align: right; font-size: 11px; }
+
         .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .pdf-table th { background-color: #000; color: #fff; padding: 8px; text-align: left; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+        .pdf-table th { background-color: #000; color: #fff; padding: 8px; text-align: left; font-weight: bold; font-size: 11px; text-transform: uppercase; }
         .pdf-table td { border-bottom: 1px solid #ccc; padding: 8px; vertical-align: top; }
+        
         .pdf-totals-section { display: flex; justify-content: flex-end; }
         .pdf-totals-table { width: 250px; border-collapse: collapse; }
         .pdf-totals-table td { text-align: right; padding: 5px; font-size: 13px; }
         .pdf-ttc { font-size: 16px; font-weight: bold; color: #D32F2F; border-top: 2px solid #000; padding-top: 5px; }
-        .pdf-footer { position: absolute; bottom: 40px; left: 40px; right: 40px; font-size: 10px; color: #444; border-top: 1px solid #ddd; padding-top: 10px; }
-        .pdf-bank { background: #eee; padding: 8px; margin-top: 5px; font-family: monospace; border-left: 3px solid #D32F2F; }
+
+        .pdf-footer { margin-top: 40px; font-size: 10px; color: #444; border-top: 1px solid #ddd; padding-top: 10px; }
     </style>
 </head>
 <body>
@@ -142,7 +148,7 @@
         <header id="editor-header">
             <div style="display:flex; align-items:center;">
                 <button class="btn-icon" onclick="goHome()">
-                    <svg class="icon-white icon-sm" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                    <svg class="icon-white" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
                 </button>
                 <h1 id="header-title" style="margin-left:15px">FACTURE</h1>
             </div>
@@ -297,72 +303,39 @@
                     <div class="pdf-sender-col">${logoHTML}<div class="pdf-sender-txt"><strong>${USER.name}</strong><br>${USER.address}<br>Email : ${USER.email}<br>SIRET : ${USER.siret}<br>${USER.rc}</div></div>
                     <div class="pdf-client-col"><strong style="color:#D32F2F;">FACTURER À :</strong><br><br><strong>${document.getElementById('client-name').value}</strong><br>${document.getElementById('client-address').value.replace(/\n/g, '<br>')}${clientSiret ? `<br>SIRET : ${clientSiret}` : ''}</div>
                 </div>
-                <div class="pdf-title-row"><div><h1 class="pdf-title">${type} N° ${num}</h1><div style="font-size:13px; margin-top:5px; color:#D32F2F;">Objet : ${document.getElementById('doc-obj').value}</div></div><div class="pdf-dates">Date : ${date}<br>${labelFin} : ${dateFin}</div></div>
+                <div class="pdf-title-row"><div><div class="pdf-title">${type} N° ${num}</div><div style="font-size:13px; margin-top:5px; color:#D32F2F;">Objet : ${document.getElementById('doc-obj').value}</div></div><div class="pdf-dates">Date : ${date}<br>${labelFin} : ${dateFin}</div></div>
                 <table class="pdf-table"><thead><tr><th style="width:50%">DÉSIGNATION</th><th style="text-align:center">QTÉ</th><th style="text-align:right">P.U. HT</th><th style="text-align:right">TOTAL HT</th></tr></thead><tbody>${rows}</tbody></table>
                 <div class="pdf-totals-section"><table class="pdf-totals-table"><tr><td>Total HT :</td><td>${totalHT.toFixed(2)} €</td></tr>${hasTVA ? `<tr><td>TVA (20%) :</td><td>${mtTVA.toFixed(2)} €</td></tr>` : ''}<tr><td class="pdf-ttc">NET À PAYER :</td><td class="pdf-ttc">${ttc.toFixed(2)} €</td></tr></table></div>
                 <div class="pdf-footer"><div style="display:flex; justify-content:space-between;"><div style="width:60%"><strong>Règlement :</strong> ${paymentTerms}<br><span style="font-size:10px">Pas d'escompte pour paiement anticipé. Retard : taux légal en vigueur + 40€ indemnité.</span><div class="pdf-bank">IBAN : ${USER.iban}</div></div><div style="width:30%; text-align:right;">${type === 'DEVIS' ? '<div style="border:1px solid #ccc; height:60px; padding:5px; font-size:10px;">Bon pour accord (Date & Signature)</div>' : ''}</div></div><div style="text-align:center; margin-top:20px; color:#999; font-size:10px;">${USER.name} - ${type} ${num} ${!hasTVA ? '- TVA non applicable, art. 293 B du CGI.' : ''}</div></div>
             </div>`;
         }
 
-        // --- GESTION PREVIEW RESPONSIVE ---
-        function fitPreview() {
-            const preview = document.getElementById('paper-preview');
-            const container = document.getElementById('preview-scroll-area');
-            if(!container || !preview) return;
-            
-            // Calcul du scale pour mobile (on laisse 40px de marge)
-            const availableWidth = container.clientWidth - 40;
-            const paperWidth = 794; 
-            
-            let scale = availableWidth / paperWidth;
-            if(scale > 1) scale = 1; // Pas de zoom si écran large (PC)
-
-            preview.style.transform = `scale(${scale})`;
-            preview.style.marginBottom = `-${(1-scale)*1123}px`; // Compense le vide en bas
-        }
-
+        // --- APERÇU RESPONSIVE (POUR L'OEIL) ---
         function preparePreview() { 
             document.getElementById('paper-preview').innerHTML = getDocHTML(); 
-            document.getElementById('preview-overlay').style.display = 'flex';
-            // Petit délai pour laisser le CSS s'appliquer avant le calcul
-            setTimeout(fitPreview, 50); 
+            document.getElementById('preview-overlay').style.display = 'flex'; 
         }
-        window.addEventListener('resize', fitPreview);
         function closePreview() { document.getElementById('preview-overlay').style.display = 'none'; }
         
-        // --- TÉLÉCHARGEMENT PDF ROBUSTE ---
+        // --- GÉNÉRATION PDF FORCE (POUR LE FICHIER) ---
+        // C'est ici que la magie opère pour PC et MOBILE
         function downloadPDF() {
             const element = document.getElementById('paper-preview');
-            
-            // 1. DÉSACTIVER LE ZOOM (IMPORTANT POUR LA QUALITÉ ET LA PAGE BLANCHE)
-            const oldTransform = element.style.transform;
-            const oldMargin = element.style.marginBottom;
-            element.style.transform = 'none';
-            element.style.marginBottom = '0';
-
             const type = document.getElementById('current-type').value; 
             const num = document.getElementById('doc-num').value || "doc";
             
-            // 2. CONFIGURATION EXACTE POUR EVITER LA PAGE 2
             const opt = {
                 margin: 0,
                 filename: `${type}_${num}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2, 
-                    useCORS: true, 
-                    scrollY: 0, 
-                    windowWidth: 794, // Force la largeur "PC" même sur mobile
-                    height: 1123      // Force la hauteur exacte
-                },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                // windowWidth: 800 FORCE le moteur à "croire" qu'il est sur un écran large (PC)
+                html2canvas: { scale: 2, useCORS: true, scrollY: 0, windowWidth: 800 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                // Empeche la création de pages vides inutiles
+                pagebreak: { mode: 'avoid-all' }
             };
             
-            html2pdf().set(opt).from(element).save().then(() => {
-                // 3. REMETTRE LE ZOOM POUR L'UTILISATEUR
-                element.style.transform = oldTransform;
-                element.style.marginBottom = oldMargin;
-            });
+            html2pdf().set(opt).from(element).save();
         }
     </script>
 </body>
