@@ -32,7 +32,6 @@
         .login-brand-logo { 
             max-width: 80%; height: auto; max-height: 220px; margin-bottom: 50px; 
             display: block; margin-left: auto; margin-right: auto;
-            /* Plus de filtre ombre qui crée des bords, juste le noir sur noir */
         }
         #password-input { 
             padding: 15px; font-size: 28px; 
@@ -88,60 +87,35 @@
         .btn-close { background: #555; }
         .btn-download { background: #2ecc71; }
         
-        /* Conteneur PDF (A4) - Doit être invisible mais présent pour la génération */
+        /* Conteneur PDF (A4) */
         #paper-preview { 
             background: white; 
-            width: 210mm; /* Largeur fixe A4 */
+            width: 210mm; 
             min-height: 297mm; 
             margin: 0 auto;
             transform-origin: top center; 
         }
-        /* Ajustement affichage mobile pour l'aperçu seulement */
         @media (max-width: 800px) { 
             #paper-preview { transform: scale(0.45); margin-bottom: -150mm; margin-top: 10px; } 
         }
 
         /* --- 2. STYLES PDF (DESIGN PAPIER STRICT) --- */
         .pdf-page { padding: 40px; font-family: 'Arial', sans-serif; color: #000; font-size: 12px; line-height: 1.4; }
-        
-        /* En-tête : Flex pour séparer Gauche/Droite */
         .pdf-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
-        
-        /* Gauche : Logo + Infos MSE */
         .pdf-sender-col { width: 50%; }
         .pdf-logo { width: 200px; display: block; margin-bottom: 15px; }
         .pdf-sender-txt { font-size: 11px; color: #333; line-height: 1.5; }
-        
-        /* Droite : Cadre Gris Client */
-        .pdf-client-col { 
-            width: 40%; 
-            background-color: #f0f0f0; 
-            padding: 15px; 
-            border-left: 5px solid #333; 
-            font-size: 13px;
-        }
-        
-        /* Titre Document */
-        .pdf-title-row { 
-            display: flex; justify-content: space-between; align-items: flex-end; 
-            border-bottom: 3px solid #D32F2F; /* Ligne Rouge */
-            padding-bottom: 10px; margin-bottom: 20px; 
-        }
+        .pdf-client-col { width: 40%; background-color: #f0f0f0; padding: 15px; border-left: 5px solid #333; font-size: 13px; }
+        .pdf-title-row { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #D32F2F; padding-bottom: 10px; margin-bottom: 20px; }
         .pdf-title { font-size: 24px; font-weight: bold; margin: 0; color: #000; text-transform: uppercase; }
         .pdf-dates { text-align: right; font-size: 12px; }
-
-        /* Tableau */
         .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         .pdf-table th { background-color: #000; color: #fff; padding: 8px; text-align: left; font-weight: bold; text-transform: uppercase; font-size: 11px; }
         .pdf-table td { border-bottom: 1px solid #ccc; padding: 8px; vertical-align: top; }
-        
-        /* Totaux */
         .pdf-totals-section { display: flex; justify-content: flex-end; }
         .pdf-totals-table { width: 250px; border-collapse: collapse; }
         .pdf-totals-table td { text-align: right; padding: 5px; font-size: 13px; }
         .pdf-ttc { font-size: 16px; font-weight: bold; color: #D32F2F; border-top: 2px solid #000; padding-top: 5px; }
-
-        /* Footer */
         .pdf-footer { margin-top: 40px; font-size: 10px; color: #444; border-top: 1px solid #ddd; padding-top: 10px; }
         .pdf-bank { background: #eee; padding: 8px; margin-top: 5px; font-family: monospace; border-left: 3px solid #D32F2F; }
     </style>
@@ -152,14 +126,13 @@
 
     <div id="login-screen">
         <img src="logo.png" class="login-brand-logo" alt="MSE" onerror="this.style.display='none'">
-        <input type="tel" id="password-input" placeholder="••••" maxlength="4">
+        <input type="password" inputmode="numeric" id="password-input" placeholder="••••" maxlength="4">
         <button class="btn-login-gold" onclick="checkLogin()">ENTRER</button>
     </div>
 
     <div id="view-home">
         <img src="logo.png" class="home-logo" onerror="this.style.display='none'; document.getElementById('txt-logo').style.display='block'">
         <h1 id="txt-logo" style="display:none; color:var(--gold); font-size:40px; margin:0;">MSE</h1>
-        
         <button class="big-btn btn-gold" onclick="openJourney('FACTURE')">FACTURE</button>
         <button class="big-btn btn-red" onclick="openJourney('DEVIS')">DEVIS</button>
         <button class="btn-history" onclick="openHistory()">HISTORIQUE</button>
@@ -273,6 +246,13 @@
                 document.getElementById('view-home').style.display = 'flex';
             } else { alert("Code Incorrect"); }
         }
+
+        // --- GESTION TOUCHE ENTRÉE (NOUVEAU) ---
+        document.getElementById('password-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                checkLogin();
+            }
+        });
 
         function goHome() {
             document.querySelectorAll('body > div').forEach(div => {
