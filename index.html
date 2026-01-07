@@ -13,34 +13,47 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* --- 1. DESIGN APPLICATION (Mobile) --- */
+        /* --- 1. APPLICATION (INTERFACE MOBILE) --- */
         :root { --gold: #C5A059; --gold-bright: #E6C878; --red: #D32F2F; --bg-dark: #000000; --text: #333; }
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif; background: #f4f4f4; color: var(--text); height: 100vh; overflow: hidden; }
 
-        /* Icones SVG */
-        .icon-sm { width: 18px; height: 18px; fill: currentColor; }
-        .icon-white { fill: white; }
-
-        /* LOGIN */
+        /* Login Screen */
         #login-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background-color: #000000; 
-            z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;
+            background-color: #000000; z-index: 9999; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;
         }
-        .login-brand-logo { max-width: 80%; height: auto; max-height: 220px; margin-bottom: 50px; display: block; margin-left: auto; margin-right: auto; }
-        #password-input { padding: 15px; font-size: 28px; border: 2px solid var(--gold); background: #111; color: var(--gold-bright); text-align: center; border-radius: 12px; width: 180px; margin-bottom: 30px; letter-spacing: 8px; font-weight:bold; }
-        .btn-login-gold { background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #000; border: none; padding: 15px 60px; font-size: 16px; border-radius: 50px; cursor: pointer; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; box-shadow: 0 5px 20px rgba(197, 160, 89, 0.3); }
+        .login-brand-logo { 
+            max-width: 80%; height: auto; max-height: 220px; margin-bottom: 50px; 
+            display: block; margin-left: auto; margin-right: auto;
+            /* TECHNIQUE DE FUSION POUR EFFACER LE CADRE NOIR */
+            mix-blend-mode: lighten; 
+        }
+        #password-input { 
+            padding: 15px; font-size: 28px; border: 2px solid var(--gold); background: #111; 
+            color: var(--gold-bright); text-align: center; border-radius: 12px; width: 180px; 
+            margin-bottom: 30px; letter-spacing: 8px; font-weight:bold;
+        }
+        .btn-login-gold { 
+            background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #000; border: none; 
+            padding: 15px 60px; font-size: 16px; border-radius: 50px; cursor: pointer; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; 
+            box-shadow: 0 5px 20px rgba(197, 160, 89, 0.3); 
+        }
 
-        /* HOME */
+        /* Home Screen */
         #view-home { display: none; height: 100vh; background-color: #000000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .home-logo { max-width: 80%; max-height: 200px; object-fit: contain; margin-bottom: 60px; display: block; margin-left: auto; margin-right: auto; }
+        .home-logo { 
+            max-width: 80%; max-height: 200px; object-fit: contain; margin-bottom: 60px; 
+            display: block; margin-left: auto; margin-right: auto;
+            mix-blend-mode: lighten;
+        }
         .big-btn { width: 100%; max-width: 350px; height: 75px; margin-bottom: 25px; border: none; border-radius: 12px; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; gap: 15px; }
         .btn-gold { background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #000; }
         .btn-red { background: linear-gradient(135deg, #FF5252, #D32F2F); color: white; }
         .btn-history { margin-top: 30px; background: transparent; border: 1px solid #333; color: #666; padding: 10px 25px; border-radius: 30px; font-size: 12px; text-transform: uppercase; cursor: pointer; }
 
-        /* EDITOR */
+        /* Editor Screen */
         #view-editor { display: none; height: 100vh; overflow-y: auto; background: #f4f4f4; padding-bottom: 40px; }
         header { padding: 15px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: white; transition: background 0.3s; }
         .btn-icon { background: rgba(0,0,0,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -58,80 +71,77 @@
         .row-bottom { display: flex; gap: 10px; align-items: center; }
         .qty-input { width: 60px; text-align: center; }
         .price-input { width: 90px; text-align: right; }
+        
+        /* Boutons Actions */
         .btn-trash { background: #ffebee; color: #c62828; border: none; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .icon-sm { width: 18px; height: 18px; fill: currentColor; }
+        .icon-white { fill: white; }
         .btn-add { width: 100%; padding: 15px; background: #333; color: white; border: none; border-radius: 6px; font-weight: bold; margin-top: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .action-bar { padding: 20px; text-align: center; }
         .btn-generate { color: white; border: none; padding: 16px 40px; border-radius: 50px; font-size: 16px; font-weight: bold; width: 100%; max-width: 400px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* HISTORY */
+        /* History */
         #view-history { display: none; height: 100vh; overflow-y: auto; background: #f4f4f4; }
         .history-header { background: #333; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; }
         .history-card { background: white; padding: 15px; border-radius: 8px; margin: 10px 15px; border-left: 5px solid #333; display: flex; justify-content: space-between; align-items: center; }
 
-        /* --- PREVIEW SYSTEME RIGIDE --- */
+        /* --- PREVIEW SYSTEME "A4 RIGIDE" --- */
         #preview-overlay { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #1a1a1a; z-index: 20000; flex-direction: column; 
-            padding: 0; overflow: hidden; /* Empêche le scroll global */
+            background: #222; z-index: 20000; flex-direction: column; 
+            padding: 0;
         }
         #preview-actions { 
-            display: flex; gap: 10px; width: 100%; padding: 15px; 
-            background: #000; position: fixed; top: 0; left: 0; z-index: 20001; 
+            display: flex; gap: 10px; padding: 10px; background: #000; 
+            width: 100%; z-index: 20001; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
         .btn-action { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; color: white; cursor: pointer; text-transform: uppercase; font-size: 12px; }
         .btn-close { background: #555; }
         .btn-download { background: #2ecc71; }
 
-        /* ZONE SCROLLABLE POUR L'APERÇU */
-        #preview-scroll-area {
-            margin-top: 70px; /* Espace pour les boutons */
+        /* Zone de défilement pour l'aperçu */
+        #preview-container {
+            flex: 1;
             width: 100%;
-            height: calc(100vh - 70px);
-            overflow: auto; /* Scroll interne */
+            overflow: auto; /* Permet de scroller si on zoom */
             display: flex;
             justify-content: center;
-            align-items: flex-start;
             padding: 20px;
             background: #333;
         }
 
-        /* LA FEUILLE A4 - DIMENSIONS FIXES ET RIGIDES */
+        /* LA FEUILLE A4 STRICTE - NE PAS TOUCHER AUX DIMENSIONS */
         #paper-preview { 
             background: white; 
-            width: 794px; /* Largeur exacte A4 en pixels (96dpi) */
-            min-height: 1123px; /* Hauteur A4 */
-            padding: 0;
+            width: 794px;  /* Largeur A4 96 DPI */
+            min-height: 1123px; /* Hauteur A4 96 DPI */
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            /* Transformation par JS pour ajuster à l'écran mobile */
-            transform-origin: top center;
+            margin: 0 auto;
+            transform-origin: top center; /* Important pour le zoom */
         }
 
-        /* --- STYLES DU DOCUMENT PDF (INTERIEUR) --- */
-        /* Ces styles ne bougent jamais, quelle que soit la taille de l'écran */
-        .pdf-page { padding: 40px; font-family: 'Arial', sans-serif; color: #000; font-size: 14px; line-height: 1.4; width: 100%; box-sizing: border-box; }
-        
+        /* --- STYLES PDF (Fixes, ne s'adaptent pas au mobile) --- */
+        .pdf-page { width: 100%; height: 100%; padding: 40px; box-sizing: border-box; font-family: Arial, sans-serif; color: #000; line-height: 1.4; }
         .pdf-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
-        .pdf-sender-col { width: 55%; }
-        .pdf-logo { width: 220px; display: block; margin-bottom: 15px; }
-        .pdf-sender-txt { font-size: 12px; color: #333; line-height: 1.5; }
+        .pdf-logo { width: 200px; display: block; margin-bottom: 10px; }
+        .pdf-sender-txt { font-size: 12px; color: #333; }
+        .pdf-client-col { width: 300px; background-color: #f0f0f0; padding: 15px; border-left: 5px solid #333; font-size: 13px; }
         
-        .pdf-client-col { width: 40%; background-color: #f0f0f0; padding: 20px; border-left: 5px solid #333; font-size: 14px; }
-        
-        .pdf-title-row { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #D32F2F; padding-bottom: 15px; margin-bottom: 30px; }
-        .pdf-title { font-size: 28px; font-weight: bold; margin: 0; color: #000; text-transform: uppercase; }
+        .pdf-title-row { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #D32F2F; padding-bottom: 10px; margin-bottom: 20px; }
+        .pdf-title { font-size: 24px; font-weight: bold; text-transform: uppercase; margin: 0; }
         .pdf-dates { text-align: right; font-size: 12px; }
 
-        .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        .pdf-table th { background-color: #000; color: #fff; padding: 10px; text-align: left; font-weight: bold; text-transform: uppercase; font-size: 12px; }
-        .pdf-table td { border-bottom: 1px solid #ccc; padding: 10px; vertical-align: top; }
+        .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .pdf-table th { background-color: #000; color: #fff; padding: 8px; text-align: left; font-weight: bold; font-size: 12px; }
+        .pdf-table td { border-bottom: 1px solid #ccc; padding: 8px; font-size: 12px; vertical-align: top; }
         
         .pdf-totals-section { display: flex; justify-content: flex-end; }
-        .pdf-totals-table { width: 300px; border-collapse: collapse; }
-        .pdf-totals-table td { text-align: right; padding: 8px; font-size: 14px; }
-        .pdf-ttc { font-size: 18px; font-weight: bold; color: #D32F2F; border-top: 2px solid #000; padding-top: 10px; }
+        .pdf-totals-table { width: 250px; }
+        .pdf-totals-table td { text-align: right; padding: 5px; font-size: 13px; }
+        .pdf-ttc { font-size: 16px; font-weight: bold; color: #D32F2F; border-top: 2px solid #000; padding-top: 5px; }
 
-        .pdf-footer { margin-top: 50px; font-size: 11px; color: #444; border-top: 1px solid #ddd; padding-top: 15px; }
-        .pdf-bank { background: #eee; padding: 10px; margin-top: 10px; font-family: monospace; border-left: 3px solid #D32F2F; }
+        .pdf-footer { margin-top: 40px; font-size: 10px; color: #444; border-top: 1px solid #ddd; padding-top: 10px; }
+        .pdf-bank { background: #eee; padding: 8px; margin-top: 5px; font-family: monospace; border-left: 3px solid #D32F2F; }
     </style>
 </head>
 <body>
@@ -240,7 +250,7 @@
             <button class="btn-action btn-close" onclick="closePreview()">RETOUR</button>
             <button class="btn-action btn-download" onclick="downloadPDF()">TÉLÉCHARGER</button>
         </div>
-        <div id="preview-scroll-area">
+        <div id="preview-container">
             <div id="paper-preview"></div>
         </div>
     </div>
@@ -256,6 +266,7 @@
         };
         let customLogoData = null;
 
+        // Login avec Touche Entrée
         function checkLogin() {
             if(document.getElementById('password-input').value === "1984") {
                 document.getElementById('login-screen').style.display = 'none';
@@ -405,7 +416,6 @@
             const hasTVA = document.getElementById('tva-switch').checked;
             const clientSiret = document.getElementById('client-siret').value;
             const paymentTerms = document.getElementById('payment-terms').value;
-            
             let rows = ""; let totalHT = 0;
             document.querySelectorAll('.article-row').forEach(row => {
                 const desc = row.querySelector('.desc-input').value;
@@ -415,7 +425,6 @@
                 rows += `<tr><td>${desc}</td><td style="text-align:center">${qty}</td><td style="text-align:right">${pu.toFixed(2)} €</td><td style="text-align:right">${tot.toFixed(2)} €</td></tr>`;
             });
             const mtTVA = hasTVA ? totalHT * 0.2 : 0; const ttc = totalHT + mtTVA;
-            
             let logoHTML = customLogoData ? `<img src="${customLogoData}" class="pdf-logo">` : `<img src="logo.png" class="pdf-logo" onerror="this.style.display='none'">`;
             
             return `
@@ -459,57 +468,50 @@
             </div>`;
         }
 
-        // --- FONCTION MAGIQUE DE ZOOM ---
-        function fitPreview() {
-            const preview = document.getElementById('paper-preview');
-            const container = document.getElementById('preview-scroll-area');
-            const availableWidth = container.clientWidth - 40; // Marge 20px de chaque côté
-            const paperWidth = 794; // Largeur A4 96dpi
-            
-            // Calcul du ratio de zoom
-            let scale = availableWidth / paperWidth;
-            if (scale > 1) scale = 1; // Ne pas grossir sur grand écran
-
-            // Application du zoom
-            preview.style.transform = `scale(${scale})`;
-            // Ajustement de la hauteur du conteneur pour ne pas avoir de vide immense
-            preview.style.marginBottom = `-${(1 - scale) * 1123}px`;
-        }
-
+        // --- FONCTION D'AFFICHAGE DU PREVIEW (ZOOMÉ POUR MOBILE) ---
         function preparePreview() { 
-            document.getElementById('paper-preview').innerHTML = getDocHTML(); 
+            const element = document.getElementById('paper-preview');
+            element.innerHTML = getDocHTML();
             document.getElementById('preview-overlay').style.display = 'flex';
-            setTimeout(fitPreview, 100); // Petit délai pour le calcul
+            
+            // Calcul du ratio pour afficher la page A4 (794px) sur l'écran du mobile
+            const screenWidth = window.innerWidth;
+            const scale = (screenWidth - 40) / 794; // 40px de marge
+            
+            // On applique le zoom VISUELLEMENT seulement
+            element.style.transform = `scale(${scale < 1 ? scale : 1})`;
+            element.style.marginBottom = `-${(1-scale)*1123}px`; // Corrige l'espace vide créé par le scale
         }
-        
-        // Recalcul au changement d'orientation
-        window.addEventListener('resize', fitPreview);
 
         function closePreview() { document.getElementById('preview-overlay').style.display = 'none'; }
         
+        // --- FONCTION DE TÉLÉCHARGEMENT (FORCE A4) ---
         function downloadPDF() {
-            const el = document.getElementById('paper-preview');
-            // Reset temporaire du scale pour que le PDF soit généré en pleine taille
-            const oldTransform = el.style.transform;
-            el.style.transform = 'scale(1)';
-            
+            const element = document.getElementById('paper-preview');
+            // On enlève le zoom temporairement pour que le PDF soit généré en pleine taille
+            const oldTransform = element.style.transform;
+            const oldMargin = element.style.marginBottom;
+            element.style.transform = 'none';
+            element.style.marginBottom = '0';
+
             const type = document.getElementById('current-type').value; 
             const num = document.getElementById('doc-num').value || "doc";
             
+            // Options CRITIQUES pour forcer le format A4 et le rendu desktop
             const opt = {
                 margin: 0,
                 filename: `${type}_${num}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+                html2canvas: { scale: 2, useCORS: true, windowWidth: 800 }, // windowWidth FORCE le rendu large
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
             
-            html2pdf().set(opt).from(el).save().then(() => {
-                // Remettre le zoom pour l'aperçu
-                el.style.transform = oldTransform;
+            html2pdf().set(opt).from(element).save().then(() => {
+                // On remet le zoom pour l'utilisateur
+                element.style.transform = oldTransform;
+                element.style.marginBottom = oldMargin;
             });
         }
     </script>
 </body>
 </html>
-
