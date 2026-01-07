@@ -88,33 +88,21 @@
 
         /* --- STYLES DU DOCUMENT PDF (CONFORME ORIGINAL) --- */
         .pdf-page { padding: 40px; font-family: 'Roboto', Arial, sans-serif; color: #333; line-height: 1.5; background:white; }
-        
-        /* HEADER : GAUCHE = MSE / DROITE = CLIENT */
         .pdf-header { display: flex; justify-content: space-between; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px; align-items: flex-start; }
-        
         .pdf-sender-col { width: 55%; }
         .pdf-logo { max-width: 250px; max-height: 120px; display: block; margin-bottom: 15px; }
         .pdf-sender-txt { font-size: 13px; color: #555; line-height: 1.6; }
-
         .pdf-client-col { width: 40%; background-color: #f8f8f8; padding: 20px; border-radius: 4px; border-left: 4px solid #333; font-size: 14px; color: #000; }
-        
-        /* TITRES */
         .pdf-title-row { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #D32F2F; padding-bottom: 15px; margin-bottom: 30px; }
         .pdf-title { font-size: 28px; font-weight: bold; text-transform: uppercase; margin: 0; color: #333; }
         .pdf-dates { text-align: right; font-size: 13px; color: #555; }
-
-        /* TABLEAU */
         .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
         .pdf-table th { background-color: #333; color: white; padding: 10px; text-align: left; font-weight: bold; text-transform: uppercase; }
         .pdf-table td { border-bottom: 1px solid #eee; padding: 10px; vertical-align: top; }
-        
-        /* TOTAUX */
         .pdf-totals-box { display: flex; justify-content: flex-end; }
         .pdf-totals-table { width: 300px; border-collapse: collapse; font-size: 14px; }
         .pdf-totals-table td { text-align: right; padding: 5px 0; }
         .pdf-ttc-row td { font-size: 18px; font-weight: bold; color: #D32F2F; border-top: 2px solid #000; padding-top: 10px; margin-top: 5px; }
-        
-        /* FOOTER */
         .pdf-footer { margin-top: 50px; font-size: 12px; color: #555; border-top: 1px solid #eee; padding-top: 20px; display: flex; justify-content: space-between; }
         .pdf-bank { background: #f9f9f9; padding: 10px; border-left: 3px solid #D32F2F; font-family: monospace; margin-top: 10px; }
     </style>
@@ -156,7 +144,8 @@
             <details open><summary>INFORMATIONS</summary>
                 <div class="section-content">
                     <div class="form-group"><label>Numéro</label><input type="text" id="doc-num" placeholder="Auto ou 2026-01"></div>
-                    <div class="form-group"><label>Date d'émission</label><input type="date" id="doc-date"></div>
+                    <div class="form-group"><label>Date d'émission</label><input type="date" id="doc-date" onchange="updateDueDate()"></div>
+                    <div class="form-group"><label id="label-date-fin">Date d'échéance</label><input type="date" id="doc-date-end"></div>
                     <div class="form-group"><label>Objet / Référence</label><input type="text" id="doc-obj" placeholder="Ex: Remplacement serrure"></div>
                 </div>
             </details>
@@ -183,9 +172,17 @@
                 </div>
             </details>
 
-            <details open><summary>TOTAL</summary>
+            <details open><summary>TOTAL & RÈGLEMENT</summary>
                 <div class="section-content">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center">
+                    <div class="form-group"><label>Délai de Paiement</label>
+                        <select id="payment-terms">
+                            <option value="Paiement à réception">Paiement à réception</option>
+                            <option value="Paiement immédiat">Paiement immédiat</option>
+                            <option value="Paiement à 30 jours (réception)" selected>Paiement à 30 jours</option>
+                            <option value="Paiement à 60 jours">Paiement à 60 jours</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center; border-top:1px solid #eee; padding-top:15px;">
                         <label>Appliquer TVA (20%)</label>
                         <input type="checkbox" id="tva-switch" checked onchange="calculate()" style="width:20px; height:20px;">
                     </div>
@@ -252,22 +249,37 @@
             document.getElementById('view-home').style.display = 'none';
             document.getElementById('view-editor').style.display = 'block';
             document.getElementById('current-type').value = type;
-            document.getElementById('doc-date').value = new Date().toISOString().split('T')[0];
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('doc-date').value = today;
+            updateDueDate(); // Set default due date
 
             const header = document.getElementById('editor-header');
             const btnGen = document.getElementById('btn-gen');
             const title = document.getElementById('header-title');
+            const labelFin = document.getElementById('label-date-fin');
 
             title.innerText = type;
 
             if (type === 'FACTURE') {
                 header.style.background = '#C5A059'; // OR
                 btnGen.style.background = '#C5A059';
+                labelFin.innerText = "Date d'échéance";
             } else {
                 header.style.background = '#D32F2F'; // ROUGE
                 btnGen.style.background = '#D32F2F';
+                labelFin.innerText = "Date de validité";
             }
             if(document.getElementById('items-container').children.length === 0) addItem();
+        }
+
+        function updateDueDate() {
+            const startDate = document.getElementById('doc-date').value;
+            if (startDate) {
+                const d = new Date(startDate);
+                d.setDate(d.getDate() + 30);
+                document.getElementById('doc-date-end').value = d.toISOString().split('T')[0];
+            }
         }
 
         function openHistory() {
@@ -320,11 +332,13 @@
                 type: document.getElementById('current-type').value,
                 num: document.getElementById('doc-num').value || 'Sans N°',
                 date: document.getElementById('doc-date').value,
+                dateFin: document.getElementById('doc-date-end').value,
                 client: document.getElementById('client-name').value || 'Client',
                 address: document.getElementById('client-address').value,
                 obj: document.getElementById('doc-obj').value,
                 tva: document.getElementById('tva-switch').checked,
                 siret_client: document.getElementById('client-siret').value,
+                payment: document.getElementById('payment-terms').value,
                 items: []
             };
             document.querySelectorAll('.article-row').forEach(row => {
@@ -361,10 +375,12 @@
             openJourney(doc.type);
             document.getElementById('doc-num').value = doc.num;
             document.getElementById('doc-date').value = doc.date;
+            document.getElementById('doc-date-end').value = doc.dateFin || '';
             document.getElementById('doc-obj').value = doc.obj;
             document.getElementById('client-name').value = doc.client;
             document.getElementById('client-address').value = doc.address;
             document.getElementById('client-siret').value = doc.siret_client || '';
+            document.getElementById('payment-terms').value = doc.payment || 'Paiement à 30 jours (réception)';
             document.getElementById('tva-switch').checked = doc.tva;
             document.getElementById('items-container').innerHTML = '';
             doc.items.forEach(i => addItem(i.desc, i.qty, i.price));
@@ -384,11 +400,21 @@
             const type = document.getElementById('current-type').value;
             const num = document.getElementById('doc-num').value || "Brouillon";
             const date = new Date(document.getElementById('doc-date').value).toLocaleDateString('fr-FR');
-            const d = new Date(document.getElementById('doc-date').value); d.setDate(d.getDate() + 30);
-            const dateFin = d.toLocaleDateString('fr-FR');
+            
+            // Date fin manuelle ou auto
+            let dateFinRaw = document.getElementById('doc-date-end').value;
+            if(!dateFinRaw) {
+                // Securité si vide
+                const d = new Date(document.getElementById('doc-date').value); 
+                d.setDate(d.getDate() + 30);
+                dateFinRaw = d.toISOString().split('T')[0];
+            }
+            const dateFin = new Date(dateFinRaw).toLocaleDateString('fr-FR');
+
             const labelFin = type === 'FACTURE' ? "Date d'échéance" : "Validité";
             const hasTVA = document.getElementById('tva-switch').checked;
             const clientSiret = document.getElementById('client-siret').value;
+            const paymentTerms = document.getElementById('payment-terms').value;
             
             let rows = ""; let totalHT = 0;
             document.querySelectorAll('.article-row').forEach(row => {
@@ -402,7 +428,7 @@
             
             let logoHTML = customLogoData ? `<img src="${customLogoData}" class="pdf-logo">` : `<img src="logo.png" id="pdf-logo-img" class="pdf-logo" onerror="onLogoError(this)"><div id="fallback-logo-btn" style="display:none; border:2px dashed #ccc; padding:10px; text-align:center; cursor:pointer" onclick="triggerUpload()">AJOUTER LOGO</div>`;
             
-            /* --- GENERATION HTML PDF (CONFORME ORIGINAL) --- */
+            /* --- PDF HTML --- */
             return `
             <div class="pdf-page">
                 <div class="pdf-header">
@@ -451,7 +477,7 @@
                 <div class="pdf-footer">
                     <div style="width: 55%;">
                         <strong>Conditions de règlement :</strong><br>
-                        Paiement à 30 jours (réception).<br>
+                        ${paymentTerms}<br>
                         Retard : Pénalités légales + 40€. Pas d'escompte.<br>
                         <div class="pdf-bank">
                             IBAN : ${USER.iban}
@@ -477,5 +503,3 @@
     </script>
 </body>
 </html>
-
-
