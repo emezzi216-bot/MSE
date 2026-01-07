@@ -6,7 +6,7 @@
     <title>MSE App</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* --- DESIGN DE L'APPLICATION (MOBILE) --- */
+        /* --- DESIGN DE L'APPLICATION (MOBILE - MODE LUXE) --- */
         :root { --gold: #C5A059; --gold-bright: #E6C878; --red: #D32F2F; --bg-dark: #121212; --text: #333; }
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif; background: #f4f4f4; color: var(--text); height: 100vh; overflow: hidden; }
@@ -15,24 +15,16 @@
         .icon-sm { width: 18px; height: 18px; fill: currentColor; }
         .icon-white { fill: white; }
 
-        /* --- LOGIN SCREEN (CORRIGÉ & CENTRÉ) --- */
+        /* Login Screen */
         #login-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            /* Fond ajusté : Noir pur au centre pour fondre le logo, dégradé vers gris foncé sur les bords */
             background: radial-gradient(circle at center, #000000 0%, #1a1a1a 120%);
             z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; 
             padding: 20px;
         }
         .login-brand-logo { 
-            max-width: 80%; 
-            height: auto; 
-            max-height: 220px; 
-            margin-bottom: 50px; 
-            /* CENTRAGE FORCÉ */
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            /* Lueur dorée pour l'intégration */
+            max-width: 80%; height: auto; max-height: 220px; margin-bottom: 50px; 
+            display: block; margin-left: auto; margin-right: auto;
             filter: drop-shadow(0 0 20px rgba(197, 160, 89, 0.15)); 
         }
         #password-input { 
@@ -49,7 +41,7 @@
         }
         .btn-login-gold:active { transform: scale(0.95); }
 
-        /* Home */
+        /* Home Screen */
         #view-home { display: none; height: 100vh; background: var(--bg-dark); flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         .home-logo { max-width: 80%; max-height: 200px; object-fit: contain; margin-bottom: 50px; display: block; margin-left: auto; margin-right: auto; }
         .big-btn { width: 100%; max-width: 350px; height: 70px; margin-bottom: 20px; border: none; border-radius: 12px; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; gap: 15px; }
@@ -57,7 +49,7 @@
         .btn-red { background: linear-gradient(135deg, #FF5252, #D32F2F); color: white; }
         .btn-history { margin-top: 20px; background: transparent; border: 1px solid #444; color: #888; padding: 10px 25px; border-radius: 30px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; }
 
-        /* Editor */
+        /* Editor Screen */
         #view-editor { display: none; height: 100vh; overflow-y: auto; background: #f4f4f4; padding-bottom: 40px; }
         header { padding: 15px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: white; transition: background 0.3s; }
         .btn-icon { background: rgba(0,0,0,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -80,7 +72,7 @@
         .action-bar { padding: 20px; text-align: center; }
         .btn-generate { color: white; border: none; padding: 16px 40px; border-radius: 50px; font-size: 16px; font-weight: bold; width: 100%; max-width: 400px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* History */
+        /* History Screen */
         #view-history { display: none; height: 100vh; overflow-y: auto; background: #f4f4f4; }
         .history-header { background: #333; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; }
         .history-card { background: white; padding: 15px; border-radius: 8px; margin: 10px 15px; border-left: 5px solid #333; display: flex; justify-content: space-between; align-items: center; }
@@ -94,31 +86,36 @@
         #paper-preview { background: white; width: 210mm; min-height: 297mm; transform-origin: top center; }
         @media (max-width: 800px) { #paper-preview { transform: scale(0.45); margin-bottom: -150mm; } }
 
-        /* --- STYLES EXACTS DU DOCUMENT (COPIÉS DU PROMPT ORIGINAL) --- */
-        .pdf-page { padding: 40px; font-family: 'Roboto', Arial, sans-serif; color: #333; line-height: 1.4; }
-        .pdf-logo { max-width: 250px; max-height: 120px; }
-        .pdf-header { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px; }
+        /* --- STYLES DU DOCUMENT PDF (CONFORME ORIGINAL) --- */
+        .pdf-page { padding: 40px; font-family: 'Roboto', Arial, sans-serif; color: #333; line-height: 1.5; background:white; }
         
-        /* Encadré Client GRIS comme demandé initialement */
-        .pdf-client-box { background-color: #f8f8f8; color: #000; padding: 20px; width: 40%; border-radius: 4px; border-left: 4px solid #333; }
+        /* HEADER : GAUCHE = MSE / DROITE = CLIENT */
+        .pdf-header { display: flex; justify-content: space-between; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px; align-items: flex-start; }
         
-        /* Titre avec soulignement ROUGE */
+        .pdf-sender-col { width: 55%; }
+        .pdf-logo { max-width: 250px; max-height: 120px; display: block; margin-bottom: 15px; }
+        .pdf-sender-txt { font-size: 13px; color: #555; line-height: 1.6; }
+
+        .pdf-client-col { width: 40%; background-color: #f8f8f8; padding: 20px; border-radius: 4px; border-left: 4px solid #333; font-size: 14px; color: #000; }
+        
+        /* TITRES */
         .pdf-title-row { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #D32F2F; padding-bottom: 15px; margin-bottom: 30px; }
         .pdf-title { font-size: 28px; font-weight: bold; text-transform: uppercase; margin: 0; color: #333; }
-        
+        .pdf-dates { text-align: right; font-size: 13px; color: #555; }
+
+        /* TABLEAU */
         .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
-        /* En-têtes NOIRS */
-        .pdf-table th { background-color: #333; color: white; padding: 12px 10px; text-align: left; font-weight: bold; text-transform: uppercase; }
-        .pdf-table td { border-bottom: 1px solid #eee; padding: 10px; }
+        .pdf-table th { background-color: #333; color: white; padding: 10px; text-align: left; font-weight: bold; text-transform: uppercase; }
+        .pdf-table td { border-bottom: 1px solid #eee; padding: 10px; vertical-align: top; }
         
-        /* Totaux */
+        /* TOTAUX */
         .pdf-totals-box { display: flex; justify-content: flex-end; }
-        .pdf-totals-table { width: 300px; border-collapse: collapse; font-size: 13px; }
-        .pdf-totals-table td { text-align: right; padding: 5px; }
-        /* Total TTC ROUGE */
-        .pdf-ttc-row td { font-size: 16px; font-weight: bold; color: #D32F2F; border-top: 2px solid #000; padding-top: 10px; }
+        .pdf-totals-table { width: 300px; border-collapse: collapse; font-size: 14px; }
+        .pdf-totals-table td { text-align: right; padding: 5px 0; }
+        .pdf-ttc-row td { font-size: 18px; font-weight: bold; color: #D32F2F; border-top: 2px solid #000; padding-top: 10px; margin-top: 5px; }
         
-        .pdf-footer { margin-top: 50px; font-size: 11px; color: #555; border-top: 1px solid #eee; padding-top: 15px; }
+        /* FOOTER */
+        .pdf-footer { margin-top: 50px; font-size: 12px; color: #555; border-top: 1px solid #eee; padding-top: 20px; display: flex; justify-content: space-between; }
         .pdf-bank { background: #f9f9f9; padding: 10px; border-left: 3px solid #D32F2F; font-family: monospace; margin-top: 10px; }
     </style>
 </head>
@@ -168,6 +165,7 @@
                 <div class="section-content">
                     <div class="form-group"><label>Nom du client</label><input type="text" id="client-name" list="clients-list" placeholder="Nom ou Société"></div>
                     <div class="form-group"><label>Adresse</label><textarea id="client-address" rows="3" placeholder="Adresse complète"></textarea></div>
+                    <div class="form-group"><label>SIRET Client (Optionnel)</label><input type="text" id="client-siret" placeholder="14 chiffres"></div>
                     <datalist id="clients-list"><option value="COMMUNE DE CRETEIL - CCAS"><option value="Particulier"></datalist>
                 </div>
             </details>
@@ -226,7 +224,14 @@
     </div>
 
     <script>
-        const USER = { name: "Sabri BENNACEUR EI", address: "2 Résidence des Rosiers, 92800 Puteaux, FR", email: "serruremse@gmail.com", siret: "943032755", iban: "FR76 1695 8000 0159 6810 0824 765" };
+        const USER = { 
+            name: "Sabri BENNACEUR EI", 
+            address: "2 Résidence des Rosiers, 92800 Puteaux, FR", 
+            email: "serruremse@gmail.com", 
+            siret: "943032755", 
+            iban: "FR76 1695 8000 0159 6810 0824 765",
+            rc: "RC décennale TETRIS police n° SV75018041T37384" 
+        };
         let customLogoData = null;
 
         function checkLogin() {
@@ -319,6 +324,7 @@
                 address: document.getElementById('client-address').value,
                 obj: document.getElementById('doc-obj').value,
                 tva: document.getElementById('tva-switch').checked,
+                siret_client: document.getElementById('client-siret').value,
                 items: []
             };
             document.querySelectorAll('.article-row').forEach(row => {
@@ -358,6 +364,7 @@
             document.getElementById('doc-obj').value = doc.obj;
             document.getElementById('client-name').value = doc.client;
             document.getElementById('client-address').value = doc.address;
+            document.getElementById('client-siret').value = doc.siret_client || '';
             document.getElementById('tva-switch').checked = doc.tva;
             document.getElementById('items-container').innerHTML = '';
             doc.items.forEach(i => addItem(i.desc, i.qty, i.price));
@@ -381,6 +388,7 @@
             const dateFin = d.toLocaleDateString('fr-FR');
             const labelFin = type === 'FACTURE' ? "Date d'échéance" : "Validité";
             const hasTVA = document.getElementById('tva-switch').checked;
+            const clientSiret = document.getElementById('client-siret').value;
             
             let rows = ""; let totalHT = 0;
             document.querySelectorAll('.article-row').forEach(row => {
@@ -394,47 +402,67 @@
             
             let logoHTML = customLogoData ? `<img src="${customLogoData}" class="pdf-logo">` : `<img src="logo.png" id="pdf-logo-img" class="pdf-logo" onerror="onLogoError(this)"><div id="fallback-logo-btn" style="display:none; border:2px dashed #ccc; padding:10px; text-align:center; cursor:pointer" onclick="triggerUpload()">AJOUTER LOGO</div>`;
             
-            /* --- STRUCTURE HTML EXACTE DU DOCUMENT ORIGINAL --- */
+            /* --- GENERATION HTML PDF (CONFORME ORIGINAL) --- */
             return `
             <div class="pdf-page">
                 <div class="pdf-header">
-                    <div style="width:50%">${logoHTML}</div>
-                    <div style="width:45%; text-align:right">
-                        <div style="font-size:14px"><strong>${USER.name}</strong></div>
-                        <div style="font-size:11px; color:#555">${USER.address}<br>SIRET: ${USER.siret}<br>${USER.email}</div>
+                    <div class="pdf-sender-col">
+                        ${logoHTML}
+                        <div class="pdf-sender-txt">
+                            <strong>${USER.name}</strong><br>
+                            ${USER.address}<br>
+                            Email : ${USER.email}<br>
+                            SIRET : ${USER.siret}<br>
+                            ${USER.rc}
+                        </div>
+                    </div>
+                    <div class="pdf-client-col">
+                        <strong style="color:#D32F2F; font-size:10px; text-transform:uppercase;">Facturer à :</strong><br><br>
+                        <strong style="font-size:16px;">${document.getElementById('client-name').value}</strong><br>
+                        ${document.getElementById('client-address').value.replace(/\n/g, '<br>')}
+                        ${clientSiret ? `<br><br>SIRET : ${clientSiret}` : ''}
                     </div>
                 </div>
 
                 <div class="pdf-title-row">
-                    <div><h1 class="pdf-title">${type} N° ${num}</h1><div style="font-size:14px; margin-top:5px; color:#333">Objet : ${document.getElementById('doc-obj').value}</div></div>
-                    <div style="text-align:right; font-size:12px; color:#555"><div>Date d'émission : ${date}</div><div>${labelFin} : ${dateFin}</div></div>
-                </div>
-
-                <div class="pdf-client-box">
-                    <strong>CLIENT :</strong><br>
-                    ${document.getElementById('client-name').value}<br>
-                    ${document.getElementById('client-address').value.replace(/\n/g, '<br>')}
+                    <div>
+                        <h1 class="pdf-title">${type} N° ${num}</h1>
+                        <div style="font-size:14px; margin-top:5px; color:#D32F2F; font-weight:bold;">Objet : ${document.getElementById('doc-obj').value}</div>
+                    </div>
+                    <div class="pdf-dates">
+                        <strong>Date d'émission :</strong> ${date}<br>
+                        <strong>${labelFin} :</strong> ${dateFin}
+                    </div>
                 </div>
 
                 <table class="pdf-table">
-                    <thead><tr><th>DESIGNATION</th><th style="text-align:center">QTE</th><th style="text-align:right">PU HT</th><th style="text-align:right">TOTAL HT</th></tr></thead>
+                    <thead><tr><th style="width: 45%;">Désignation</th><th style="text-align: center;">Qté</th><th style="text-align: right;">P.U. HT</th><th style="text-align: right;">Total HT</th></tr></thead>
                     <tbody>${rows}</tbody>
                 </table>
 
                 <div class="pdf-totals-box">
                     <table class="pdf-totals-table">
-                        <tr><td>Total HT :</td><td>${totalHT.toFixed(2)} €</td></tr>
-                        ${hasTVA ? `<tr><td>TVA (20%) :</td><td>${mtTVA.toFixed(2)} €</td></tr>` : ''}
-                        <tr class="pdf-ttc-row"><td>NET À PAYER :</td><td>${ttc.toFixed(2)} €</td></tr>
+                        <tr><td>Total HT</td><td>${totalHT.toFixed(2)} €</td></tr>
+                        ${hasTVA ? `<tr><td>Total TVA (20%)</td><td>${mtTVA.toFixed(2)} €</td></tr>` : ''}
+                        <tr class="pdf-ttc-row"><td>NET À PAYER TTC</td><td>${ttc.toFixed(2)} €</td></tr>
                     </table>
                 </div>
 
                 <div class="pdf-footer">
-                    <div style="display:flex; justify-content:space-between">
-                        <div style="width:60%"><strong>CONDITIONS :</strong> Paiement à 30 jours.<br><div class="pdf-bank">IBAN : ${USER.iban}</div></div>
-                        <div style="width:30%; text-align:right">${type === 'DEVIS' ? 'Bon pour accord<br>(Date & Signature)' : ''}</div>
+                    <div style="width: 55%;">
+                        <strong>Conditions de règlement :</strong><br>
+                        Paiement à 30 jours (réception).<br>
+                        Retard : Pénalités légales + 40€. Pas d'escompte.<br>
+                        <div class="pdf-bank">
+                            IBAN : ${USER.iban}
+                        </div>
                     </div>
-                    <div style="text-align:center; margin-top:30px; color:#aaa">${USER.name} - ${type} ${num} ${!hasTVA ? '- TVA non applicable, art. 293 B du CGI.' : ''}</div>
+                    <div style="width: 40%; text-align: right;">
+                        ${type === 'DEVIS' ? '<strong>Validation :</strong><div style="border: 1px solid #ccc; height: 80px; width: 200px; margin-top: 10px; padding: 5px;">Mention "Bon pour accord",<br>Date et Signature :</div>' : ''}
+                    </div>
+                </div>
+                <div style="text-align: center; font-size: 10px; color: #ccc; margin-top: 40px;">
+                    ${USER.name} - ${type} ${num} ${!hasTVA ? '- TVA non applicable, art. 293 B du CGI.' : ''}
                 </div>
             </div>`;
         }
@@ -449,4 +477,5 @@
     </script>
 </body>
 </html>
+
 
