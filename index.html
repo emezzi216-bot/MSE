@@ -13,7 +13,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* --- 1. DESIGN APPLICATION (INTERFACE SOMBRE) --- */
+        /* --- 1. UI APPLICATION (MOBILE) --- */
         :root { --gold: #C5A059; --gold-bright: #E6C878; --red: #D32F2F; --bg-dark: #000000; --text: #333; }
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Roboto", sans-serif; background: #f4f4f4; color: var(--text); height: 100vh; overflow: hidden; }
@@ -24,29 +24,24 @@
             background-color: #000000; z-index: 9999; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;
         }
-        .login-brand-logo { 
-            max-width: 80%; height: auto; max-height: 220px; margin-bottom: 50px; 
-            display: block; margin-left: auto; margin-right: auto;
-            /* Le logo se fond dans le noir uniquement ici */
-            mix-blend-mode: screen; 
-        }
-        #password-input { padding: 15px; font-size: 28px; border: 2px solid var(--gold); background: #111; color: var(--gold-bright); text-align: center; border-radius: 12px; width: 180px; margin-bottom: 30px; letter-spacing: 8px; font-weight:bold; }
-        .btn-login-gold { background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #000; border: none; padding: 15px 60px; font-size: 16px; border-radius: 50px; cursor: pointer; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; box-shadow: 0 5px 20px rgba(197, 160, 89, 0.3); }
+        .login-brand-logo { max-width: 80%; height: auto; max-height: 220px; margin-bottom: 50px; display: block; margin: 0 auto 50px auto; mix-blend-mode: screen; }
+        #password-input { padding: 15px; font-size: 28px; border: 2px solid var(--gold); background: #111; color: var(--gold-bright); text-align: center; border-radius: 12px; width: 180px; margin-bottom: 30px; font-weight:bold; }
+        .btn-login-gold { background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #000; border: none; padding: 15px 60px; font-size: 16px; border-radius: 50px; font-weight: 900; text-transform: uppercase; cursor: pointer; }
 
         /* Home */
         #view-home { display: none; height: 100vh; background-color: #000000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .home-logo { max-width: 80%; max-height: 200px; object-fit: contain; margin-bottom: 60px; display: block; margin-left: auto; margin-right: auto; mix-blend-mode: screen; }
-        .big-btn { width: 100%; max-width: 350px; height: 75px; margin-bottom: 25px; border: none; border-radius: 12px; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; gap: 15px; }
+        .home-logo { max-width: 80%; max-height: 200px; object-fit: contain; margin-bottom: 60px; display: block; margin: 0 auto 60px auto; mix-blend-mode: screen; }
+        .big-btn { width: 100%; max-width: 350px; height: 75px; margin-bottom: 25px; border: none; border-radius: 12px; font-size: 20px; font-weight: 800; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 15px; }
         .btn-gold { background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #000; }
         .btn-red { background: linear-gradient(135deg, #FF5252, #D32F2F); color: white; }
         .btn-history { margin-top: 30px; background: transparent; border: 1px solid #333; color: #666; padding: 10px 25px; border-radius: 30px; font-size: 12px; text-transform: uppercase; cursor: pointer; }
 
-        /* Editor & Common UI */
-        #view-editor, #view-history { display: none; height: 100vh; overflow-y: auto; background: #f4f4f4; padding-bottom: 40px; }
+        /* Editor */
+        #view-editor { display: none; height: 100vh; overflow-y: auto; background: #f4f4f4; padding-bottom: 40px; }
         header { padding: 15px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.1); color: white; transition: background 0.3s; }
-        .btn-icon { background: rgba(0,0,0,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .icon-white { fill: white; width: 24px; height: 24px; }
+        .btn-icon { background: rgba(0,0,0,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .icon-sm { width: 18px; height: 18px; fill: currentColor; }
+        .icon-white { fill: white; }
         
         .container { max-width: 600px; margin: 0 auto; padding: 15px; }
         details { background: white; margin-bottom: 12px; border-radius: 8px; overflow: hidden; }
@@ -62,72 +57,67 @@
         .qty-input { width: 60px; text-align: center; }
         .price-input { width: 90px; text-align: right; }
         .btn-trash { background: #ffebee; color: #c62828; border: none; width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .btn-add { width: 100%; padding: 15px; background: #333; color: white; border: none; border-radius: 6px; font-weight: bold; margin-top: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-add { width: 100%; padding: 15px; background: #333; color: white; border: none; border-radius: 6px; font-weight: bold; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; }
         .action-bar { padding: 20px; text-align: center; }
-        .btn-generate { color: white; border: none; padding: 16px 40px; border-radius: 50px; font-size: 16px; font-weight: bold; width: 100%; max-width: 400px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-generate { color: white; border: none; padding: 16px 40px; border-radius: 50px; font-size: 16px; font-weight: bold; width: 100%; max-width: 400px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; }
 
-        /* History Cards */
+        /* History */
+        #view-history { display: none; height: 100vh; overflow-y: auto; background: #f4f4f4; }
         .history-header { background: #333; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; }
         .history-card { background: white; padding: 15px; border-radius: 8px; margin: 10px 15px; border-left: 5px solid #333; display: flex; justify-content: space-between; align-items: center; }
 
-        /* --- PREVIEW OVERLAY & CONTAINER --- */
+        /* --- PREVIEW SYSTEME (CORRECTIF) --- */
         #preview-overlay { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #111; z-index: 20000; flex-direction: column; padding: 0; 
+            background: #222; z-index: 20000; flex-direction: column; 
         }
         #preview-actions { 
-            display: flex; gap: 10px; padding: 15px; background: #000; 
+            display: flex; gap: 10px; padding: 10px; background: #000; 
             width: 100%; z-index: 20001; 
         }
         .btn-action { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; color: white; cursor: pointer; text-transform: uppercase; font-size: 12px; }
         .btn-close { background: #555; }
         .btn-download { background: #2ecc71; }
 
-        /* Zone de défilement pour voir le PDF en entier */
+        /* Zone de scroll qui contient le papier */
         #preview-scroll-area {
             flex: 1; width: 100%; overflow: auto; 
             display: flex; justify-content: center; padding: 20px; 
             background: #333;
         }
 
-        /* --- LE PAPIER A4 (STRUCTURE RIGIDE) --- */
+        /* --- PAPIER A4 FIXE (794px x 1123px) --- */
         #paper-preview { 
             background: white; 
-            width: 210mm; /* Largeur A4 */
-            min-height: 297mm; /* Hauteur A4 */
+            width: 794px; 
+            min-height: 1123px; 
+            max-height: 1123px; /* Empêche tout débordement page 2 */
             padding: 0; 
             margin: 0 auto;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            /* Transformation JS pour l'aperçu mobile */
-            transform-origin: top center;
+            /* Important pour le zoom mobile */
+            transform-origin: top center; 
+            overflow: hidden; 
         }
 
-        /* --- STYLES DU CONTENU PDF --- */
-        /* Ces styles s'appliquent à l'intérieur de la feuille blanche */
-        .pdf-page { width: 100%; padding: 40px; box-sizing: border-box; font-family: Arial, sans-serif; color: #000; font-size: 12px; line-height: 1.4; }
-        
+        /* --- STYLES INTERNES DU PDF --- */
+        .pdf-page { width: 100%; height: 100%; padding: 40px; box-sizing: border-box; font-family: Arial, sans-serif; color: #000; font-size: 12px; line-height: 1.4; position: relative; }
         .pdf-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; }
-        .pdf-sender-col { width: 50%; }
-        /* Logo NORMAL sur le papier (pas de mix-blend-mode) */
-        .pdf-logo { width: 220px; display: block; margin-bottom: 15px; } 
-        .pdf-sender-txt { font-size: 12px; color: #333; line-height: 1.5; }
-        
-        .pdf-client-col { width: 40%; background-color: #f0f0f0; padding: 15px; border-left: 5px solid #333; font-size: 13px; }
-        
+        .pdf-logo { width: 220px; display: block; margin-bottom: 10px; } /* Pas de blend mode ici */
+        .pdf-sender-txt { font-size: 12px; color: #333; }
+        .pdf-client-col { width: 300px; background-color: #f0f0f0; padding: 15px; border-left: 5px solid #333; font-size: 13px; }
         .pdf-title-row { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #D32F2F; padding-bottom: 10px; margin-bottom: 20px; }
-        .pdf-title { font-size: 24px; font-weight: bold; margin: 0; color: #000; text-transform: uppercase; }
+        .pdf-title { font-size: 24px; font-weight: bold; margin: 0; text-transform: uppercase; }
         .pdf-dates { text-align: right; font-size: 12px; }
-
         .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .pdf-table th { background-color: #000; color: #fff; padding: 8px; text-align: left; font-weight: bold; font-size: 11px; text-transform: uppercase; }
+        .pdf-table th { background-color: #000; color: #fff; padding: 8px; text-align: left; font-weight: bold; text-transform: uppercase; font-size: 11px; }
         .pdf-table td { border-bottom: 1px solid #ccc; padding: 8px; vertical-align: top; }
-        
         .pdf-totals-section { display: flex; justify-content: flex-end; }
         .pdf-totals-table { width: 250px; border-collapse: collapse; }
         .pdf-totals-table td { text-align: right; padding: 5px; font-size: 13px; }
         .pdf-ttc { font-size: 16px; font-weight: bold; color: #D32F2F; border-top: 2px solid #000; padding-top: 5px; }
-
-        .pdf-footer { margin-top: 40px; font-size: 10px; color: #444; border-top: 1px solid #ddd; padding-top: 10px; }
+        .pdf-footer { position: absolute; bottom: 40px; left: 40px; right: 40px; font-size: 10px; color: #444; border-top: 1px solid #ddd; padding-top: 10px; }
+        .pdf-bank { background: #eee; padding: 8px; margin-top: 5px; font-family: monospace; border-left: 3px solid #D32F2F; }
     </style>
 </head>
 <body>
@@ -142,7 +132,7 @@
 
     <div id="view-home">
         <img src="logo.png" class="home-logo" onerror="this.style.display='none'; document.getElementById('txt-logo').style.display='block'">
-        <h1 id="txt-logo" style="display:none; color:var(--gold); font-size:40px; margin:0;">MSE</h1>
+        <h1 id="txt-logo" style="display:none; color:var(--gold); font-size:40px; margin:0; text-align:center;">MSE</h1>
         <button class="big-btn btn-gold" onclick="openJourney('FACTURE')">FACTURE</button>
         <button class="big-btn btn-red" onclick="openJourney('DEVIS')">DEVIS</button>
         <button class="btn-history" onclick="openHistory()">HISTORIQUE</button>
@@ -152,7 +142,7 @@
         <header id="editor-header">
             <div style="display:flex; align-items:center;">
                 <button class="btn-icon" onclick="goHome()">
-                    <svg class="icon-white" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                    <svg class="icon-white icon-sm" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
                 </button>
                 <h1 id="header-title" style="margin-left:15px">FACTURE</h1>
             </div>
@@ -224,7 +214,9 @@
             <button class="btn-action btn-close" onclick="closePreview()">RETOUR</button>
             <button class="btn-action btn-download" onclick="downloadPDF()">TÉLÉCHARGER</button>
         </div>
-        <div id="preview-scroll-area"><div id="paper-preview"></div></div>
+        <div id="preview-scroll-area">
+            <div id="paper-preview"></div>
+        </div>
     </div>
 
     <script>
@@ -297,7 +289,6 @@
                 rows += `<tr><td>${desc}</td><td style="text-align:center">${qty}</td><td style="text-align:right">${pu.toFixed(2)} €</td><td style="text-align:right">${tot.toFixed(2)} €</td></tr>`;
             });
             const mtTVA = hasTVA ? totalHT * 0.2 : 0; const ttc = totalHT + mtTVA;
-            
             let logoHTML = customLogoData ? `<img src="${customLogoData}" class="pdf-logo">` : `<img src="logo.png" class="pdf-logo" onerror="this.style.display='none'">`;
             
             return `
@@ -313,55 +304,64 @@
             </div>`;
         }
 
-        // --- CALCUL DU ZOOM POUR L'APERÇU MOBILE ---
+        // --- GESTION PREVIEW RESPONSIVE ---
         function fitPreview() {
             const preview = document.getElementById('paper-preview');
             const container = document.getElementById('preview-scroll-area');
             if(!container || !preview) return;
-            // On calcule combien de fois la feuille (210mm) rentre dans l'écran
-            // 210mm approx 794px à 96dpi
-            const scale = (container.clientWidth - 40) / 794; 
-            // On applique le zoom
-            preview.style.transform = `scale(${scale < 1 ? scale : 1})`;
-            // On compense la marge vide créée par le dézoom (transform scale ne réduit pas la boite, juste l'image)
-            preview.style.marginBottom = `-${(1 - (scale < 1 ? scale : 1)) * 1123}px`;
+            
+            // Calcul du scale pour mobile (on laisse 40px de marge)
+            const availableWidth = container.clientWidth - 40;
+            const paperWidth = 794; 
+            
+            let scale = availableWidth / paperWidth;
+            if(scale > 1) scale = 1; // Pas de zoom si écran large (PC)
+
+            preview.style.transform = `scale(${scale})`;
+            preview.style.marginBottom = `-${(1-scale)*1123}px`; // Compense le vide en bas
         }
 
         function preparePreview() { 
             document.getElementById('paper-preview').innerHTML = getDocHTML(); 
             document.getElementById('preview-overlay').style.display = 'flex';
-            setTimeout(fitPreview, 100); 
+            // Petit délai pour laisser le CSS s'appliquer avant le calcul
+            setTimeout(fitPreview, 50); 
         }
         window.addEventListener('resize', fitPreview);
         function closePreview() { document.getElementById('preview-overlay').style.display = 'none'; }
         
-        // --- GÉNÉRATION PDF CORRIGÉE (SUPPRESSION PAGE VIDE) ---
+        // --- TÉLÉCHARGEMENT PDF ROBUSTE ---
         function downloadPDF() {
-            const el = document.getElementById('paper-preview');
-            // On remet l'échelle à 1 (taille réelle) pour l'impression, invisible pour l'utilisateur
-            const oldTransform = el.style.transform;
-            const oldMargin = el.style.marginBottom;
-            el.style.transform = 'none';
-            el.style.marginBottom = '0';
+            const element = document.getElementById('paper-preview');
+            
+            // 1. DÉSACTIVER LE ZOOM (IMPORTANT POUR LA QUALITÉ ET LA PAGE BLANCHE)
+            const oldTransform = element.style.transform;
+            const oldMargin = element.style.marginBottom;
+            element.style.transform = 'none';
+            element.style.marginBottom = '0';
 
             const type = document.getElementById('current-type').value; 
             const num = document.getElementById('doc-num').value || "doc";
             
-            // CONFIGURATION ROBUSTE A4
+            // 2. CONFIGURATION EXACTE POUR EVITER LA PAGE 2
             const opt = {
                 margin: 0,
                 filename: `${type}_${num}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, scrollY: 0, windowWidth: 794 }, // windowWidth force le rendu Desktop
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                // Cette ligne empêche la création de pages inutiles si le contenu déborde d'un pixel
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } 
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true, 
+                    scrollY: 0, 
+                    windowWidth: 794, // Force la largeur "PC" même sur mobile
+                    height: 1123      // Force la hauteur exacte
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
             
-            html2pdf().set(opt).from(el).save().then(() => {
-                // On remet le zoom pour l'affichage mobile
-                el.style.transform = oldTransform;
-                el.style.marginBottom = oldMargin;
+            html2pdf().set(opt).from(element).save().then(() => {
+                // 3. REMETTRE LE ZOOM POUR L'UTILISATEUR
+                element.style.transform = oldTransform;
+                element.style.marginBottom = oldMargin;
             });
         }
     </script>
