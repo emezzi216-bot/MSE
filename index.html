@@ -4,9 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>MSE ONE</title>
+    
     <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    
     <style>
         :root {
             --bg: #000; --card: #141416; --border: rgba(255, 255, 255, 0.08);
@@ -15,37 +22,37 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
         body { margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
 
-        /* --- HEADER & HUB --- */
+        /* --- HEADER --- */
         header { padding: calc(env(safe-area-inset-top) + 20px) 24px 10px; display: flex; justify-content: space-between; align-items: center; }
         .brand { font-size: 28px; font-weight: 900; letter-spacing: -1.5px; }
         .brand span { color: var(--mse-red); }
+
+        /* --- BENTO GRID FULL ICON --- */
         #hub { height: 100%; overflow-y: auto; padding: 0 16px 180px; }
         .apps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .section-label { grid-column: span 3; font-size: 11px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; margin: 25px 0 10px 5px; }
 
-        /* --- ICONS FULL CASE --- */
         .app { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
-        .app span { font-size: 10px; font-weight: 700; text-align: center; color: var(--text); line-height: 1.1; }
-        .icon-box { width: 95px; height: 95px; border-radius: 22px; overflow: hidden; background: var(--card); border: 1px solid var(--border); transition: transform 0.15s; }
+        .app span { font-size: 10px; font-weight: 700; color: var(--text); text-align: center; }
+        .icon-box { width: 95px; height: 95px; border-radius: 22px; overflow: hidden; background: var(--card); border: 1px solid var(--border); transition: transform 0.1s; }
+        /* Full Icon 100% */
         .icon-box img { width: 100%; height: 100%; object-fit: cover; }
         .app:active .icon-box { transform: scale(0.9); }
 
-        /* --- WINDOWS & NAVIGATION --- */
+        /* --- NAVIGATION INTERNE --- */
         .window { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: none; flex-direction: column; }
         .win-header { padding: calc(env(safe-area-inset-top) + 15px) 20px; display: flex; align-items: center; gap: 20px; border-bottom: 1px solid var(--border); }
-        .back-btn { font-size: 32px; background: none; border: none; color: white; padding: 0; cursor: pointer; }
+        .back-btn { font-size: 32px; background: none; border: none; color: white; cursor: pointer; }
         .win-body { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 180px; }
         
-        /* --- CARDS & INPUTS --- */
         .pro-card { background: var(--card); border-radius: 28px; padding: 22px; margin-bottom: 16px; border: 1px solid var(--border); }
-        .pro-card h4 { margin: 0 0 12px; font-size: 10px; color: var(--mse-red); text-transform: uppercase; letter-spacing: 1px; }
         input, textarea, select { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 16px; padding: 15px; color: var(--text); font-size: 15px; margin-bottom: 10px; outline: none; }
         
         /* --- DOCK REACHABILITY --- */
-        .dock { position: fixed; bottom: 30px; left: 20px; right: 20px; background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(40px); border: 1px solid var(--border); border-radius: 40px; padding: 18px 28px; display: flex; justify-content: space-between; align-items: center; z-index: 1100; box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
-        .btn-mse { background: var(--mse-red); color: #fff; border: none; padding: 18px 35px; border-radius: 22px; font-weight: 900; font-size: 14px; cursor: pointer; }
+        .dock { position: fixed; bottom: 30px; left: 20px; right: 20px; background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(40px); border: 1px solid var(--border); border-radius: 40px; padding: 18px 28px; display: flex; justify-content: space-between; align-items: center; z-index: 1100; }
+        .btn-mse { background: var(--mse-red); color: #fff; border: none; padding: 18px 35px; border-radius: 22px; font-weight: 900; cursor: pointer; }
 
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
+        /* --- PDF UHD (SCALE 3) --- */
         #pdf-paper { background: white !important; color: black !important; width: 100%; display: none; }
     </style>
 </head>
@@ -55,16 +62,11 @@
 
 <div id="hub">
     <div class="apps-grid">
-        <div class="section-label">Facturation Pro</div>
-        <div class="app" onclick="openApp('DEVIS', 'premium')"><div class="icon-box"><img src="devis.png"></div><span>Devis Premium</span></div>
-        <div class="app" onclick="openApp('FACTURE', 'premium')"><div class="icon-box"><img src="facture.png"></div><span>Facture Premium</span></div>
-        <div class="app" onclick="openApp('ACQUITTEE')"><div class="icon-box"><img src="acquittee.png"></div><span>Acquittée (PDF)</span></div>
-
-        <div class="section-label">Régime Micro</div>
-        <div class="app" onclick="openApp('DEVIS', 'micro')"><div class="icon-box"><img src="devis.png"></div><span>Devis Micro</span></div>
-        <div class="app" onclick="openApp('FACTURE', 'micro')"><div class="icon-box"><img src="facture.png"></div><span>Facture Micro</span></div>
-
-        <div class="section-label">Base Commune & CA</div>
+        <div class="section-label">Facturation Elite</div>
+        <div class="app" onclick="openApp('DEVIS')"><div class="icon-box"><img src="devis.png"></div><span>Devis</span></div>
+        <div class="app" onclick="openApp('FACTURE')"><div class="icon-box"><img src="facture.png"></div><span>Facture</span></div>
+        <div class="app" onclick="openApp('ACQUITTEE')"><div class="icon-box"><img src="acquittee.png"></div><span>Acquittée</span></div>
+        <div class="section-label">Outils & Base</div>
         <div class="app" onclick="openApp('CLIENTS')"><div class="icon-box"><img src="clients.png"></div><span>Clients</span></div>
         <div class="app" onclick="openApp('RENDEMENT')"><div class="icon-box"><img src="rendement.png"></div><span>Rendement</span></div>
         <div class="app" onclick="openApp('URSSAF')"><div class="icon-box"><img src="urssaf.png"></div><span>URSSAF</span></div>
@@ -73,10 +75,7 @@
 </div>
 
 <div id="win" class="window">
-    <div class="win-header">
-        <button class="back-btn" onclick="goBack()">←</button>
-        <b id="win-title" style="text-transform: uppercase;"></b>
-    </div>
+    <div class="win-header"><button class="back-btn" onclick="goBack()">←</button><b id="win-title"></b></div>
     <div class="win-body" id="win-content"></div>
     <div class="dock" id="win-dock" style="display:none;">
         <div id="dock-total" style="font-size:22px; font-weight:900;">0.00 €</div>
@@ -87,24 +86,18 @@
 <div id="pdf-paper"></div>
 
 <script>
-/* --- CONFIGURATION --- */
+/* --- DB & CONFIG --- */
 const USER = { 
     name: "Sabri BENNACEUR EI", siren: "943 032 755 00010", 
-    addr: "2 Résidence des Rosiers, Puteaux, FR", email: "serruremse@gmail.com",
-    dec: "RC décennale TETRIS police n° SV75018041T37384",
+    addr: "2 Résidence des Rosiers, Puteaux, FR", dec: "RC décennale TETRIS SV75018041T37384",
     iban: "FR76 1695 8000 0159 6810 0824 765", bic: "ONTO FR P1 XXX" 
 };
+let db = { clients: JSON.parse(localStorage.getItem('mse_clients') || '[]'), history: JSON.parse(localStorage.getItem('mse_history') || '[]') };
 
-let db = {
-    clients: JSON.parse(localStorage.getItem('mse_clients') || '[]'),
-    history: JSON.parse(localStorage.getItem('mse_history') || '[]')
-};
-
-/* --- GESTION NAVIGATION NATIVE --- */
+/* --- NAVIGATION NATIVE SAMSUNG --- */
 window.addEventListener('popstate', () => { document.getElementById('win').style.display = 'none'; });
 
-function openApp(type, mode='premium'){
-    curType = type; curMode = mode;
+function openApp(type){
     history.pushState({view: 'app'}, ''); 
     document.getElementById('win').style.display = 'flex';
     document.getElementById('win-title').innerText = type;
@@ -119,22 +112,22 @@ function openApp(type, mode='premium'){
     else if(type === 'ARCHIVES') renderHistory(cont);
     else if(type === 'ACQUITTEE') renderAcquit(cont);
 }
-
 function goBack() { window.history.back(); }
 
 /* --- MODULES --- */
 function renderClients(c) {
     c.innerHTML = `<div class="pro-card"><h4>Nouveau Client</h4><input id="cn" placeholder="Nom"><textarea id="ca" placeholder="Adresse"></textarea><button class="btn-mse" style="width:100%" onclick="saveClient()">AJOUTER</button></div>
-    <div class="pro-card"><h4>Base de données</h4>${db.clients.map((cli,i)=>`<div class="list-item"><b>${cli.name}</b><span onclick="delCli(${i})" style="color:red">✕</span></div>`).join('')}</div>`;
+    <div class="pro-card"><h4>Répertoire</h4>${db.clients.map((cli,i)=>`<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);"><b>${cli.name}</b><span onclick="delCli(${i})" style="color:red">✕</span></div>`).join('')}</div>`;
 }
-function saveClient(){ const n=document.getElementById('cn').value; const a=document.getElementById('ca').value; if(n){db.clients.push({name:n, addr:a}); sync(); renderClients(document.getElementById('win-content'));}}
+function saveClient(){ const n=document.getElementById('cn').value; if(n){db.clients.push({name:n, addr:document.getElementById('ca').value}); sync(); renderClients(document.getElementById('win-content'));}}
 function delCli(i){ db.clients.splice(i,1); sync(); renderClients(document.getElementById('win-content'));}
 
-function renderYield(c){ let t=0; db.history.forEach(h=>t+=h.val); c.innerHTML=`<div class="pro-card" style="text-align:center"><h4>CA Cumulé Global</h4><h1 style="font-size:48px">${t.toFixed(2)} €</h1><p>Partagé entre tous les utilisateurs</p></div>`;}
-function renderHistory(c){ c.innerHTML=`<div class="pro-card"><h4>Historique Cloud</h4>${db.history.reverse().map(h=>`<div class="list-item"><span>${h.num} - ${h.client}</span><b>${h.val}€</b></div>`).join('')}</div>`;}
+function renderYield(c){ let t=0; db.history.forEach(h=>t+=h.val); c.innerHTML=`<div class="pro-card" style="text-align:center"><h4>Chiffre d'Affaires Global</h4><h1 style="font-size:48px">${t.toFixed(2)} €</h1></div>`;}
+function renderUrssaf(c){ c.innerHTML=`<div class="pro-card"><h4>Simulation Taxes (21.2%)</h4><input type="number" placeholder="CA HT" oninput="this.nextElementSibling.innerText=(this.value*0.212).toFixed(2)+' €'"><h1>0.00 €</h1></div>`;}
+function renderHistory(c){ c.innerHTML=`<div class="pro-card"><h4>Historique Cloud</h4>${db.history.reverse().map(h=>`<div style="padding:10px 0; border-bottom:1px solid var(--border);"><b>${h.num}</b> - ${h.client} (${h.val}€)</div>`).join('')}</div>`;}
 
 function renderAcquit(c) {
-    c.innerHTML = `<div class="pro-card"><h4>Importation Facture PDF</h4><input type="file" id="pdf-up" accept="application/pdf" style="padding:40px; border:2px dashed var(--border);"><button class="btn-mse" style="width:100%; margin-top:20px;" onclick="processPdf()">APPOSER TAMPON</button></div>`;
+    c.innerHTML = `<div class="pro-card"><h4>Importation PDF</h4><input type="file" id="pdf-up" accept="application/pdf" style="padding:30px; border:2px dashed var(--border);"><button class="btn-mse" style="width:100%; margin-top:15px;" onclick="processPdf()">TAMPONNER</button></div>`;
 }
 async function processPdf() {
     const f=document.getElementById('pdf-up').files[0]; if(!f) return;
@@ -149,25 +142,25 @@ async function processPdf() {
 function renderEditor(c) {
     const today = new Date().toISOString().split('T')[0];
     c.innerHTML = `
-        <div class="pro-card"><h4>📁 Administration</h4>
+        <div class="pro-card"><h4>📁 Dates & Admin</h4>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                 <div><label style="font-size:10px;">ÉMISSION</label><input type="date" id="d-e" value="${today}"></div>
                 <div><label style="font-size:10px;">ÉCHÉANCE</label><input type="date" id="d-h" value="${today}"></div>
             </div>
-            <input id="d-s" value="${USER.siren}" placeholder="SIRET"><input id="d-d" value="${USER.dec}" placeholder="Décennale">
+            <input id="d-s" value="${USER.siren}"><input id="d-d" value="${USER.dec}">
         </div>
-        <div class="pro-card"><h4>👤 Client & Dossier</h4>
-            <select onchange="fillCli(this.value)"><option value="">Choisir un client...</option>${db.clients.map((cli,i)=>`<option value="${i}">${cli.name}</option>`).join('')}</select>
-            <input id="cn" placeholder="Nom"><textarea id="ca" placeholder="Adresse" rows="2"></textarea>
-            <input id="dn" placeholder="N° Document"><input id="do" placeholder="Objet de l'intervention">
+        <div class="pro-card"><h4>👤 Client</h4>
+            <select onchange="fillCli(this.value)"><option value="">Clients...</option>${db.clients.map((cli,i)=>`<option value="${i}">${cli.name}</option>`).join('')}</select>
+            <input id="cn" placeholder="Nom"><textarea id="ca" placeholder="Adresse"></textarea>
+            <input id="dn" placeholder="N° Document"><input id="do" placeholder="Objet">
         </div>
-        <div class="pro-card"><h4>🛠️ Prestations</h4><div id="lines"></div><button onclick="addLine()" style="width:100%; background:none; border:1px dashed #fff; color:#fff; padding:15px; border-radius:15px;">+ AJOUTER LIGNE</button></div>`;
+        <div class="pro-card"><h4>🛠️ Prestations</h4><div id="lines"></div><button onclick="addLine()" style="width:100%; background:none; border:1px dashed #fff; padding:15px; border-radius:15px;">+ AJOUTER LIGNE</button></div>`;
     addLine();
 }
 function fillCli(i){ if(i==="")return; document.getElementById('cn').value=db.clients[i].name; document.getElementById('ca').value=db.clients[i].addr; }
 function addLine(){
-    const d=document.createElement('div'); d.className="line-item"; d.style.borderBottom="1px solid var(--border)"; d.style.paddingBottom="15px"; d.style.marginBottom="15px";
-    d.innerHTML=`<input class="lt" placeholder="Prestation (Gras)" style="font-weight:900;"><textarea class="ld" placeholder="Détails techniques (Italique)" rows="1" style="font-style:italic; font-weight:300; border:none;"></textarea>
+    const d=document.createElement('div'); d.className="line-item"; d.style.borderBottom="1px solid var(--border)"; d.style.paddingBottom="10px"; d.style.marginBottom="10px";
+    d.innerHTML=`<input class="lt" placeholder="Prestation" style="font-weight:900;"><textarea class="ld" placeholder="Détails (Italique)" rows="1" style="font-style:italic; font-weight:300; border:none;"></textarea>
     <div style="display:flex;gap:10px;"><input type="number" class="lq" value="1" style="flex:1" oninput="calc()"><input type="number" class="lp" placeholder="Prix" style="flex:2" oninput="calc()"></div>`;
     document.getElementById('lines').appendChild(d);
 }
@@ -181,30 +174,24 @@ function generatePreview() {
     db.history.push({num:document.getElementById('dn').value, client:document.getElementById('cn').value, val:v}); sync();
     let rows = ""; document.querySelectorAll('.lt').forEach((t,i)=>{
         const q=document.querySelectorAll('.lq')[i].value; const p=document.querySelectorAll('.lp')[i].value;
-        rows += `<tr><td style="padding:15px 10px; border-bottom:1px solid #eee;"><b>${t.value}</b><br><i style="font-size:10px; color:#666;">${document.querySelectorAll('.ld')[i].value}</i></td><td style="text-align:center">${q}</td><td style="text-align:right">${parseFloat(p).toFixed(2)}€</td><td style="text-align:right">${(q*p).toFixed(2)}€</td></tr>`;
+        rows += `<tr><td style="padding:15px 10px; border-bottom:1px solid #eee;"><b>${t.value}</b><br><i style="font-size:10px;">${document.querySelectorAll('.ld')[i].value}</i></td><td style="text-align:center">${q}</td><td style="text-align:right">${parseFloat(p).toFixed(2)}€</td><td style="text-align:right">${(q*p).toFixed(2)}€</td></tr>`;
     });
     document.getElementById('pdf-paper').innerHTML = `<div style="padding:45px; background:#fff; color:#000; font-family:Arial;">
         <div style="display:flex; justify-content:space-between; border-bottom:2px solid #eee; padding-bottom:30px;">
-            <div style="width:65%;"><img src="logo.png" style="max-width:320px; max-height:160px;" onerror="this.style.display='none'">
-            <div style="font-size:12px; color:#555; margin-top:20px;"><strong>${USER.name}</strong><br>${USER.addr}<br>SIRET: ${document.getElementById('d-s').value}<br>${document.getElementById('d-d').value}</div></div>
-            <div style="background:#f8f8f8; padding:20px; width:40%; border-left:5px solid #333;"><strong>Facturer à :</strong><br><br><b>${document.getElementById('cn').value}</b><br>${document.getElementById('ca').value}</div>
+            <div style="width:65%;"><img src="logo.png" style="max-width:320px; max-height:160px;">
+            <div style="font-size:12px; margin-top:20px;"><strong>${USER.name}</strong><br>${USER.addr}<br>SIRET: ${document.getElementById('d-s').value}<br>${document.getElementById('d-d').value}</div></div>
+            <div style="background:#f8f8f8; padding:20px; width:40%;"><strong>Facturer à :</strong><br><br><b>${document.getElementById('cn').value}</b><br>${document.getElementById('ca').value}</div>
         </div>
         <div style="display:flex; justify-content:space-between; border-bottom:4px solid #D32F2F; margin: 30px 0 20px; padding-bottom:15px;">
             <div><h1 style="margin:0; font-size:26px;">${curType} N° ${document.getElementById('dn').value}</h1><b>Objet : ${document.getElementById('do').value}</b></div>
             <div style="text-align:right; font-size:12px;">Émission : ${dE}</div>
         </div>
-        <table style="width:100%; border-collapse:collapse; font-size:12px;">
-            <thead><tr style="background:#333; color:#fff;"><th style="text-align:left; padding:10px;">Désignation</th><th>Qté</th><th>P.U</th><th>Total</th></tr></thead>
-            <tbody>${rows}</tbody>
-        </table>
-        <div style="display:flex; justify-content:flex-end; margin-top:30px;">
-            <table style="width:300px; text-align:right; font-size:22px; font-weight:900; color:#D32F2F;"><tr><td>TOTAL TTC</td><td>${(v*1.2).toFixed(2)}€</td></tr></table>
-        </div>
+        <table style="width:100%; border-collapse:collapse; font-size:12px;"><thead><tr style="background:#333; color:#fff;"><th>Désignation</th><th>Qté</th><th>P.U</th><th>Total</th></tr></thead><tbody>${rows}</tbody></table>
+        <div style="display:flex; justify-content:flex-end; margin-top:30px;"><h2 style="color:#D32F2F;">TOTAL TTC: ${(v*1.2).toFixed(2)}€</h2></div>
     </div>`;
-    html2pdf().set({ margin:0, filename:`MSE_${curType}.pdf`, html2canvas:{scale:3, useCORS:true}, jsPDF:{unit:'mm', format:'a4'} })
-    .from(document.getElementById('pdf-paper')).save().then(()=>goBack());
+    // UHD SCALE 3 FOR PERFECT RENDERING [cite: 2026-01-02]
+    html2pdf().set({ margin:0, filename:`MSE_${curType}.pdf`, html2canvas:{scale:3, useCORS:true}, jsPDF:{unit:'mm', format:'a4'} }).from(document.getElementById('pdf-paper')).save().then(()=>goBack());
 }
-
 function sync(){ localStorage.setItem('mse_clients', JSON.stringify(db.clients)); localStorage.setItem('mse_history', JSON.stringify(db.history)); }
 </script>
 </body>
