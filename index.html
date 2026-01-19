@@ -1,358 +1,249 @@
 <!DOCTYPE html>
 <html lang="fr" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>MSE ONE – App Launcher</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MSE ONE | Elite Suite 2026</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        /* --- DESIGN SYSTEM ONE UI 8.5 --- */
+        :root {
+            --bg: #000000; 
+            --surface: #050505; 
+            --panel: rgba(25, 25, 25, 0.7);
+            --card: #121214; 
+            --border: rgba(255, 255, 255, 0.05);
+            --red-mse: #D32F2F;
+            --gold-neon: #C5A059;
+            --blue-neon: #007AFF;
+            --text: #FFFFFF;
+            --text-dim: #929297;
+            --radius-os: 34px;
+        }
 
-<style>
-/* ================= ONE UI CORE ================= */
-:root{
---bg:#0b0b0e;
---surface:#15151a;
---card:#1f1f26;
---border:rgba(255,255,255,.08);
---text:#ffffff;
---text-dim:#9b9ba0;
---accent:#d32f2f;
---radius-xl:30px;
---radius-lg:24px;
---radius-md:18px;
---safe-top:env(safe-area-inset-top);
---safe-bottom:env(safe-area-inset-bottom);
-}
+        [data-theme="light"] {
+            --bg: #F2F2F7;
+            --surface: #FFFFFF;
+            --panel: rgba(242, 242, 247, 0.8);
+            --card: #FFFFFF;
+            --border: rgba(0, 0, 0, 0.05);
+            --text: #000000;
+            --text-dim: #666666;
+        }
 
-*{
-box-sizing:border-box;
--webkit-tap-highlight-color:transparent;
-font-family:-apple-system,BlinkMacSystemFont,"SamsungOne",Roboto,Segoe UI;
-}
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', system-ui, sans-serif; transition: all 0.4s cubic-bezier(0.2, 0, 0, 1); }
+        body { margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
 
-body{
-margin:0;
-background:radial-gradient(120% 120% at 50% 0%, #12121a 0%, #08080b 60%);
-color:var(--text);
-height:100vh;
-overflow:hidden;
-}
+        header { padding: calc(env(safe-area-inset-top) + 30px) 24px 20px; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .brand { font-size: 30px; font-weight: 900; letter-spacing: -1.5px; }
+        .brand span { color: var(--red-mse); text-shadow: 0 0 15px rgba(211, 47, 47, 0.4); }
+        .theme-btn { width: 48px; height: 48px; border-radius: 50%; background: var(--panel); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
 
-/* ================= HEADER ================= */
-header{
-padding:calc(var(--safe-top) + 26px) 24px 18px;
-}
-header h1{
-margin:0;
-font-size:36px;
-font-weight:900;
-letter-spacing:-1px;
-}
-header h1 span{color:var(--accent)}
-header p{
-margin:6px 0 0;
-font-size:15px;
-color:var(--text-dim);
-}
+        /* --- BENTO HUB AVEC GLOW NÉON --- */
+        #hub { height: 100%; overflow-y: auto; padding: 0 16px 180px; }
+        .apps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px 12px; }
+        .section-label { grid-column: span 3; font-size: 12px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin: 30px 0 12px 10px; }
 
-/* ================= HUB ================= */
-#hub{
-height:calc(100vh - 140px);
-overflow-y:auto;
-padding:14px 12px 160px;
-}
+        .app { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; }
+        .app span { font-size: 11px; font-weight: 600; text-align: center; color: var(--text-dim); line-height: 1.2; }
 
-/* ================= APP GRID ================= */
-.apps-grid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:26px 14px;
-}
+        .icon-box {
+            width: 82px; height: 82px; border-radius: 26px;
+            display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.2s;
+        }
+        .icon-box img { width: 100%; height: 100%; object-fit: cover; padding: 12px; }
+        .app:active .icon-box { transform: scale(0.9); }
 
-/* ================= APP ================= */
-.app{
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:10px;
-cursor:pointer;
-}
-.app span{
-font-size:12px;
-text-align:center;
-line-height:1.2;
-}
+        /* Neon Categories */
+        .neon-gold { background: linear-gradient(145deg, #2a210f, #c5a059); box-shadow: 0 0 20px rgba(197, 160, 89, 0.3); }
+        .neon-red { background: linear-gradient(145deg, #2d0a0a, #d32f2f); box-shadow: 0 0 20px rgba(211, 47, 47, 0.3); }
+        .neon-blue { background: linear-gradient(145deg, #0a162d, #007aff); box-shadow: 0 0 20px rgba(0, 122, 255, 0.3); }
+        .neon-grey { background: linear-gradient(145deg, #1a1a1a, #5f5f66); box-shadow: 0 0 15px rgba(255, 255, 255, 0.1); }
 
-/* ================= ICON ================= */
-.icon{
-width:78px;
-height:78px;
-border-radius:26px;
-display:flex;
-align-items:center;
-justify-content:center;
-position:relative;
-overflow:hidden;
-transition:transform .25s ease;
-}
+        /* --- EDITOR WINDOW --- */
+        .window { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: none; flex-direction: column; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .win-header { padding: calc(env(safe-area-inset-top) + 20px) 24px 15px; display: flex; align-items: center; justify-content: space-between; }
+        .win-body { flex: 1; overflow-y: auto; padding: 10px 20px 180px; }
+        
+        .card { background: var(--card); border-radius: var(--radius-os); padding: 25px; margin-bottom: 16px; border: 1px solid var(--border); }
+        .card h4 { margin: 0 0 15px; font-size: 11px; color: var(--gold-neon); text-transform: uppercase; letter-spacing: 2px; font-weight: 800; }
+        
+        input, textarea, select { width: 100%; background: var(--panel); border: 1.5px solid transparent; border-radius: 20px; padding: 18px; color: var(--text); font-size: 16px; font-weight: 500; margin-bottom: 12px; outline: none; }
+        input:focus { border-color: var(--gold-neon); }
 
-/* 👉 IMAGES ADAPTÉES (PLEINES SANS TOUCHER AUX PNG) */
-.icon img{
-width:100%;
-height:100%;
-object-fit:cover;
-padding:10px;
-border-radius:22px;
-filter:drop-shadow(0 0 10px rgba(0,0,0,.35));
-}
+        .line-item { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 20px; }
 
-.app:active .icon{
-transform:scale(.9);
-}
+        /* --- REACHABLE BOTTOM DOCK --- */
+        .dock { position: fixed; bottom: 25px; left: 20px; right: 20px; background: rgba(15, 15, 15, 0.85); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); border: 1.5px solid var(--border); border-radius: 40px; padding: 18px 28px; display: flex; justify-content: space-between; align-items: center; z-index: 1100; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .btn-mse { background: var(--red-mse); color: #fff; border: none; padding: 20px 45px; border-radius: 24px; font-weight: 900; font-size: 15px; cursor: pointer; }
 
-/* ================= NEON THEMES ================= */
-.neon-gold{
-background:linear-gradient(145deg,#3a2c12,#c5a059);
-box-shadow:
-0 0 0 1px rgba(197,160,89,.35),
-0 0 20px rgba(197,160,89,.45),
-0 0 40px rgba(197,160,89,.25);
-}
-
-.neon-red{
-background:linear-gradient(145deg,#3b0d0d,#d32f2f);
-box-shadow:
-0 0 0 1px rgba(211,47,47,.35),
-0 0 22px rgba(211,47,47,.5),
-0 0 44px rgba(211,47,47,.25);
-}
-
-.neon-blue{
-background:linear-gradient(145deg,#0d1f3b,#2979ff);
-box-shadow:
-0 0 0 1px rgba(41,121,255,.35),
-0 0 22px rgba(41,121,255,.5),
-0 0 44px rgba(41,121,255,.25);
-}
-
-.neon-purple{
-background:linear-gradient(145deg,#22113a,#9c27b0);
-box-shadow:
-0 0 0 1px rgba(156,39,176,.35),
-0 0 22px rgba(156,39,176,.5),
-0 0 44px rgba(156,39,176,.25);
-}
-
-.neon-grey{
-background:linear-gradient(145deg,#2a2a2f,#5f5f66);
-box-shadow:
-0 0 0 1px rgba(255,255,255,.18),
-0 0 18px rgba(255,255,255,.2);
-}
-
-/* ================= WINDOW ================= */
-.window{
-position:fixed;
-inset:0;
-background:var(--bg);
-z-index:1000;
-display:none;
-flex-direction:column;
-animation:up .35s ease;
-}
-@keyframes up{
-from{transform:translateY(100%)}
-to{transform:translateY(0)}
-}
-
-.win-header{
-padding:calc(var(--safe-top) + 16px) 20px 12px;
-display:flex;
-align-items:center;
-gap:14px;
-}
-.win-header button{
-background:none;
-border:none;
-font-size:22px;
-color:var(--text);
-}
-.win-header b{
-font-size:20px;
-font-weight:800;
-}
-
-.win-body{
-flex:1;
-overflow-y:auto;
-padding:10px 20px 160px;
-}
-
-.card{
-background:var(--card);
-border-radius:var(--radius-lg);
-padding:22px;
-border:1px solid var(--border);
-margin-bottom:16px;
-}
-.card h4{
-margin:0 0 12px;
-font-size:12px;
-text-transform:uppercase;
-letter-spacing:1.4px;
-color:var(--text-dim);
-}
-
-input,textarea{
-width:100%;
-padding:16px;
-border-radius:var(--radius-md);
-border:1px solid var(--border);
-background:transparent;
-color:var(--text);
-font-size:16px;
-margin-bottom:10px;
-}
-
-/* ================= BOTTOM ================= */
-.bottom{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-background:var(--surface);
-border-top:1px solid var(--border);
-padding:18px 20px calc(var(--safe-bottom) + 18px);
-display:flex;
-align-items:center;
-gap:14px;
-}
-.bottom .total{
-font-size:13px;
-color:var(--text-dim);
-}
-.bottom .total b{
-display:block;
-font-size:24px;
-color:var(--text);
-}
-.bottom button{
-flex:1;
-background:var(--accent);
-border:none;
-border-radius:22px;
-padding:18px;
-font-size:16px;
-font-weight:900;
-color:#fff;
-}
-</style>
+        /* --- PDF PREVIEW --- */
+        #preview-overlay { display: none; position: fixed; inset: 0; background: #000; z-index: 2000; flex-direction: column; }
+        #pdf-paper { background: white !important; color: black !important; width: 100%; min-height: 100%; }
+        .stamp { border: 6px solid var(--red-mse); color: var(--red-mse); padding: 10px 20px; font-size: 26px; font-weight: 900; position: absolute; top: 180px; right: 40px; transform: rotate(-15deg); text-transform: uppercase; border-radius: 12px; opacity: 0.8; }
+    </style>
 </head>
-
 <body>
 
 <header>
-<h1>MSE <span>ONE</span></h1>
-<p>Suite métier – Serrurerie & multiservices</p>
+    <div class="header-top">
+        <div class="brand">MSE <span>ONE</span></div>
+        <div class="theme-btn" onclick="toggleTheme()">🌙</div>
+    </div>
 </header>
 
 <div id="hub">
-<div class="apps-grid">
+    <div class="apps-grid">
+        <div class="section-label">Documents Premium (TVA)</div>
+        <div class="app" onclick="openApp('DEVIS', 'premium')"><div class="icon-box neon-gold"><img src="devis.png"></div><span>Devis Premium</span></div>
+        <div class="app" onclick="openApp('FACTURE', 'premium')"><div class="icon-box neon-red"><img src="facture.png"></div><span>Facture Premium</span></div>
+        <div class="app" onclick="openApp('FACTURE ACQUITTÉE', 'premium')"><div class="icon-box neon-red"><img src="acquittee.png"></div><span>Acquittée Premium</span></div>
 
-<div class="app" onclick="openApp('Devis Premium')">
-<div class="icon neon-gold"><img src="devis.png"></div>
-<span>Devis Premium</span>
-</div>
+        <div class="section-label">Régime Micro (Net)</div>
+        <div class="app" onclick="openApp('DEVIS', 'micro')"><div class="icon-box neon-gold"><img src="devis.png"></div><span>Devis Micro</span></div>
+        <div class="app" onclick="openApp('FACTURE', 'micro')"><div class="icon-box neon-gold"><img src="facture.png"></div><span>Facture Micro</span></div>
 
-<div class="app" onclick="openApp('Facture Premium')">
-<div class="icon neon-red"><img src="facture.png"></div>
-<span>Facture Premium</span>
-</div>
-
-<div class="app" onclick="openApp('Facture Acquittée')">
-<div class="icon neon-red"><img src="acquittee.png"></div>
-<span>Facture acquittée</span>
-</div>
-
-<div class="app" onclick="openApp('Facture Micro')">
-<div class="icon neon-gold"><img src="facture.png"></div>
-<span>Facture Micro</span>
+        <div class="section-label">Finance & Performance</div>
+        <div class="app" onclick="alert('Clients')"><div class="icon-box neon-blue"><img src="clients.png"></div><span>Clients</span></div>
+        <div class="app" onclick="alert('Rendement')"><div class="icon-box neon-blue"><img src="rendement.png"></div><span>Validés</span></div>
+        <div class="app" onclick="alert('Urssaf')"><div class="icon-box neon-blue"><img src="urssaf.png"></div><span>URSSAF</span></div>
+        <div class="app" onclick="alert('Archives')"><div class="icon-box neon-grey"><img src="archives.png"></div><span>Archives</span></div>
+    </div>
 </div>
 
-<div class="app" onclick="openApp('Clients')">
-<div class="icon neon-blue"><img src="clients.png"></div>
-<span>Clients</span>
+<div id="win" class="window">
+    <div class="win-header">
+        <div onclick="closeApp()" style="font-size: 36px; cursor:pointer;">✕</div>
+        <h2 id="win-title" style="margin:0; font-size: 18px; font-weight: 800;">ÉDITION PRO</h2>
+        <div style="width: 36px;"></div>
+    </div>
+    <div class="win-body" id="win-content"></div>
+    <div class="dock" id="win-dock" style="display:none;">
+        <div><div style="font-size:10px; font-weight:900; color:var(--text-dim); text-transform:uppercase;">Net à Payer</div><div id="dock-total" style="font-size:26px; font-weight:900;">0.00 €</div></div>
+        <button class="btn-mse" onclick="generatePreview()">GÉNÉRER PDF</button>
+    </div>
 </div>
 
-<div class="app" onclick="openApp('Adresses')">
-<div class="icon neon-blue"><img src="adresse.png"></div>
-<span>Adresses</span>
-</div>
-
-<div class="app" onclick="openApp('Validés')">
-<div class="icon neon-purple"><img src="rendement.png"></div>
-<span>Validés</span>
-</div>
-
-<div class="app" onclick="openApp('URSSAF')">
-<div class="icon neon-purple"><img src="urssaf.png"></div>
-<span>URSSAF</span>
-</div>
-
-<div class="app" onclick="openApp('Net Réel')">
-<div class="icon neon-purple"><img src="net.png"></div>
-<span>Net réel</span>
-</div>
-
-<div class="app" onclick="openApp('Dépenses')">
-<div class="icon neon-blue"><img src="depenses.png"></div>
-<span>Dépenses</span>
-</div>
-
-<div class="app" onclick="openApp('Compta')">
-<div class="icon neon-purple"><img src="compta.png"></div>
-<span>Compta</span>
-</div>
-
-<div class="app" onclick="openApp('Tarifs')">
-<div class="icon neon-gold"><img src="tarifs.png"></div>
-<span>Tarifs</span>
-</div>
-
-<div class="app" onclick="openApp('Archives')">
-<div class="icon neon-grey"><img src="archives.png"></div>
-<span>Archives</span>
-</div>
-
-</div>
-</div>
-
-<div class="window" id="win">
-<div class="win-header">
-<button onclick="closeApp()">←</button>
-<b id="win-title"></b>
-</div>
-<div class="win-body" id="win-body"></div>
-<div class="bottom">
-<div class="total">Total<b>0.00 €</b></div>
-<button>Action</button>
-</div>
+<div id="preview-overlay">
+    <div style="padding: 60px 20px 20px; display:flex; gap:12px; background:rgba(0,0,0,0.9);"><button class="btn-mse" style="flex:1; background:#222;" onclick="document.getElementById('preview-overlay').style.display='none'">RETOUR</button><button class="btn-mse" style="flex:2;" onclick="downloadPDF()">TÉLÉCHARGER UHD</button></div>
+    <div style="flex:1; overflow-y:auto; padding:15px; background:#111;"><div id="pdf-paper"></div></div>
 </div>
 
 <script>
-function openApp(name){
-document.getElementById('win').style.display='flex';
-document.getElementById('win-title').innerText=name;
-document.getElementById('win-body').innerHTML=`
-<div class="card">
-<h4>${name}</h4>
-<input placeholder="Champ principal">
-<textarea placeholder="Détails"></textarea>
-<input type="number" placeholder="Montant">
-</div>`;
+let curMode = "premium"; let curType = "FACTURE";
+const USER = { 
+    name: "Sabri BENNACEUR EI", 
+    addr: "2 Résidence des Rosiers, 92800 Puteaux, FR", 
+    email: "serruremse@gmail.com", 
+    siren: "943032755", 
+    iban: "FR76 1695 8000 0159 6810 0824 765", 
+    bic: "ONTO FR P1 XXX" 
+};
+
+function toggleTheme(){ document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+
+function openApp(type, mode){
+    curType = type; curMode = mode;
+    document.getElementById('win').style.display = 'flex';
+    document.getElementById('win-dock').style.display = 'flex';
+    renderEditor(document.getElementById('win-content'));
 }
-function closeApp(){
-document.getElementById('win').style.display='none';
+
+function closeApp(){ document.getElementById('win').style.display = 'none'; }
+
+function renderEditor(c){
+    c.innerHTML = `
+        <div class="card"><h4>📁 Dossier</h4><input type="text" id="doc-num" placeholder="Numéro Document"><input type="text" id="doc-obj" placeholder="Objet de l'intervention"></div>
+        <div class="card"><h4>👤 Client</h4><input type="text" id="c-name" placeholder="Nom complet"><textarea id="c-addr" placeholder="Adresse complète" rows="2"></textarea>
+        <div style="display:flex; align-items:center; gap:12px;"><input type="checkbox" id="ref-check" style="width:22px;height:22px;" onchange="document.getElementById('c-ref').style.display = this.checked ? 'block' : 'none'"><span style="font-size:13px; font-weight:600;">Référence Client ?</span></div>
+        <input type="text" id="c-ref" placeholder="N° Dossier / Syndic" style="display:none; margin-top:10px;"></div>
+        ${curMode==='premium' ? `<div class="card"><h4>⚙️ Taxes</h4><select id="tva-rate" onchange="updateCalc()"><option value="20">Standard 20%</option><option value="10">Réduit 10%</option><option value="5.5">Energie 5.5%</option></select></div>` : ''}
+        <div class="card"><h4>🛠️ Prestations</h4><div id="lines"></div><button onclick="addLine()" style="background:none; border:1.5px dashed var(--border); color:var(--text); padding:18px; width:100%; border-radius:24px; font-weight:700;">+ AJOUTER PRESTATION</button></div>`;
+    addLine();
+}
+
+function addLine(){
+    const id = Date.now();
+    const div = document.createElement('div'); div.className = 'line-item'; div.id = 'l-'+id;
+    div.innerHTML = `<input type="text" class="l-t" placeholder="Titre (Extra-Bold)" style="font-weight:900;"><textarea class="l-d" placeholder="Détails techniques (Italique)" rows="1" style="font-style:italic; font-weight:300; opacity:0.7; border:none;"></textarea>
+    <div style="display:flex; gap:10px; margin-top:10px;"><input type="number" class="l-q" value="1" style="flex:1" oninput="updateCalc()"><input type="number" class="l-p" placeholder="Prix" style="flex:2" oninput="updateCalc()" inputmode="decimal">
+    <button onclick="document.getElementById('l-${id}').remove(); updateCalc();" style="border:none; background:none; color:var(--red-mse); font-size:24px;">✕</button></div>`;
+    document.getElementById('lines').appendChild(div);
+}
+
+function updateCalc(){
+    let raw = 0;
+    document.querySelectorAll('.line-item').forEach(l => { raw += (l.querySelector('.l-q').value * l.querySelector('.l-p').value); });
+    const rate = curMode === 'premium' ? parseFloat(document.getElementById('tva-rate')?.value || 20) : 0;
+    const final = raw * (1 + rate/100);
+    document.getElementById('dock-total').innerText = final.toFixed(2) + ' €';
+    return { raw, final, rate };
+}
+
+function generatePreview(){
+    const data = updateCalc();
+    const isPremium = (curMode === 'premium');
+    const isQuote = (curType === 'DEVIS');
+    const isAcquit = (curType === 'FACTURE ACQUITTÉE');
+    const date = new Date().toLocaleDateString('fr-FR');
+    
+    let rows = "";
+    document.querySelectorAll('.line-item').forEach(l => {
+        rows += `<tr>
+            <td style="padding:15px 10px; border-bottom:1px solid #eee; vertical-align:top;">
+                <div style="font-weight:900; font-size:14px; color:#000;">${l.querySelector('.l-t').value}</div>
+                <div style="font-style:italic; font-size:10px; color:#555; font-weight:300; margin-top:3px;">${l.querySelector('.l-d').value}</div>
+            </td>
+            <td style="text-align:center; padding:15px 10px; border-bottom:1px solid #eee;">${l.querySelector('.l-q').value}</td>
+            <td style="text-align:right; padding:15px 10px; border-bottom:1px solid #eee;">${parseFloat(l.querySelector('.l-p').value).toFixed(2)} €</td>
+            <td style="text-align:right; padding:15px 10px; border-bottom:1px solid #eee;">${(l.querySelector('.l-q').value * l.querySelector('.l-p').value).toFixed(2)} €</td>
+            ${isPremium ? `<td style="text-align:center; padding:15px 10px; border-bottom:1px solid #eee;">${data.rate}%</td><td style="text-align:right; padding:15px 10px; border-bottom:1px solid #eee;">${(l.querySelector('.l-q').value * l.querySelector('.l-p').value * (data.rate/100)).toFixed(2)} €</td>` : ''}
+        </tr>`;
+    });
+
+    document.getElementById('pdf-paper').innerHTML = `
+    <div style="padding:45px; position:relative; color:#000; background:#fff; font-family:Arial, sans-serif;">
+        ${isAcquit ? `<div class="stamp">ACQUITTÉE</div>` : ''}
+        <div style="display:flex; justify-content:space-between; border-bottom:2px solid #eee; padding-bottom:30px;">
+            <div style="width:55%;"><img src="logo.png" style="max-width:250px; max-height:110px;" onerror="this.style.display='none'">
+            <div style="font-size:13px; color:#555; margin-top:15px;"><strong>${USER.name}</strong><br>${USER.addr}<br>${USER.email}</div></div>
+            <div style="background:#f8f8f8; padding:20px; width:44%; border-left:5px solid #333;"><strong>${isQuote?'Devis pour :':'Facturer à :'}</strong><br><br><strong>${document.getElementById('c-name').value}</strong><br>${document.getElementById('c-addr').value.replace(/\n/g,'<br>')}</div>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-bottom:4px solid #D32F2F; margin: 30px 0 20px; padding-bottom:15px;">
+            <div><h1 style="margin:0; font-size:26px;">${curType} N° ${document.getElementById('doc-num').value}</h1><div style="color:#D32F2F; font-weight:bold; margin-top:5px;">Objet : ${document.getElementById('doc-obj').value}</div>
+            ${document.getElementById('ref-check').checked ? `<div style="font-size:11px; margin-top:5px;"><strong>Référence :</strong> ${document.getElementById('c-ref').value}</div>` : ''}</div>
+            <div style="text-align:right; font-size:12px;"><strong>Date :</strong> ${date}<br><strong>Échéance :</strong> ${date}</div>
+        </div>
+        <table style="width:100%; border-collapse:collapse; font-size:12px;">
+            <thead><tr style="background:#333; color:#fff;"><th style="text-align:left; padding:12px;">Désignation & Détails</th><th style="text-align:center;">Qté</th><th style="text-align:right;">P.U HT</th><th style="text-align:right;">Total HT</th>${isPremium ? `<th>TVA</th><th>Mt TVA</th>` : ''}</tr></thead>
+            <tbody>${rows}</tbody>
+        </table>
+        <div style="display:flex; justify-content:flex-end; margin-top:30px;">
+            <table style="width:320px; text-align:right; font-size:15px;">
+                <tr><td style="padding:5px 0;">Total ${isPremium?'HT':'NET'}</td><td>${data.raw.toFixed(2)} €</td></tr>
+                ${isPremium ? `<tr><td>Total TVA (${data.rate}%)</td><td>${(data.final - data.raw).toFixed(2)} €</td></tr>` : ''}
+                <tr style="font-size:22px; font-weight:900; color:#D32F2F; border-top:3px solid #000;"><td>${isPremium?'TOTAL TTC':'MONTANT NET'}</td><td>${data.final.toFixed(2)} €</td></tr>
+            </table>
+        </div>
+        <div style="margin-top:100px; border-top:1px solid #ddd; padding-top:25px; display:flex; justify-content:space-between; font-size:11px; color:#555;">
+            <div style="width:60%;"><strong>RIB :</strong> ${USER.iban}<br>BIC : ${USER.bic}</div>
+            <div style="text-align:right;">${isQuote?'Mention "Bon pour accord", Signature :':'Signature et cachet'}</div>
+        </div>
+        <div style="text-align:center; font-size:9px; color:#999; margin-top:40px;">SIRET ${USER.siren} - ${!isPremium ? 'TVA non applicable, art. 293 B du CGI.' : ''}</div>
+    </div>`;
+    document.getElementById('preview-overlay').style.display = 'flex';
+}
+
+function downloadPDF(){
+    const el = document.getElementById('pdf-paper');
+    // UHD Scale 3 (300 DPI) for perfect rendering [cite: 2026-01-02]
+    html2pdf().set({ margin:0, filename:`MSE_${curType}.pdf`, html2canvas:{scale:3, useCORS:true}, jsPDF:{unit:'mm', format:'a4'} }).from(el).save();
 }
 </script>
-
 </body>
 </html>
