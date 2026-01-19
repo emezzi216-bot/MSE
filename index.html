@@ -3,392 +3,343 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MSE PRO 2026 | Multi-Task</title>
+    <title>MSE ULTIMATE 2026</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #D4AF37;
-            --bg: #050505;
-            --surface: #121212;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
-            --text: #ffffff;
-            --text-dim: #888;
-            --grad: linear-gradient(135deg, #fceabb 0%, #fccd4d 50%, #f8b500 100%);
+            --gold: #D4AF37;
+            --gold-light: #F9E29C;
+            --bg: #000000;
+            --surface: #1A1A1A;
+            --text: #FFFFFF;
+            --text-dim: #A0A0A0;
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
-        body { margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-
-        /* --- NAVIGATION --- */
-        .tab-bar {
-            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(20px);
-            display: flex; justify-content: space-around; padding: 15px 10px 30px;
-            border-top: 1px solid var(--border); position: fixed; bottom: 0; width: 100%; z-index: 1000;
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        
+        body { 
+            margin: 0; background: var(--bg); color: var(--text); 
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
-        .tab-item { text-align: center; color: var(--text-dim); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; flex: 1; cursor: pointer; }
-        .tab-item.active { color: var(--primary); font-weight: bold; }
 
-        /* --- VIEWS --- */
-        .view { display: none; flex: 1; overflow-y: auto; padding: 60px 20px 120px; transition: 0.3s; }
-        .view.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* --- HEADER --- */
+        .header {
+            padding: calc(var(--safe-top) + 20px) 20px 15px;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(15px);
+            border-bottom: 1px solid #333;
+        }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 800; background: linear-gradient(to right, #D4AF37, #FFF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* --- UI COMPONENTS --- */
-        .header-main { margin-bottom: 30px; }
-        .header-main h1 { font-size: 32px; font-weight: 800; margin: 0; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .search-container { position: relative; margin-bottom: 20px; }
-        .search-bar { width: 100%; background: var(--surface); border: 1px solid var(--border); padding: 15px 15px 15px 45px; border-radius: 15px; color: white; font-size: 16px; }
-        .search-icon { position: absolute; left: 15px; top: 18px; opacity: 0.4; }
+        /* --- NAVIGATION TABS --- */
+        .nav-tabs {
+            display: flex; background: var(--surface); padding: 8px; margin: 15px 20px; border-radius: 15px;
+        }
+        .tab-btn {
+            flex: 1; padding: 12px; border: none; background: none; color: var(--text-dim);
+            font-weight: 600; font-size: 13px; border-radius: 10px; transition: 0.2s;
+        }
+        .tab-btn.active { background: var(--gold); color: #000; }
 
-        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 20px; }
-        .card-title { font-size: 12px; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; display: block; }
+        /* --- CONTENT AREA --- */
+        .content { flex: 1; overflow-y: auto; padding: 0 20px 120px; }
+        .view { display: none; animation: slideUp 0.3s ease-out; }
+        .view.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        .btn-action { background: var(--grad); color: black; border: none; padding: 15px 25px; border-radius: 15px; font-weight: 800; width: 100%; cursor: pointer; text-transform: uppercase; }
-        .btn-secondary { background: var(--glass); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 12px; width: 100%; margin-top: 10px; }
+        /* --- CARDS & FORMS --- */
+        .card { background: var(--surface); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #222; }
+        .card-label { font-size: 11px; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: block; }
 
-        /* --- FORMS --- */
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        label { display: block; font-size: 10px; color: var(--text-dim); margin-bottom: 5px; text-transform: uppercase; }
-        input, select, textarea { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: white; font-size: 15px; }
-        
-        /* --- CATALOG & SEARCH RESULTS --- */
-        .result-item { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .result-item:last-child { border: none; }
-        .badge { font-size: 10px; padding: 4px 8px; border-radius: 6px; background: var(--primary); color: black; font-weight: bold; }
+        .input-box {
+            width: 100%; background: #252525; border: 1px solid #333; border-radius: 12px;
+            padding: 15px; color: white; font-size: 16px; margin-bottom: 12px;
+        }
+        .input-box:focus { border-color: var(--gold); outline: none; }
 
-        /* --- PDF PREVIEW --- */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        /* --- CATALOGUE SEARCH --- */
+        .search-results {
+            background: #111; border-radius: 12px; max-height: 200px; overflow-y: auto;
+            margin-bottom: 15px; border: 1px solid #333;
+        }
+        .search-item { padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
+        .search-item:active { background: #333; }
+
+        /* --- PRESTATION LINES --- */
+        .item-line { background: #252525; border-radius: 15px; padding: 15px; margin-bottom: 10px; position: relative; }
+        .btn-del { position: absolute; top: -5px; right: -5px; background: #FF3B30; color: white; border: none; width: 24px; height: 24px; border-radius: 50%; }
+
+        /* --- DOCK ACTION --- */
+        .dock {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(0,0,0,0.9); backdrop-filter: blur(20px);
+            padding: 20px 20px calc(var(--safe-bottom) + 20px);
+            border-top: 1px solid #333; display: flex; justify-content: space-between; align-items: center;
+        }
+        .btn-gen { background: var(--gold); color: black; border: none; padding: 18px 35px; border-radius: 16px; font-weight: 800; font-size: 15px; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); }
+
+        /* --- PREVIEW OVERLAY --- */
         #preview-overlay { display: none; position: fixed; inset: 0; background: black; z-index: 2000; flex-direction: column; }
-        #preview-content { flex: 1; overflow-y: auto; background: #222; padding: 10px; }
-        #paper { background: white; width: 100%; max-width: 800px; margin: 0 auto; color: black; min-height: 100%; }
+        #pdf-render { flex: 1; overflow-y: auto; background: #333; padding: 10px; }
+        #pdf-paper { background: white; width: 100%; color: black; min-height: 100%; }
 
-        /* Styles spécifiques PDF */
-        .pdf-page { padding: 40px; }
-        .pdf-header { display: flex; justify-content: space-between; margin-bottom: 40px; border-bottom: 4px solid #000; padding-bottom: 20px; }
-        .pdf-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        .pdf-table th { background: #f0f0f0; padding: 10px; text-align: left; font-size: 10px; }
-        .pdf-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 11px; }
-        .pdf-total-box { float: right; width: 200px; margin-top: 20px; }
+        /* PDF Styles */
+        .pdf-page { padding: 30px; font-size: 12px; }
+        .pdf-header { display: flex; justify-content: space-between; border-bottom: 2px solid black; padding-bottom: 15px; margin-bottom: 20px; }
+        .pdf-table { width: 100%; border-collapse: collapse; }
+        .pdf-table th { background: #eee; padding: 8px; text-align: left; }
+        .pdf-table td { padding: 8px; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
 
-    <div id="view-dashboard" class="view active">
-        <div class="header-main">
-            <h1>MSE PRO</h1>
-            <div style="color:var(--text-dim); font-size:12px;">Expert Serrurerie • Vitrerie • Peinture</div>
-        </div>
-
-        <div class="card">
-            <span class="card-title">Résumé Activité</span>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <div style="font-size:24px; font-weight:800;" id="stat-total">0.00 €</div>
-                    <div style="font-size:10px; color:var(--text-dim);">Chiffre d'affaires (Local)</div>
-                </div>
-                <div style="text-align:right">
-                    <div style="font-size:24px; font-weight:800;" id="stat-count">0</div>
-                    <div style="font-size:10px; color:var(--text-dim);">Documents</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="search-container">
-            <span class="search-icon">🔍</span>
-            <input type="text" class="search-bar" id="history-search" placeholder="Rechercher un client ou un N°..." oninput="filterHistory()">
-        </div>
-
-        <div id="history-list">
-            </div>
+    <div class="header">
+        <h1>MSE ULTIMATE</h1>
     </div>
 
-    <div id="view-create" class="view">
-        <div class="header-main">
-            <h1>NOUVEAU DOC</h1>
-        </div>
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="showView('create', this)">NOUVEAU</button>
+        <button class="tab-btn" onclick="showView('history', this)">HISTORIQUE</button>
+        <button class="tab-btn" onclick="showView('clients', this)">CLIENTS</button>
+    </div>
 
-        <div class="card">
-            <span class="card-title">Type & Client</span>
-            <div class="form-row">
-                <div>
-                    <label>Type</label>
-                    <select id="doc-type">
+    <div class="content">
+        <div id="view-create" class="view active">
+            <div class="card">
+                <span class="card-label">Infos Document</span>
+                <div class="grid-2">
+                    <select id="doc-type" class="input-box">
                         <option value="FACTURE">FACTURE</option>
                         <option value="DEVIS">DEVIS</option>
                     </select>
+                    <input type="text" id="doc-num" class="input-box" placeholder="N° 2026-001">
                 </div>
-                <div>
-                    <label>N° Document</label>
-                    <input type="text" id="doc-num" placeholder="2026-XXX">
+                <input type="text" id="doc-obj" class="input-box" placeholder="Objet (ex: Vitre cassée)">
+            </div>
+
+            <div class="card">
+                <span class="card-label">Client</span>
+                <input type="text" id="c-name" class="input-box" placeholder="Nom du client" oninput="suggestClient()">
+                <div id="suggest-box"></div>
+                <textarea id="c-addr" class="input-box" placeholder="Adresse d'intervention" rows="2"></textarea>
+            </div>
+
+            <div class="card" style="border: 1px solid var(--gold);">
+                <span class="card-label">🛠️ Catalogue Métiers</span>
+                <input type="text" id="cat-search" class="input-box" placeholder="Rechercher article..." oninput="searchCat()">
+                <div id="cat-results" class="search-results"></div>
+                
+                <div style="margin-top:15px; display:flex; gap:10px;">
+                    <button class="tab-btn" style="border:1px solid #444" onclick="addCustomLine()">+ Ligne Vide</button>
+                    <button class="tab-btn" style="border:1px solid #444" onclick="openCalc()">📐 Calcul m²</button>
                 </div>
             </div>
-            <div class="input-group">
-                <label>Rechercher un client enregistré</label>
-                <input type="text" id="client-search" placeholder="Nom du client..." oninput="searchClient()">
-                <div id="client-results" style="background:var(--bg); border-radius:10px; margin-top:5px;"></div>
-            </div>
-            <div class="input-group" style="margin-top:15px;">
-                <label>Détails Manuels</label>
-                <input type="text" id="c-name" placeholder="Nom du Client">
-                <textarea id="c-addr" placeholder="Adresse complète" style="margin-top:10px;"></textarea>
+
+            <div id="items-container"></div>
+
+            <div class="card">
+                <span class="card-label">Calculatrice Directe</span>
+                <div class="grid-2">
+                    <div><label style="font-size:10px">TOTAL HT</label><input type="number" id="g-ht" class="input-box" inputmode="decimal" oninput="syncP('HT')"></div>
+                    <div><label style="font-size:10px">TOTAL TTC</label><input type="number" id="g-ttc" class="input-box" inputmode="decimal" oninput="syncP('TTC')"></div>
+                </div>
             </div>
         </div>
 
-        <div class="card" style="border-color: var(--primary);">
-            <span class="card-title">🛠️ Catalogue & Services</span>
-            <div class="search-container">
-                <span class="search-icon">🔎</span>
-                <input type="text" id="catalog-search" class="search-bar" placeholder="Ex: Porte, Double Vitrage, Peinture..." oninput="searchCatalog()">
-            </div>
-            <div id="catalog-results" style="max-height: 200px; overflow-y: auto;"></div>
+        <div id="view-history" class="view">
+            <div id="hist-list"></div>
         </div>
 
-        <div class="card">
-            <span class="card-title">Lignes de prestations</span>
-            <div id="items-list"></div>
-            <button class="btn-secondary" onclick="addNewLine()">+ LIGNE PERSONNALISÉE</button>
+        <div id="view-clients" class="view">
+            <div id="client-list"></div>
         </div>
-
-        <div class="card">
-            <span class="card-title">Calculatrice Global</span>
-            <div class="form-row">
-                <div><label>Total HT</label><input type="number" id="g-ht" oninput="sync('HT')"></div>
-                <div><label>Total TTC</label><input type="number" id="g-ttc" oninput="sync('TTC')"></div>
-            </div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <label>Appliquer TVA (20%)</label>
-                <input type="checkbox" id="tva-sw" checked onchange="calculateAll()" style="width:25px; height:25px;">
-            </div>
-        </div>
-        
-        <button class="btn-action" onclick="generatePreview()">Aperçu & Enregistrer</button>
     </div>
 
-    <div class="tab-bar">
-        <div class="tab-item active" onclick="switchTab('dashboard', this)">
-            <div style="font-size:20px;">📊</div>Dashboard
+    <div class="dock">
+        <div>
+            <div style="font-size:11px; color:var(--text-dim)">NET À PAYER</div>
+            <div id="dock-ttc" style="font-size:22px; font-weight:900; color:var(--gold)">0.00 €</div>
         </div>
-        <div class="tab-item" onclick="switchTab('create', this)">
-            <div style="font-size:20px;">➕</div>Nouveau
-        </div>
+        <button class="btn-gen" onclick="generate()">GÉNÉRER</button>
     </div>
 
     <div id="preview-overlay">
-        <div style="padding:15px; display:flex; gap:10px; background:#000;">
-            <button class="btn-secondary" onclick="closePreview()" style="margin:0; flex:1">RETOUR</button>
-            <button class="btn-action" onclick="saveToPDF()" style="flex:2">TELECHARGER PDF</button>
+        <div style="padding: 50px 20px 20px; display: flex; gap: 10px; background: #000;">
+            <button class="tab-btn" style="background:#333; color:white" onclick="closePrev()">RETOUR</button>
+            <button class="btn-gen" style="flex:1" onclick="download()">TÉLÉCHARGER PDF</button>
         </div>
-        <div id="preview-content">
-            <div id="paper"></div>
+        <div id="pdf-render">
+            <div id="pdf-paper"></div>
         </div>
     </div>
 
     <script>
-        // --- DATA BASE ---
+        // --- BASE DE DONNÉES MÉTIERS ---
         const CATALOG = [
-            { t: 'Serrurerie', n: 'Ouverture de porte claquée', p: 90 },
-            { t: 'Serrurerie', n: 'Remplacement Cylindre standard', p: 120 },
-            { t: 'Serrurerie', n: 'Blindage de porte sur mesure', p: 1800 },
-            { t: 'Vitrerie', n: 'Remplacement Double Vitrage (m²)', p: 350 },
-            { t: 'Vitrerie', n: 'Miroir Argenté 4mm (m²)', p: 120 },
-            { t: 'Peinture', n: 'Peinture Murs (Enduit + 2 couches) / m²', p: 45 },
-            { t: 'Peinture', n: 'Lessivage murs et plafonds / m²', p: 15 },
-            { t: 'Urgence', n: 'Déplacement Jour', p: 45 },
-            { t: 'Urgence', n: 'Déplacement Nuit/Weekend', p: 90 }
+            { m: 'Serrurier', n: 'Ouverture de porte claquée', p: 90 },
+            { m: 'Serrurier', n: 'Remplacement Cylindre 30x30', p: 85 },
+            { m: 'Vitrier', n: 'Remplacement Double Vitrage 4/16/4', p: 280 },
+            { m: 'Vitrier', n: 'Mise en sécurité provisoire', p: 150 },
+            { m: 'Peintre', n: 'Peinture Mat blanche (m²)', p: 35 },
+            { m: 'Peintre', n: 'Forfait Lessivage/Préparation', p: 120 },
+            { m: 'Divers', n: 'Déplacement Urgent', p: 55 }
         ];
 
-        let history = JSON.parse(localStorage.getItem('mse_v26_history') || '[]');
-        let clients = JSON.parse(localStorage.getItem('mse_v26_clients') || '[]');
+        let db = {
+            history: JSON.parse(localStorage.getItem('mse_hist') || '[]'),
+            clients: JSON.parse(localStorage.getItem('mse_cli') || '[]')
+        };
 
-        const USER = { name: "Sabri BENNACEUR EI", addr: "2 Résidence des Rosiers, 92800 Puteaux", siren: "943032755", mail: "serruremse@gmail.com", iban: "FR76 1695 8000 0159 6810 0824 765" };
+        const USER = { name: "Sabri BENNACEUR EI", addr: "2 Résidence des Rosiers, 92800 Puteaux", siren: "943032755", iban: "FR76 1695 8000 0159 6810 0824 765" };
 
-        // --- NAVIGATION ---
-        function switchTab(viewId, el) {
+        function showView(id, btn) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-            document.getElementById('view-' + viewId).classList.add('active');
-            el.classList.add('active');
-            if(viewId === 'dashboard') loadHistory();
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('view-' + id).classList.add('active');
+            btn.classList.add('active');
+            if(id === 'history') renderHistory();
+            if(id === 'clients') renderClients();
         }
 
-        // --- CATALOG & CLIENT SEARCH ---
-        function searchCatalog() {
-            const q = document.getElementById('catalog-search').value.toLowerCase();
-            const res = document.getElementById('catalog-results');
+        function searchCat() {
+            const q = document.getElementById('cat-search').value.toLowerCase();
+            const res = document.getElementById('cat-results');
             res.innerHTML = '';
             if(!q) return;
-            CATALOG.filter(i => i.n.toLowerCase().includes(q)).forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'result-item';
-                div.innerHTML = `<div><span class="badge">${item.t}</span> ${item.n}</div><b>${item.p}€</b>`;
-                div.onclick = () => addItemFromCatalog(item);
-                res.appendChild(div);
+            CATALOG.filter(i => i.n.toLowerCase().includes(q)).forEach(i => {
+                const d = document.createElement('div');
+                d.className = 'search-item';
+                d.innerHTML = `<span><b>${i.m}</b> • ${i.n}</span> <b>${i.p}€</b>`;
+                d.onclick = () => { addLine(i.n, 1, i.p); res.innerHTML = ''; document.getElementById('cat-search').value = ''; };
+                res.appendChild(d);
             });
         }
 
-        function searchClient() {
-            const q = document.getElementById('client-search').value.toLowerCase();
-            const res = document.getElementById('client-results');
-            res.innerHTML = '';
-            if(!q) return;
-            clients.filter(c => c.name.toLowerCase().includes(q)).forEach(c => {
-                const div = document.createElement('div');
-                div.className = 'result-item';
-                div.innerHTML = `<div>${c.name}</div><small>${c.addr.substring(0,20)}...</small>`;
-                div.onclick = () => {
-                    document.getElementById('c-name').value = c.name;
-                    document.getElementById('c-addr').value = c.addr;
-                    res.innerHTML = '';
-                };
-                res.appendChild(div);
-            });
-        }
-
-        // --- CALCULATIONS ---
-        function sync(src) {
-            const hasTva = document.getElementById('tva-sw').checked;
-            const ht = document.getElementById('g-ht');
-            const ttc = document.getElementById('g-ttc');
-            if(src === 'HT') ttc.value = hasTva ? (ht.value * 1.2).toFixed(2) : ht.value;
-            else ht.value = hasTva ? (ttc.value / 1.2).toFixed(2) : ttc.value;
-            calculateAll();
-        }
-
-        function addItemFromCatalog(item) {
-            addNewLine(item.n, 1, item.p);
-            document.getElementById('catalog-search').value = '';
-            document.getElementById('catalog-results').innerHTML = '';
-        }
-
-        function addNewLine(desc='', qty=1, pu='') {
+        function addLine(n='', q=1, p='') {
             const id = Date.now();
             const div = document.createElement('div');
-            div.className = 'card'; div.id = id;
-            div.style.padding = '10px';
+            div.className = 'item-line'; div.id = id;
             div.innerHTML = `
-                <input type="text" placeholder="Désignation" value="${desc}" class="l-desc" style="margin-bottom:10px;">
-                <div class="form-row" style="margin:0">
-                    <input type="number" placeholder="Qté" value="${qty}" class="l-qty" oninput="calculateAll()">
-                    <input type="number" placeholder="Prix HT" value="${pu}" class="l-pu" oninput="calculateAll()">
-                </div>
-                <button onclick="document.getElementById('${id}').remove(); calculateAll()" style="background:none; border:none; color:red; font-size:10px; margin-top:5px;">SUPPRIMER LIGNE</button>
-            `;
-            document.getElementById('items-list').appendChild(div);
-            calculateAll();
+                <button class="btn-del" onclick="document.getElementById('${id}').remove(); updateCalc();">✕</button>
+                <input type="text" class="input-box l-n" value="${n}" placeholder="Désignation">
+                <div class="grid-2">
+                    <input type="number" class="input-box l-q" value="${q}" oninput="updateCalc()" placeholder="Qté">
+                    <input type="number" class="input-box l-p" value="${p}" oninput="updateCalc()" placeholder="P.U HT" inputmode="decimal">
+                </div>`;
+            document.getElementById('items-container').prepend(div);
+            updateCalc();
         }
 
-        function calculateAll() {
-            let totalHT = parseFloat(document.getElementById('g-ht').value) || 0;
-            document.querySelectorAll('#items-list .card').forEach(card => {
-                const q = card.querySelector('.l-qty').value || 0;
-                const p = card.querySelector('.l-pu').value || 0;
-                totalHT += (q * p);
+        function syncP(src) {
+            const ht = document.getElementById('g-ht');
+            const ttc = document.getElementById('g-ttc');
+            if(src === 'HT') ttc.value = (ht.value * 1.2).toFixed(2);
+            else ht.value = (ttc.value / 1.2).toFixed(2);
+            updateCalc();
+        }
+
+        function updateCalc() {
+            let ht = parseFloat(document.getElementById('g-ht').value) || 0;
+            document.querySelectorAll('.item-line').forEach(l => {
+                ht += (l.querySelector('.l-q').value * l.querySelector('.l-p').value);
             });
-            const hasTva = document.getElementById('tva-sw').checked;
-            const ttc = hasTva ? totalHT * 1.2 : totalHT;
-            document.getElementById('total-val-display')?.remove();
-            document.getElementById('total-val-box'); // useless here but for logic
-            document.getElementById('view-create').insertAdjacentHTML('beforeend', `<div id="total-val-display" style="text-align:center; font-weight:800; font-size:20px; color:var(--primary); margin-bottom:20px;">TOTAL TTC : ${ttc.toFixed(2)} €</div>`);
+            document.getElementById('dock-ttc').innerText = (ht * 1.2).toFixed(2) + ' €';
         }
 
-        // --- PDF & STORAGE ---
-        function generatePreview() {
+        function generate() {
             const type = document.getElementById('doc-type').value;
-            const num = document.getElementById('doc-num').value || 'Brouillon';
-            const clientName = document.getElementById('c-name').value;
-            const clientAddr = document.getElementById('c-addr').value;
+            const num = document.getElementById('doc-num').value || 'SANS-N°';
+            const client = document.getElementById('c-name').value || 'CLIENT ANONYME';
+            const addr = document.getElementById('c-addr').value;
             const date = new Date().toLocaleDateString('fr-FR');
 
-            // Sauvegarde Client
-            if(clientName && !clients.find(c => c.name === clientName)) {
-                clients.push({name: clientName, addr: clientAddr});
-                localStorage.setItem('mse_v26_clients', JSON.stringify(clients));
+            // Enregistrement client
+            if(client && !db.clients.find(c => c.n === client)) {
+                db.clients.push({n: client, a: addr});
+                localStorage.setItem('mse_cli', JSON.stringify(db.clients));
             }
 
-            let lines = "";
+            let rows = "";
             let totalHT = parseFloat(document.getElementById('g-ht').value) || 0;
-            if(totalHT > 0) lines += `<tr><td>Forfait global intervention</td><td>1</td><td>${totalHT.toFixed(2)}€</td><td>${totalHT.toFixed(2)}€</td></tr>`;
-            
-            document.querySelectorAll('#items-list .card').forEach(card => {
-                const d = card.querySelector('.l-desc').value;
-                const q = card.querySelector('.l-qty').value;
-                const p = parseFloat(card.querySelector('.l-pu').value) || 0;
+            if(totalHT > 0) rows += `<tr><td>Forfait global intervention</td><td>1</td><td>${totalHT.toFixed(2)}€</td><td>${totalHT.toFixed(2)}€</td></tr>`;
+
+            document.querySelectorAll('.item-line').forEach(l => {
+                const n = l.querySelector('.l-n').value;
+                const q = l.querySelector('.l-q').value;
+                const p = parseFloat(l.querySelector('.l-p').value) || 0;
                 totalHT += (q*p);
-                lines += `<tr><td>${d}</td><td>${q}</td><td>${p.toFixed(2)}€</td><td>${(q*p).toFixed(2)}€</td></tr>`;
+                rows += `<tr><td>${n}</td><td>${q}</td><td>${p.toFixed(2)}€</td><td>${(q*p).toFixed(2)}€</td></tr>`;
             });
 
-            const tva = document.getElementById('tva-sw').checked ? totalHT * 0.2 : 0;
-            const ttc = totalHT + tva;
+            const ttc = (totalHT * 1.2).toFixed(2);
 
-            // Save to history
-            const docData = { type, num, client: clientName, total: ttc.toFixed(2), date: date, raw: {lines, totalHT, tva, ttc, clientAddr} };
-            history.unshift(docData);
-            localStorage.setItem('mse_v26_history', JSON.stringify(history.slice(0,50)));
+            // Historique
+            db.history.unshift({ type, num, client, ttc, date });
+            localStorage.setItem('mse_hist', JSON.stringify(db.history.slice(0,30)));
 
-            const html = `
+            document.getElementById('pdf-paper').innerHTML = `
                 <div class="pdf-page">
                     <div class="pdf-header">
-                        <div><div style="font-size:30px; font-weight:900; letter-spacing:-1px;">MSE</div>${USER.name}<br>${USER.addr}<br>SIREN: ${USER.siren}</div>
-                        <div style="text-align:right">
-                            <strong style="font-size:18px;">${type} N° ${num}</strong><br>Date: ${date}<br><br>
-                            <strong>CLIENT:</strong><br>${clientName}<br>${clientAddr.replace(/\n/g, '<br>')}
-                        </div>
+                        <div><strong>${USER.name}</strong><br>${USER.addr}<br>SIREN: ${USER.siren}</div>
+                        <div style="text-align:right"><strong>${type} N° ${num}</strong><br>Date: ${date}</div>
                     </div>
+                    <div style="margin-bottom:20px"><strong>CLIENT:</strong><br>${client}<br>${addr.replace(/\n/g,'<br>')}</div>
+                    <p><strong>OBJET:</strong> ${document.getElementById('doc-obj').value}</p>
                     <table class="pdf-table">
                         <thead><tr><th>DESIGNATION</th><th>QTÉ</th><th>P.U HT</th><th>TOTAL HT</th></tr></thead>
-                        <tbody>${lines}</tbody>
+                        <tbody>${rows}</tbody>
                     </table>
-                    <div class="pdf-total-box">
+                    <div style="float:right; width:200px; margin-top:20px;">
                         <table style="width:100%">
-                            <tr><td>Total HT</td><td>${totalHT.toFixed(2)} €</td></tr>
-                            <tr><td>TVA (20%)</td><td>${tva.toFixed(2)} €</td></tr>
-                            <tr style="font-size:18px; font-weight:bold; border-top:2px solid #000;"><td>TOTAL TTC</td><td>${ttc.toFixed(2)} €</td></tr>
+                            <tr><td>TOTAL HT:</td><td style="text-align:right">${totalHT.toFixed(2)}€</td></tr>
+                            <tr><td>TVA (20%):</td><td style="text-align:right">${(totalHT*0.2).toFixed(2)}€</td></tr>
+                            <tr style="font-size:16px; font-weight:bold;"><td>TOTAL TTC:</td><td style="text-align:right">${ttc}€</td></tr>
                         </table>
                     </div>
-                    <div style="margin-top:100px; font-size:9px; color:#888;">
-                        RIB: ${USER.iban} | RCS Nanterre | TVA non applicable (si micro-entrepreneur)
+                    <div style="margin-top:150px; font-size:9px; color:#777; border-top:1px solid #eee; padding-top:10px;">
+                        RIB: ${USER.iban} | TVA non applicable art. 293 B du CGI (si applicable).
                     </div>
                 </div>`;
-            
-            document.getElementById('paper').innerHTML = html;
             document.getElementById('preview-overlay').style.display = 'flex';
         }
 
-        function loadHistory() {
-            const list = document.getElementById('history-list');
-            list.innerHTML = '';
-            let sum = 0;
-            history.forEach(item => {
-                sum += parseFloat(item.total);
-                const div = document.createElement('div');
-                div.className = 'card';
-                div.innerHTML = `
-                    <div style="display:flex; justify-content:space-between;">
-                        <div><span class="badge" style="background:${item.type==='DEVIS'?'#ff5252':'#D4AF37'}">${item.type}</span> <b>${item.num}</b></div>
-                        <div style="font-weight:800;">${item.total} €</div>
-                    </div>
-                    <div style="font-size:12px; color:var(--text-dim); margin-top:5px;">${item.client} • ${item.date}</div>
-                `;
-                list.appendChild(div);
-            });
-            document.getElementById('stat-total').innerText = sum.toFixed(2) + ' €';
-            document.getElementById('stat-count').innerText = history.length;
-        }
-
-        function closePreview() { document.getElementById('preview-overlay').style.display = 'none'; }
-        function saveToPDF() {
-            const element = document.getElementById('paper');
+        function closePrev() { document.getElementById('preview-overlay').style.display = 'none'; }
+        
+        function download() {
+            const el = document.getElementById('pdf-paper');
             html2pdf().set({ 
-                margin: 0, filename: 'MSE_PRO_Doc.pdf', 
-                html2canvas: { scale: 3 }, 
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-            }).from(element).save();
+                margin: 0, filename: `MSE_${Date.now()}.pdf`, 
+                html2canvas: { scale: 3 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+            }).from(el).save();
         }
 
-        // Init
-        loadHistory();
+        function renderHistory() {
+            const div = document.getElementById('hist-list');
+            div.innerHTML = db.history.map(h => `
+                <div class="card" style="padding:15px; margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <b>${h.type} ${h.num}</b>
+                        <b style="color:var(--gold)">${h.ttc} €</b>
+                    </div>
+                    <div style="font-size:12px; color:var(--text-dim); margin-top:5px;">${h.client} • ${h.date}</div>
+                </div>
+            `).join('');
+        }
+
+        function addCustomLine() { addLine(); }
+
+        function openCalc() {
+            const l = prompt("Longueur (m) :");
+            const w = prompt("Largeur (m) :");
+            if(l && w) {
+                const s = (l * w).toFixed(2);
+                addLine(`Surface vitrage/peinture (${l}m x ${w}m)`, s, 0);
+                alert(`Surface calculée : ${s} m². Indiquez maintenant le prix au m².`);
+            }
+        }
     </script>
 </body>
 </html>
