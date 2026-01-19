@@ -8,9 +8,9 @@
 <style>
 /* ================= ONE UI CORE ================= */
 :root{
---bg:#0f0f12;
---surface:#1a1a1f;
---card:#232329;
+--bg:#0b0b0e;
+--surface:#15151a;
+--card:#1f1f26;
 --border:rgba(255,255,255,.08);
 --text:#ffffff;
 --text-dim:#9b9ba0;
@@ -22,15 +22,6 @@
 --safe-bottom:env(safe-area-inset-bottom);
 }
 
-[data-theme="light"]{
---bg:#f2f2f7;
---surface:#ffffff;
---card:#f8f8fb;
---border:rgba(0,0,0,.08);
---text:#000000;
---text-dim:#666;
-}
-
 *{
 box-sizing:border-box;
 -webkit-tap-highlight-color:transparent;
@@ -39,7 +30,7 @@ font-family:-apple-system,BlinkMacSystemFont,"SamsungOne",Roboto,Segoe UI;
 
 body{
 margin:0;
-background:var(--bg);
+background:radial-gradient(120% 120% at 50% 0%, #12121a 0%, #08080b 60%);
 color:var(--text);
 height:100vh;
 overflow:hidden;
@@ -47,7 +38,7 @@ overflow:hidden;
 
 /* ================= HEADER ================= */
 header{
-padding:calc(var(--safe-top) + 26px) 24px 16px;
+padding:calc(var(--safe-top) + 26px) 24px 18px;
 }
 header h1{
 margin:0;
@@ -66,16 +57,17 @@ color:var(--text-dim);
 #hub{
 height:calc(100vh - 140px);
 overflow-y:auto;
-padding:10px 10px 140px;
+padding:14px 12px 160px;
 }
 
-/* ================= APP LAUNCHER GRID ================= */
+/* ================= APP GRID ================= */
 .apps-grid{
 display:grid;
 grid-template-columns:repeat(3,1fr);
-gap:22px 12px;
+gap:26px 14px;
 }
 
+/* ================= APP ICON ================= */
 .app{
 display:flex;
 flex-direction:column;
@@ -84,33 +76,91 @@ gap:10px;
 cursor:pointer;
 }
 
-.app:active .icon{
-transform:scale(.88);
-}
-
-.icon{
-width:76px;
-height:76px;
-border-radius:28px;
-background:var(--card);
-border:1px solid var(--border);
-display:flex;
-align-items:center;
-justify-content:center;
-box-shadow:0 10px 26px rgba(0,0,0,.35);
-transition:.2s ease;
-}
-
-.icon img{
-width:40px;
-height:40px;
-object-fit:contain;
-}
-
 .app span{
 font-size:12px;
 text-align:center;
 line-height:1.2;
+}
+
+/* ===== ICON BASE ===== */
+.icon{
+width:78px;
+height:78px;
+border-radius:26px;
+display:flex;
+align-items:center;
+justify-content:center;
+position:relative;
+overflow:hidden;
+transition:transform .25s ease;
+}
+
+.icon img{
+width:44px;
+height:44px;
+object-fit:contain;
+filter:drop-shadow(0 0 8px rgba(255,255,255,.25));
+z-index:2;
+}
+
+.app:active .icon{
+transform:scale(.9);
+}
+
+/* ===== NEON LAYER ===== */
+.icon::before{
+content:"";
+position:absolute;
+inset:0;
+border-radius:26px;
+background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.02));
+z-index:1;
+}
+
+/* ================= COLOR THEMES ================= */
+
+/* Serrurerie – OR */
+.neon-gold{
+background:linear-gradient(145deg,#3a2c12,#c5a059);
+box-shadow:
+0 0 0 1px rgba(197,160,89,.35),
+0 0 20px rgba(197,160,89,.45),
+0 0 40px rgba(197,160,89,.25);
+}
+
+/* Finance – ROUGE */
+.neon-red{
+background:linear-gradient(145deg,#3b0d0d,#d32f2f);
+box-shadow:
+0 0 0 1px rgba(211,47,47,.35),
+0 0 22px rgba(211,47,47,.5),
+0 0 44px rgba(211,47,47,.25);
+}
+
+/* Gestion – BLEU */
+.neon-blue{
+background:linear-gradient(145deg,#0d1f3b,#2979ff);
+box-shadow:
+0 0 0 1px rgba(41,121,255,.35),
+0 0 22px rgba(41,121,255,.5),
+0 0 44px rgba(41,121,255,.25);
+}
+
+/* Comptabilité – VIOLET */
+.neon-purple{
+background:linear-gradient(145deg,#22113a,#9c27b0);
+box-shadow:
+0 0 0 1px rgba(156,39,176,.35),
+0 0 22px rgba(156,39,176,.5),
+0 0 44px rgba(156,39,176,.25);
+}
+
+/* Archives – GRIS */
+.neon-grey{
+background:linear-gradient(145deg,#2a2a2f,#5f5f66);
+box-shadow:
+0 0 0 1px rgba(255,255,255,.18),
+0 0 18px rgba(255,255,255,.2);
 }
 
 /* ================= WINDOW ================= */
@@ -177,7 +227,7 @@ font-size:16px;
 margin-bottom:10px;
 }
 
-/* ================= BOTTOM ACTION ================= */
+/* ================= BOTTOM ================= */
 .bottom{
 position:fixed;
 bottom:0;
@@ -190,7 +240,6 @@ display:flex;
 align-items:center;
 gap:14px;
 }
-
 .bottom .total{
 font-size:13px;
 color:var(--text-dim);
@@ -200,7 +249,6 @@ display:block;
 font-size:24px;
 color:var(--text);
 }
-
 .bottom button{
 flex:1;
 background:var(--accent);
@@ -225,87 +273,81 @@ color:#fff;
 <div class="apps-grid">
 
 <div class="app" onclick="openApp('Devis Premium')">
-<div class="icon"><img src="devis.png"></div>
+<div class="icon neon-gold"><img src="devis.png"></div>
 <span>Devis Premium</span>
 </div>
 
 <div class="app" onclick="openApp('Facture Premium')">
-<div class="icon"><img src="facture.png"></div>
+<div class="icon neon-red"><img src="facture.png"></div>
 <span>Facture Premium</span>
 </div>
 
 <div class="app" onclick="openApp('Facture Acquittée')">
-<div class="icon"><img src="acquittee.png"></div>
+<div class="icon neon-red"><img src="acquittee.png"></div>
 <span>Facture acquittée</span>
 </div>
 
 <div class="app" onclick="openApp('Facture Micro')">
-<div class="icon"><img src="facture.png"></div>
+<div class="icon neon-gold"><img src="facture.png"></div>
 <span>Facture Micro</span>
 </div>
 
 <div class="app" onclick="openApp('Clients')">
-<div class="icon"><img src="clients.png"></div>
+<div class="icon neon-blue"><img src="clients.png"></div>
 <span>Clients</span>
 </div>
 
 <div class="app" onclick="openApp('Adresses')">
-<div class="icon"><img src="adresse.png"></div>
+<div class="icon neon-blue"><img src="adresse.png"></div>
 <span>Adresses</span>
 </div>
 
 <div class="app" onclick="openApp('Validés')">
-<div class="icon"><img src="rendement.png"></div>
+<div class="icon neon-purple"><img src="rendement.png"></div>
 <span>Validés</span>
 </div>
 
 <div class="app" onclick="openApp('URSSAF')">
-<div class="icon"><img src="urssaf.png"></div>
+<div class="icon neon-purple"><img src="urssaf.png"></div>
 <span>URSSAF</span>
 </div>
 
 <div class="app" onclick="openApp('Net Réel')">
-<div class="icon"><img src="net.png"></div>
+<div class="icon neon-purple"><img src="net.png"></div>
 <span>Net réel</span>
 </div>
 
 <div class="app" onclick="openApp('Dépenses')">
-<div class="icon"><img src="depenses.png"></div>
+<div class="icon neon-blue"><img src="depenses.png"></div>
 <span>Dépenses</span>
 </div>
 
 <div class="app" onclick="openApp('Compta')">
-<div class="icon"><img src="compta.png"></div>
+<div class="icon neon-purple"><img src="compta.png"></div>
 <span>Compta</span>
 </div>
 
 <div class="app" onclick="openApp('Tarifs')">
-<div class="icon"><img src="tarifs.png"></div>
+<div class="icon neon-gold"><img src="tarifs.png"></div>
 <span>Tarifs</span>
 </div>
 
 <div class="app" onclick="openApp('Archives')">
-<div class="icon"><img src="archives.png"></div>
+<div class="icon neon-grey"><img src="archives.png"></div>
 <span>Archives</span>
 </div>
 
 </div>
 </div>
 
-<!-- ================= WINDOW ================= -->
 <div class="window" id="win">
 <div class="win-header">
 <button onclick="closeApp()">←</button>
 <b id="win-title"></b>
 </div>
-
 <div class="win-body" id="win-body"></div>
-
 <div class="bottom">
-<div class="total">
-Total
-<b id="total">0.00 €</b>
-</div>
+<div class="total">Total<b>0.00 €</b></div>
 <button>Action</button>
 </div>
 </div>
@@ -322,7 +364,6 @@ document.getElementById('win-body').innerHTML=`
 <input type="number" placeholder="Montant">
 </div>`;
 }
-
 function closeApp(){
 document.getElementById('win').style.display='none';
 }
