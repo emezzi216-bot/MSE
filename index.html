@@ -1,261 +1,293 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MSE OS v8 | Multi-TVA & Elite Design</title>
+    <title>MSE OS v10 | Fusion Mode</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
+        /* --- SYSTÈME DE VARIABLES DYNAMIQUE --- */
         :root {
-            --bg: #050505;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --gold: #D4AF37;
-            --blue: #007AFF;
-            --red: #FF3B30;
-            --green: #34C759;
+            /* Mode Sombre (Défaut) */
+            --bg: #000000;
+            --surface: #121214;
+            --card: #1c1c1e;
             --text: #ffffff;
+            --text-dim: #888888;
+            --border: rgba(255, 255, 255, 0.1);
+            --gold: #D4AF37;
+            --blue: #3e82f7;
+            --green: #32d74b;
+            --red: #ff453a;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', -apple-system, sans-serif; }
+        [data-theme="light"] {
+            /* Mode Clair */
+            --bg: #f2f2f7;
+            --surface: #ffffff;
+            --card: #ffffff;
+            --text: #000000;
+            --text-dim: #666666;
+            --border: rgba(0, 0, 0, 0.05);
+            /* Les couleurs d'accent restent identiques pour l'image de marque */
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; transition: background 0.3s, color 0.3s; }
         
         body { 
             margin: 0; background: var(--bg); color: var(--text); 
-            height: 100vh; overflow: hidden;
-            background-image: radial-gradient(circle at 0% 0%, #1a1a1a 0%, transparent 50%);
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        /* --- HUB --- */
-        #main-dashboard { padding: calc(env(safe-area-inset-top) + 40px) 20px 120px; height: 100vh; overflow-y: auto; }
-        .apps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px 10px; margin-top: 20px; }
-        .app-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-        .icon-box {
-            width: 65px; height: 65px; border-radius: 20px; 
+        /* --- HEADER & THEME TOGGLE --- */
+        .home-header {
+            padding: calc(env(safe-area-inset-top) + 20px) 25px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .theme-toggle {
+            width: 45px; height: 45px; border-radius: 50%;
+            background: var(--surface); border: 1px solid var(--border);
             display: flex; align-items: center; justify-content: center;
-            font-size: 28px; background: var(--glass); border: 1px solid var(--glass-border);
-            transition: 0.3s cubic-bezier(0.2, 0, 0, 1);
+            font-size: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .app-item:active .icon-box { transform: scale(0.9); }
-        .app-item span { margin-top: 8px; font-size: 10px; font-weight: 600; color: #888; text-align: center; text-transform: uppercase; }
-        .icon-gold { border-color: var(--gold); }
-        .icon-blue { border-color: var(--blue); }
-        .icon-green { border-color: var(--green); }
 
-        /* --- EDITOR WINDOW --- */
-        .window { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: none; flex-direction: column; animation: slideUp 0.4s cubic-bezier(0, 0, 0.2, 1); }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .win-header { padding: calc(env(safe-area-inset-top) + 20px) 25px 20px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); }
-        .win-content { flex: 1; overflow-y: auto; padding: 20px 20px 150px; }
-        .glass-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 25px; padding: 20px; margin-bottom: 20px; }
-        .glass-card h3 { margin: 0 0 15px; font-size: 11px; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
+        /* --- DASHBOARD GRID --- */
+        #home-screen {
+            padding: 0 25px 120px;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px 15px;
+            overflow-y: auto; height: 100%; align-content: start;
+        }
+        .section-label { grid-column: span 4; font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin: 15px 0 5px; }
+
+        .app-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .squircle {
+            width: 62px; height: 62px; border-radius: 22px; display: flex; align-items: center; justify-content: center;
+            font-size: 28px; box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        .squircle:active { transform: scale(0.88); }
+        .app-label { margin-top: 8px; font-size: 10px; font-weight: 600; color: var(--text-dim); text-align: center; line-height: 1.2; }
+
+        /* Gradients One UI */
+        .g-gold { background: linear-gradient(135deg, #d4af37, #967a2a); color: #000; }
+        .g-blue { background: linear-gradient(135deg, #3e82f7, #1a4fa3); color: #fff; }
+        .g-green { background: linear-gradient(135deg, #32d74b, #1d8a2d); color: #fff; }
+        .g-red { background: linear-gradient(135deg, #ff453a, #c0392b); color: #fff; }
+        .g-util { background: var(--surface); border: 1px solid var(--border); }
+
+        /* --- WINDOW SYSTEM --- */
+        .window {
+            position: fixed; inset: 0; background: var(--bg); z-index: 1000;
+            display: none; flex-direction: column; animation: app-open 0.4s cubic-bezier(0, 0, 0.2, 1);
+        }
+        @keyframes app-open { from { transform: scale(0.95) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
         
-        input, textarea, select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid transparent; border-radius: 15px; padding: 14px; color: white; font-size: 16px; margin-bottom: 10px; appearance: none; }
-        select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 15px center; background-size: 20px; }
+        .win-header { padding: calc(env(safe-area-inset-top) + 15px) 25px 15px; display: flex; align-items: center; justify-content: space-between; background: var(--bg); border-bottom: 1px solid var(--border); }
+        .content { flex: 1; overflow-y: auto; padding: 20px 20px 150px; }
+        .one-card { background: var(--surface); border-radius: 28px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); }
+        .one-card h3 { font-size: 11px; color: var(--gold); text-transform: uppercase; margin: 0 0 15px; letter-spacing: 1px; }
 
-        .line-entry { background: rgba(255,255,255,0.02); border-radius: 18px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--glass-border); }
-        .dock { position: fixed; bottom: 30px; left: 20px; right: 20px; height: 80px; background: rgba(255,255,255,0.1); backdrop-filter: blur(30px); border-radius: 25px; border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1100; }
-        .btn-pay { background: var(--gold); color: #000; border: none; padding: 12px 25px; border-radius: 15px; font-weight: 800; }
+        input, textarea, select {
+            width: 100%; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 14px; padding: 15px; color: var(--text); font-size: 16px; margin-bottom: 12px;
+        }
 
+        /* --- PDF RENDERING (FORCÉ BLANC) --- */
         #preview-overlay { display: none; position: fixed; inset: 0; background: #000; z-index: 2000; flex-direction: column; }
-        #pdf-paper { background: white; color: black; width: 100%; min-height: 100%; }
-        .paid-stamp { border: 4px solid #FF3B30; color: #FF3B30; font-size: 24px; font-weight: 900; padding: 10px 20px; transform: rotate(-15deg); display: inline-block; text-transform: uppercase; border-radius: 10px; opacity: 0.8; position: absolute; top: 150px; right: 50px; }
+        #pdf-paper { background: white !important; color: black !important; width: 100%; min-height: 100%; }
+
+        /* --- DOCK --- */
+        .dock {
+            position: fixed; bottom: 0; width: 100%; padding: 20px 25px calc(env(safe-area-inset-bottom) + 20px);
+            background: var(--surface); backdrop-filter: blur(20px); border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .btn-main { background: var(--gold); color: #000; border: none; padding: 16px 30px; border-radius: 18px; font-weight: 800; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="main-dashboard">
-        <div style="margin-bottom: 30px;">
-            <h1 style="font-size: 34px; font-weight: 900; margin: 0; letter-spacing: -1px;">MSE BUSINESS</h1>
-            <p style="opacity: 0.5; font-size: 12px;">Unified Pro Suite v8.0 • 2026</p>
+    <div class="home-header">
+        <div>
+            <h1 style="margin:0; font-size: 28px; font-weight: 900;">MSE OS</h1>
+            <p style="margin:0; font-size: 12px; color: var(--gold); font-weight: 700;">PRO SUITE v10</p>
         </div>
+        <div class="theme-toggle" onclick="toggleTheme()" id="theme-btn">🌙</div>
+    </div>
 
-        <div style="font-size: 10px; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 15px;">Standard (TVA Variable)</div>
-        <div class="apps-grid">
-            <div class="app-item" onclick="openApp('DEVIS', 'standard')"><div class="icon-box icon-gold">📝</div><span>Devis</span></div>
-            <div class="app-item" onclick="openApp('FACTURE', 'standard')"><div class="icon-box icon-gold">💰</div><span>Facture</span></div>
-            <div class="app-item" onclick="openApp('FACTURE ACQUITTÉE', 'standard')"><div class="icon-box icon-green">✅</div><span>Acquittée</span></div>
-        </div>
+    <div id="home-screen">
+        <div class="section-label">Facturation Premium</div>
+        <div class="app-item" onclick="openApp('DEVIS', 'standard')"><div class="squircle g-gold">📝</div><div class="app-label">Devis<br>20%</div></div>
+        <div class="app-item" onclick="openApp('FACTURE', 'standard')"><div class="squircle g-gold">💰</div><div class="app-label">Facture<br>20%</div></div>
+        <div class="app-item" onclick="openApp('ACQUITTÉE', 'standard')"><div class="squircle g-green">✅</div><div class="app-label">Acquittée</div></div>
 
-        <div style="font-size: 10px; color: var(--blue); letter-spacing: 2px; text-transform: uppercase; margin: 30px 0 15px;">Régime Micro (Net)</div>
-        <div class="apps-grid">
-            <div class="app-item" onclick="openApp('DEVIS', 'micro')"><div class="icon-box icon-blue">📄</div><span>Devis</span></div>
-            <div class="app-item" onclick="openApp('FACTURE', 'micro')"><div class="icon-box icon-blue">🪙</div><span>Facture</span></div>
-            <div class="app-item" onclick="openApp('FACTURE ACQUITTÉE', 'micro')"><div class="icon-box icon-green">✅</div><span>Acquittée</span></div>
-        </div>
+        <div class="section-label">Régime Micro</div>
+        <div class="app-item" onclick="openApp('DEVIS', 'micro')"><div class="squircle g-blue">📄</div><div class="app-label">Devis<br>Net</div></div>
+        <div class="app-item" onclick="openApp('FACTURE', 'micro')"><div class="squircle g-blue">🪙</div><div class="app-label">Facture<br>Net</div></div>
+
+        <div class="section-label">Gestion & Outils</div>
+        <div class="app-item" onclick="alert('Clients')"><div class="squircle g-util">👥</div><div class="app-label">Clients</div></div>
+        <div class="app-item" onclick="alert('Compta')"><div class="squircle g-util">⚖️</div><div class="app-label">Compta</div></div>
+        <div class="app-item" onclick="alert('Urssaf')"><div class="squircle g-red">🏛️</div><div class="app-label">Urssaf</div></div>
     </div>
 
     <div id="app-window" class="window">
         <div class="win-header">
             <div onclick="closeApp()" style="font-size: 24px; cursor: pointer;">✕</div>
-            <div id="win-title" style="font-weight: 800; letter-spacing: 1px;">FACTURE</div>
+            <h2 id="win-title" style="margin:0; font-size: 18px;">EDITEUR</h2>
             <div style="width: 24px;"></div>
         </div>
-
-        <div class="win-content">
-            <div class="glass-card">
-                <h3>📁 Dossier</h3>
-                <input type="text" id="doc-num" placeholder="Numéro Document">
-                <input type="text" id="doc-obj" placeholder="Objet de l'intervention">
+        <div class="content" id="win-content">
             </div>
-
-            <div class="glass-card">
-                <h3>👤 Client</h3>
-                <input type="text" id="c-name" placeholder="Nom / Société">
-                <textarea id="c-addr" placeholder="Adresse complète" rows="2"></textarea>
-                <div style="display:flex; align-items:center; gap:10px; margin: 10px 0;">
-                    <input type="checkbox" id="ref-check" onchange="toggleRef()" style="width:20px; height:20px; margin:0;">
-                    <label style="font-size: 12px; color: var(--gold);">Inclure une référence ?</label>
-                </div>
-                <input type="text" id="c-ref" placeholder="Réf. (ex: N° Dossier Assurance)" style="display:none; border:1px solid var(--gold);">
-            </div>
-
-            <div id="tva-card" class="glass-card">
-                <h3>⚙️ Options TVA</h3>
-                <label style="font-size:10px; opacity:0.6;">Taux de TVA à appliquer :</label>
-                <select id="tva-rate" onchange="updateTotal()">
-                    <option value="20">Normal (20%)</option>
-                    <option value="15">Intermédiaire (15%)</option>
-                    <option value="10">Réduit (10%)</option>
-                    <option value="5.5">Très réduit (5.5%)</option>
-                </select>
-            </div>
-
-            <div class="glass-card">
-                <h3>🛠️ Prestations</h3>
-                <div id="items-list"></div>
-                <button onclick="addLine()" style="background:rgba(255,255,255,0.05); border: 1px dashed #444; color:white; width:100%; padding:15px; border-radius:15px;">+ AJOUTER LIGNE</button>
-            </div>
-        </div>
-
         <div class="dock">
             <div>
-                <div id="dock-label" style="font-size: 10px; opacity: 0.5;">MONTANT TTC</div>
-                <div id="dock-ttc" style="font-size: 22px; font-weight: 900; color: var(--gold);">0.00 €</div>
+                <div id="dock-label" style="font-size: 10px; opacity: 0.6;">NET À PAYER</div>
+                <div id="dock-val" style="font-size: 22px; font-weight: 900; color: var(--gold);">0.00 €</div>
             </div>
-            <button class="btn-pay" onclick="generatePreview()">GÉNÉRER PDF</button>
+            <button class="btn-main" onclick="generatePDF()">Générer</button>
         </div>
     </div>
 
     <div id="preview-overlay">
-        <div style="padding: 60px 20px 20px; display:flex; gap:10px; background:rgba(0,0,0,0.9);">
-            <button onclick="document.getElementById('preview-overlay').style.display='none'" style="background:#222; color:white; border:none; padding:15px; border-radius:15px; flex:1">RETOUR</button>
-            <button id="btn-dl" class="btn-pay" style="flex:2" onclick="downloadPDF()">TÉLÉCHARGER (ULTRA HD)</button>
+        <div style="padding: 60px 20px 20px; display:flex; gap:12px; background:#000;">
+            <button onclick="document.getElementById('preview-overlay').style.display='none'" style="background:#252528; color:white; border:none; padding:15px; border-radius:18px; flex:1">Retour</button>
+            <button class="btn-main" style="flex:2" onclick="downloadPDF()">Télécharger HD</button>
         </div>
-        <div style="flex:1; overflow-y:auto; padding:15px; background:#333;"><div id="pdf-paper"></div></div>
+        <div style="flex:1; overflow-y:auto; padding:10px; background:#333;"><div id="pdf-paper"></div></div>
     </div>
 
     <script>
         let currentMode = "standard";
         let currentType = "FACTURE";
-        const USER = { name: "Sabri BENNACEUR EI", addr: "2 Résidence des Rosiers, 92800 Puteaux", siren: "943032755", iban: "FR76 1695 8000 0159 6810 0824 765" };
 
-        function toggleRef() { document.getElementById('c-ref').style.display = document.getElementById('ref-check').checked ? 'block' : 'none'; }
+        // --- GESTION DU THÈME ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('theme-btn');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.setAttribute('data-theme', 'light');
+                btn.innerText = '☀️';
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                btn.innerText = '🌙';
+            }
+        }
 
+        // --- GESTION DES APPS ---
         function openApp(type, mode) {
             currentType = type;
             currentMode = mode;
             document.getElementById('app-window').style.display = 'flex';
-            document.getElementById('win-title').innerText = type + (mode === 'micro' ? ' (MICRO)' : '');
-            document.getElementById('tva-card').style.display = (mode === 'micro') ? 'none' : 'block';
-            document.getElementById('dock-label').innerText = (mode === 'micro') ? 'MONTANT NET' : 'MONTANT TTC';
-            document.getElementById('items-list').innerHTML = '';
-            addLine();
-            updateTotal();
+            document.getElementById('win-title').innerText = type + (mode === 'micro' ? ' MICRO' : '');
+            renderEditor();
         }
 
         function closeApp() { document.getElementById('app-window').style.display = 'none'; }
 
+        function renderEditor() {
+            const cont = document.getElementById('win-content');
+            const isMicro = (currentMode === 'micro');
+            cont.innerHTML = `
+                <div class="one-card">
+                    <h3>Infos Dossier</h3>
+                    <input type="text" id="doc-num" placeholder="Numéro Document">
+                    <input type="text" id="doc-obj" placeholder="Objet de l'intervention">
+                </div>
+                <div class="one-card">
+                    <h3>Client</h3>
+                    <input type="text" id="c-name" placeholder="Nom du Client">
+                    <textarea id="c-addr" placeholder="Adresse complète" rows="2"></textarea>
+                    <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+                        <input type="checkbox" id="ref-check" style="width:20px; height:20px; margin:0;" onchange="document.getElementById('c-ref').style.display = this.checked ? 'block' : 'none'">
+                        <label style="font-size:12px;">Ajouter Référence ?</label>
+                    </div>
+                    <input type="text" id="c-ref" placeholder="Réf. Assurance / Syndic" style="display:none; margin-top:10px;">
+                </div>
+                <div class="one-card">
+                    <h3>Prestations</h3>
+                    <div id="items-list"></div>
+                    <button onclick="addLine()" style="background:var(--border); border:none; color:var(--text); width:100%; padding:15px; border-radius:14px;">+ Ligne</button>
+                </div>
+            `;
+            addLine();
+        }
+
         function addLine() {
             const id = Date.now();
             const div = document.createElement('div');
-            div.className = 'line-entry'; div.id = 'l-'+id;
-            const priceLabel = (currentMode === 'micro') ? 'Prix' : 'Prix HT';
+            div.style.marginBottom = '20px';
             div.innerHTML = `
-                <input type="text" class="ln-n" placeholder="Titre (Gras)" style="font-weight:800; border-bottom:1px solid #333;">
-                <textarea class="ln-d" placeholder="Description (Italique fin)" rows="1" style="font-style:italic; font-size:13px; opacity:0.6;"></textarea>
+                <input type="text" placeholder="Titre (Gras)" style="font-weight:bold;" class="l-n">
+                <textarea placeholder="Détails (Italique fin)" style="font-style:italic; font-size:13px; opacity:0.7;" class="l-d"></textarea>
                 <div style="display:flex; gap:10px;">
-                    <input type="number" class="ln-q" value="1" style="flex:1" oninput="updateTotal()">
-                    <input type="number" class="ln-p" placeholder="${priceLabel}" style="flex:2" oninput="updateTotal()" inputmode="decimal">
-                    <button onclick="document.getElementById('l-${id}').remove(); updateTotal();" style="color:red; background:none; border:none;">✕</button>
-                </div>`;
+                    <input type="number" value="1" style="flex:1" class="l-q" oninput="updateTotal()">
+                    <input type="number" placeholder="Prix" style="flex:2" class="l-p" oninput="updateTotal()">
+                </div>
+            `;
             document.getElementById('items-list').appendChild(div);
         }
 
         function updateTotal() {
-            let total = 0;
-            document.querySelectorAll('.line-entry').forEach(div => {
-                total += (div.querySelector('.ln-q').value * div.querySelector('.ln-p').value);
+            let ht = 0;
+            document.querySelectorAll('#items-list > div').forEach(div => {
+                ht += (div.querySelector('.l-q').value * div.querySelector('.l-p').value);
             });
-            const tvaPercent = parseFloat(document.getElementById('tva-rate').value);
-            const final = (currentMode === 'standard') ? total * (1 + tvaPercent/100) : total;
-            document.getElementById('dock-ttc').innerText = final.toFixed(2) + ' €';
-            return { raw: total, final: final, tvaRate: tvaPercent };
+            const ttc = (currentMode === 'standard') ? ht * 1.2 : ht;
+            document.getElementById('dock-val').innerText = ttc.toFixed(2) + ' €';
+            return { ht, ttc };
         }
 
-        function generatePreview() {
-            const vals = updateTotal();
-            const type = currentType;
+        function generatePDF() {
+            const data = updateTotal();
             const date = new Date().toLocaleDateString('fr-FR');
-            const ref = document.getElementById('ref-check').checked ? `<div style="font-size:11px; margin-top:5px;"><strong>Référence :</strong> ${document.getElementById('c-ref').value}</div>` : '';
-
             let rows = "";
-            document.querySelectorAll('.line-entry').forEach(div => {
+            document.querySelectorAll('#items-list > div').forEach(div => {
+                const n = div.querySelector('.l-n').value;
+                const d = div.querySelector('.l-d').value;
+                const q = div.querySelector('.l-q').value;
+                const p = div.querySelector('.l-p').value;
                 rows += `
-                <tr>
-                    <td style="padding:15px; border-bottom:1px solid #eee;">
-                        <div style="font-weight:900; font-size:14px;">${div.querySelector('.ln-n').value}</div>
-                        <div style="font-style:italic; font-size:10px; color:#666; font-weight:300;">${div.querySelector('.ln-d').value}</div>
-                    </td>
-                    <td style="text-align:center;">${div.querySelector('.ln-q').value}</td>
-                    <td style="text-align:right;">${parseFloat(div.querySelector('.ln-p').value).toFixed(2)}€</td>
-                    <td style="text-align:right;">${(div.querySelector('.ln-q').value * div.querySelector('.ln-p').value).toFixed(2)}€</td>
-                </tr>`;
+                    <tr>
+                        <td style="padding:15px; border-bottom:1px solid #eee;">
+                            <div style="font-weight:bold; font-size:14px;">${n}</div>
+                            <div style="font-style:italic; font-size:10px; color:#555;">${d}</div>
+                        </td>
+                        <td style="text-align:center">${q}</td>
+                        <td style="text-align:right">${parseFloat(p).toFixed(2)}€</td>
+                        <td style="text-align:right">${(q*p).toFixed(2)}€</td>
+                    </tr>`;
             });
 
-            const acquitStamp = type.includes('ACQUITTÉE') ? `<div class="paid-stamp">ACQUITTÉE</div>` : '';
-            const labelPU = (currentMode === 'micro') ? 'P.U' : 'P.U HT';
-            const labelTotalLigne = (currentMode === 'micro') ? 'TOTAL' : 'TOTAL HT';
-            const labelFinalBase = (currentMode === 'micro') ? 'MONTANT NET :' : 'TOTAL HT :';
+            const acquit = currentType === 'ACQUITTÉE' ? '<div style="border:4px solid red; color:red; padding:10px; position:absolute; top:150px; right:50px; transform:rotate(-15deg); font-weight:900; font-size:24px;">ACQUITTÉE</div>' : '';
 
             document.getElementById('pdf-paper').innerHTML = `
-                <div class="pdf-page" style="padding:40px; position:relative;">
-                    ${acquitStamp}
-                    <div style="display:flex; justify-content:space-between; border-bottom:4px solid #000; padding-bottom:15px;">
-                        <div><strong style="font-size:26px;">MSE</strong><br>${USER.name}<br>${USER.addr}</div>
-                        <div style="text-align:right"><strong>${type} N° ${document.getElementById('doc-num').value}</strong><br>Date : ${date}</div>
+                <div style="padding:40px; position:relative;">
+                    ${acquit}
+                    <div style="display:flex; justify-content:space-between; border-bottom:4px solid ${currentMode==='standard'?'#D4AF37':'#3e82f7'}; padding-bottom:15px;">
+                        <div><strong style="font-size:24px;">MSE</strong><br>Sabri BENNACEUR EI<br>2 Résidence des Rosiers, 92800 Puteaux</div>
+                        <div style="text-align:right"><strong>${currentType} N° ${document.getElementById('doc-num').value}</strong><br>Date: ${date}</div>
                     </div>
                     <div style="margin:30px 0;">
-                        <div style="font-size:12px; font-weight:bold; color:#888;">CLIENT :</div>
-                        <div style="font-size:15px; font-weight:bold;">${document.getElementById('c-name').value}</div>
-                        <div style="font-size:13px;">${document.getElementById('c-addr').value.replace(/\n/g,'<br>')}</div>
-                        ${ref}
+                        <strong>CLIENT:</strong><br>${document.getElementById('c-name').value}<br>${document.getElementById('c-addr').value.replace(/\n/g,'<br>')}
+                        ${document.getElementById('ref-check').checked ? '<br><strong>Réf:</strong> ' + document.getElementById('c-ref').value : ''}
                     </div>
                     <table style="width:100%; border-collapse:collapse;">
-                        <thead><tr style="background:#f0f0f0;"><th style="text-align:left; padding:10px;">PRESTATIONS</th><th>QTÉ</th><th style="text-align:right">${labelPU}</th><th style="text-align:right">${labelTotalLigne}</th></tr></thead>
-                        <tbody>${rows}</tbody>
+                        <tr style="background:#f9f9f9;"><th>Désignation</th><th>Qté</th><th>P.U</th><th>Total</th></tr>
+                        ${rows}
                     </table>
-                    <div style="float:right; width:280px; margin-top:30px;">
+                    <div style="float:right; width:220px; margin-top:30px;">
                         <table style="width:100%">
-                            <tr><td>${labelFinalBase}</td><td style="text-align:right">${vals.raw.toFixed(2)}€</td></tr>
-                            ${currentMode==='standard' ? `<tr><td>TVA (${vals.tvaRate}%) :</td><td style="text-align:right">${(vals.raw * vals.tvaRate/100).toFixed(2)}€</td></tr>` : ''}
-                            <tr style="font-size:18px; font-weight:bold; border-top:2px solid #000;"><td>${currentMode==='micro'?'NET À PAYER :':'TOTAL TTC :'}</td><td style="text-align:right">${vals.final.toFixed(2)}€</td></tr>
+                            <tr><td>TOTAL ${currentMode==='standard'?'HT':''}</td><td style="text-align:right">${data.ht.toFixed(2)}€</td></tr>
+                            ${currentMode==='standard' ? `<tr><td>TVA (20%)</td><td style="text-align:right">${(data.ht*0.2).toFixed(2)}€</td></tr>` : ''}
+                            <tr style="font-size:18px; font-weight:bold; border-top:2px solid #000;"><td>${currentMode==='standard'?'TOTAL TTC':'NET À PAYER'}</td><td style="text-align:right">${data.ttc.toFixed(2)}€</td></tr>
                         </table>
-                    </div>
-                    <div style="margin-top:180px; font-size:9px; color:#888;">
-                        RIB : ${USER.iban}<br>
-                        ${currentMode==='micro' ? 'TVA non applicable, art. 293 B du CGI' : ''}
                     </div>
                 </div>`;
             document.getElementById('preview-overlay').style.display = 'flex';
         }
 
         function downloadPDF() {
-            html2pdf().set({ 
-                margin: 0, 
-                filename: `MSE_${currentType}_${Date.now()}.pdf`, 
-                html2canvas: { scale: 3, useCORS: true }, 
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-            }).from(document.getElementById('pdf-paper')).save();
+            const el = document.getElementById('pdf-paper');
+            html2pdf().set({ margin:0, filename:'MSE_2026.pdf', html2canvas:{scale:3}, jsPDF:{format:'a4'} }).from(el).save();
         }
     </script>
 </body>
