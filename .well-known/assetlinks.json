@@ -3,6 +3,6 @@
   "target": {
     "namespace": "android_app",
     "package_name": "com.mseone.elite", 
-    "sha256_cert_fingerprints": ["TON_EMPREINTE_SHA256_ICI"]
+    "sha256_cert_fingerprints": ["13:1E:CB:46:4D:9E:E7:DF:F2:14:1A:CF:80:55:08:AF:89:7E:FE:3E:37:E7:DF:6E:0F:C4:18:31:CC:4E:D6:7A"]
   }
 }]
