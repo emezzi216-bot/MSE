@@ -16,22 +16,21 @@
     
     <style>
         :root {
-            --bg: #000; --surface: #0A0A0A; --card: #141416; --border: rgba(255, 255, 255, 0.08);
+            --bg: #000; --card: #141416; --border: rgba(255, 255, 255, 0.08);
             --mse-red: #D32F2F; --text: #FFFFFF; --text-dim: #929297; --radius: 24px;
         }
         [data-theme="light"] {
-            --bg: #F2F2F7; --surface: #FFFFFF; --card: #FFFFFF; --border: rgba(0, 0, 0, 0.08);
+            --bg: #F2F2F7; --card: #FFFFFF; --border: rgba(0, 0, 0, 0.1);
             --text: #000000; --text-dim: #666666;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; transition: background 0.3s; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; transition: 0.3s; }
         body { margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
 
-        /* --- UI ELEMENTS --- */
         header { padding: calc(env(safe-area-inset-top) + 20px) 24px 10px; display: flex; justify-content: space-between; align-items: center; }
         .brand { font-size: 28px; font-weight: 900; letter-spacing: -1.5px; }
         .brand span { color: var(--mse-red); }
-        .theme-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
+        .theme-toggle { width: 44px; height: 44px; border-radius: 12px; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
 
         #hub { height: 100%; overflow-y: auto; padding: 0 16px 180px; }
         .apps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
@@ -42,7 +41,6 @@
         .icon-box { width: 95px; height: 95px; border-radius: 22px; overflow: hidden; background: var(--card); border: 1px solid var(--border); }
         .icon-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* --- NAVIGATION --- */
         .window { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: none; flex-direction: column; }
         .win-header { padding: calc(env(safe-area-inset-top) + 15px) 20px; display: flex; align-items: center; gap: 20px; border-bottom: 1px solid var(--border); }
         .back-btn { font-size: 32px; background: none; border: none; color: var(--text); cursor: pointer; }
@@ -52,18 +50,17 @@
         input, textarea, select { width: 100%; background: rgba(128,128,128,0.05); border: 1px solid var(--border); border-radius: 16px; padding: 15px; color: var(--text); font-size: 15px; margin-bottom: 10px; outline: none; }
         .readonly { background: rgba(128,128,128,0.02) !important; color: var(--text-dim) !important; border-style: dashed !important; }
 
-        .dock { position: fixed; bottom: 30px; left: 20px; right: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 40px; padding: 18px 28px; display: flex; justify-content: space-between; align-items: center; z-index: 1100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .dock { position: fixed; bottom: 30px; left: 20px; right: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 40px; padding: 18px 28px; display: flex; justify-content: space-between; align-items: center; z-index: 1100; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .btn-mse { background: var(--mse-red); color: #fff; border: none; padding: 18px 35px; border-radius: 22px; font-weight: 900; cursor: pointer; }
 
         #pdf-paper { width: 210mm; background: white !important; color: black !important; display: none; font-family: 'Roboto', sans-serif; }
-        .list-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
 <header>
     <div class="brand">MSE <span>ONE</span></div>
-    <div class="theme-btn" onclick="toggleTheme()">🌓</div>
+    <div class="theme-toggle" onclick="toggleTheme()">🌓</div>
 </header>
 
 <div id="hub">
@@ -76,9 +73,9 @@
         <div class="app" onclick="openApp('FACTURE', 'micro')"><div class="icon-box"><img src="facture.png"></div><span>Facture NET</span></div>
         <div class="app" onclick="openApp('DEVIS', 'micro')"><div class="icon-box"><img src="devis.png"></div><span>Devis NET</span></div>
 
-        <div class="section-label">Base de Données</div>
+        <div class="section-label">Base Clients & Archives</div>
         <div class="app" onclick="openApp('CLIENTS')"><div class="icon-box"><img src="clients.png"></div><span>Répertoire</span></div>
-        <div class="app" onclick="openApp('ARCHIVES')"><div class="icon-box"><img src="archives.png"></div><span>Archives</span></div>
+        <div class="app" onclick="openApp('ARCHIVES')"><div class="icon-box"><img src="archives.png"></div><span>Historique</span></div>
     </div>
 </div>
 
@@ -94,22 +91,31 @@
 <div id="pdf-paper"></div>
 
 <script>
-/* --- DATA & CONFIG --- */
+/* --- CONFIG & DB --- */
 const USER = { 
-    name: "Sabri BENNACEUR EI", siren: "943032755", addr: "2 Résidence des Rosiers, 92800 Puteaux, FR",
-    email: "serruremse@gmail.com", dec: "RC décennale TETRIS SV75018041T37384",
+    name: "Sabri BENNACEUR EI", siren: "943032755", 
+    addr: "2 Résidence des Rosiers, 92800 Puteaux, FR", email: "serruremse@gmail.com",
+    dec: "RC décennale TETRIS police n° SV75018041T37384",
     iban: "FR76 1695 8000 0159 6810 0824 765", bic: "ONTO FR P1 XXX" 
 };
-let db = { clients: JSON.parse(localStorage.getItem('mse_clients') || '[]'), history: JSON.parse(localStorage.getItem('mse_history') || '[]') };
+let db = { 
+    clients: JSON.parse(localStorage.getItem('mse_clients') || '[]'), 
+    history: JSON.parse(localStorage.getItem('mse_history') || '[]') 
+};
 let curType, curMode;
 
-/* --- NAVIGATION & THEME --- */
-window.addEventListener('popstate', () => { document.getElementById('win').style.display = 'none'; });
-function goBack() { window.history.back(); }
+/* --- THEME & NAV --- */
 function toggleTheme() {
     const root = document.documentElement;
-    root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    const current = root.getAttribute('data-theme');
+    const target = current === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', target);
+    localStorage.setItem('mse_theme', target);
 }
+if(localStorage.getItem('mse_theme')) document.documentElement.setAttribute('data-theme', localStorage.getItem('mse_theme'));
+
+window.addEventListener('popstate', () => { document.getElementById('win').style.display = 'none'; });
+function goBack() { window.history.back(); }
 
 function openApp(type, mode='premium'){
     curType = type; curMode = mode;
@@ -125,18 +131,18 @@ function openApp(type, mode='premium'){
     else if(type === 'ARCHIVES') renderHistory(cont);
 }
 
-/* --- CLIENTS DB SEGMENTÉE --- */
+/* --- CLIENTS --- */
 function renderClients(c) {
     const tvaCli = db.clients.filter(cli => cli.type === 'premium');
     const netCli = db.clients.filter(cli => cli.type === 'micro');
     c.innerHTML = `
-        <div class="pro-card"><h4>Base Clients TVA</h4>${tvaCli.map(cli => `<div class="list-item"><b>${cli.name}</b><span onclick="delCli('${cli.name}')" style="color:red">✕</span></div>`).join('')}</div>
-        <div class="pro-card"><h4>Base Clients NET (Micro)</h4>${netCli.map(cli => `<div class="list-item"><b>${cli.name}</b><span onclick="delCli('${cli.name}')" style="color:red">✕</span></div>`).join('')}</div>`;
+        <div class="pro-card"><h4>Base Elite (TVA)</h4>${tvaCli.map(cli => `<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)"><b>${cli.name}</b><span onclick="delCli('${cli.name}')" style="color:red">✕</span></div>`).join('')}</div>
+        <div class="pro-card"><h4>Base Micro (NET)</h4>${netCli.map(cli => `<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)"><b>${cli.name}</b><span onclick="delCli('${cli.name}')" style="color:red">✕</span></div>`).join('')}</div>`;
 }
 function delCli(name){ db.clients = db.clients.filter(c => c.name !== name); sync(); renderClients(document.getElementById('win-content')); }
-function renderHistory(c){ c.innerHTML=`<div class="pro-card"><h4>Historique Global</h4>${db.history.reverse().map(h=>`<div class="list-item"><b>${h.num}</b> - ${h.client}<br><small>${h.date} | ${h.val.toFixed(2)}€</small></div>`).join('')}</div>`;}
+function renderHistory(c){ c.innerHTML=`<div class="pro-card"><h4>Historique Global</h4>${db.history.reverse().map(h=>`<div style="padding:12px 0;border-bottom:1px solid var(--border);"><b>${h.num}</b> - ${h.client} (${h.val.toFixed(2)}€)</div>`).join('')}</div>`;}
 
-/* --- EDITEUR (Auto-Update DB) --- */
+/* --- EDITEUR --- */
 function renderEditor(c) {
     const today = new Date().toISOString().split('T')[0];
     const filteredClients = db.clients.filter(cli => cli.type === curMode);
@@ -151,7 +157,7 @@ function renderEditor(c) {
         <div class="pro-card"><h4>Dossier Client</h4>
             <select onchange="fillCli(this.value)"><option value="">Reconnaître un client...</option>${filteredClients.map(cli=>`<option value="${cli.name}">${cli.name}</option>`).join('')}</select>
             <input id="cn" placeholder="NOM CLIENT"><textarea id="ca" placeholder="ADRESSE" rows="2"></textarea>
-            <input id="ref" placeholder="Réf. à rappeler"><input id="dn" placeholder="N° DOCUMENT"><input id="do" placeholder="OBJET">
+            <input id="ref" placeholder="Réf. dossier"><input id="dn" placeholder="N° DOCUMENT"><input id="do" placeholder="OBJET">
         </div>
         ${curMode==='premium'?`<div class="pro-card"><h4>TVA</h4><select id="tva" onchange="calc()"><option value="20">20%</option><option value="10">10%</option><option value="5.5">5.5%</option></select></div>`:''}
         <div class="pro-card"><h4>Prestations</h4><div id="lines"></div><button onclick="addLine()" style="width:100%;background:none;border:1px dashed var(--mse-red);padding:15px;border-radius:15px;">+ AJOUTER LIGNE</button></div>`;
@@ -159,9 +165,9 @@ function renderEditor(c) {
 }
 function fillCli(name){ const cli = db.clients.find(c => c.name === name); if(cli){ document.getElementById('cn').value=cli.name; document.getElementById('ca').value=cli.addr; }}
 function addLine(){
-    const d=document.createElement('div'); d.className="line-item"; d.style.flexDirection="column";
-    d.innerHTML=`<input class="lt" placeholder="Prestation" style="font-weight:900;"><textarea class="ld" placeholder="Détails" rows="1" style="font-style:italic;border:none;"></textarea>
-    <div style="display:flex;gap:10px;"><input type="number" class="lq" value="1" oninput="calc()"><input type="number" class="lp" placeholder="P.U" oninput="calc()"></div>`;
+    const d=document.createElement('div'); d.className="line-item";
+    d.innerHTML=`<input class="lt" placeholder="Désignation" style="font-weight:900;"><textarea class="ld" placeholder="Détails" rows="1" style="font-style:italic;border:none;background:none;"></textarea>
+    <div style="display:flex;gap:10px;"><input type="number" class="lq" value="1" oninput="calc()"><input type="number" class="lp" placeholder="Prix" oninput="calc()"></div>`;
     document.getElementById('lines').appendChild(d);
 }
 function calc() {
@@ -171,7 +177,7 @@ function calc() {
     document.getElementById('dock-total').innerText = final.toFixed(2) + " €"; return {tHT, final, rate};
 }
 
-/* --- GENERATION PDF UHD (Strict Template) --- */
+/* --- PDF ENGINE (No HT in Micro) --- */
 function generatePreview() {
     const data=calc(); const docNum=document.getElementById('dn').value || "SANS-NUM";
     const clientName = document.getElementById('cn').value;
@@ -184,7 +190,7 @@ function generatePreview() {
     let rows = ""; document.querySelectorAll('.lt').forEach((t,i)=>{
         const q=document.querySelectorAll('.lq')[i].value; const p=document.querySelectorAll('.lp')[i].value;
         const mtTVA = (q*p*(data.rate/100)).toFixed(2);
-        rows += `<tr><td style="padding:10px; border-bottom:1px solid #eee;"><strong>${t.value}</strong><br><span style="font-size:11px;color:#555;">${document.querySelectorAll('.ld')[i].value}</span></td>
+        rows += `<tr><td style="padding:15px; border-bottom:1px solid #eee;"><strong>${t.value}</strong><br><span style="font-size:11px;color:#555;">${document.querySelectorAll('.ld')[i].value}</span></td>
         <td style="text-align:center">${q}</td><td style="text-align:right">${parseFloat(p).toFixed(2)} €</td><td style="text-align:right">${(q*p).toFixed(2)} €</td>
         ${isPremium?`<td style="text-align:center">${data.rate}%</td><td style="text-align:right">${mtTVA} €</td>`:''}</tr>`;
     });
@@ -198,7 +204,7 @@ function generatePreview() {
         </div>
         <div style="padding:40px 0;">
             <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px solid #D32F2F; padding-bottom:15px; margin-bottom:30px;">
-                <div><h1 style="margin:0; font-size:32px; color:#333;">${curType} N° ${docNum}</h1><div style="color:#D32F2F; font-weight:bold;">Objet : ${document.getElementById('do').value}</div>${document.getElementById('ref').value ? `<div style="font-size:12px;">Réf : ${document.getElementById('ref').value}</div>` : ''}</div>
+                <div><h1 style="margin:0; font-size:32px; color:#333;">${curType} N° ${docNum}</h1><div style="color:#D32F2F; font-weight:bold;">Objet : ${document.getElementById('do').value}</div></div>
                 <div style="text-align:right; font-size:13px;"><strong>Date :</strong> ${new Date(document.getElementById('d-e').value).toLocaleDateString('fr-FR')}<br><strong>Échéance :</strong> ${new Date(document.getElementById('d-h').value).toLocaleDateString('fr-FR')}</div>
             </div>
             <table style="width:100%; border-collapse:collapse; font-size:13px;"><thead><tr style="background:#333; color:#fff; text-transform:uppercase;"><th style="padding:10px; text-align:left;">Désignation</th><th style="text-align:center;">Qté</th><th style="text-align:right;">${isPremium?'P.U HT':'P.U'}</th><th style="text-align:right;">${isPremium?'Total HT':'Total'}</th>${isPremium?'<th>TVA</th><th>Mt TVA</th>':''}</tr></thead><tbody>${rows}</tbody></table>
