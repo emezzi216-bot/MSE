@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>MSE ONE Elite</title>
+    <title>MSE TOOL Elite</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
@@ -55,18 +55,24 @@
         .btn-mse { background: var(--mse-red); color: #fff; border: none; padding: 18px 35px; border-radius: 22px; font-weight: 900; cursor: pointer; }
 
         #pdf-paper { width: 210mm; background: white !important; color: black !important; display: none; font-family: 'Roboto', sans-serif; }
+        
+        /* MODALE ARCHIVE DÉTAILLÉE */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(10px); }
+        .modal-content { background: var(--card); padding: 25px; border-radius: 28px; width: 100%; max-width: 450px; border: 1px solid var(--border); max-height: 80vh; overflow-y: auto; }
+        .archive-line { font-size: 11px; padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+        .list-item-clickable { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="brand">MSE <span>ONE</span></div>
+    <div class="brand">MSE <span>TOOL</span></div>
     <div class="theme-toggle" onclick="toggleTheme()">🌓</div>
 </header>
 
 <div id="hub">
     <div class="apps-grid">
-        <div class="section-label">Facturation Premium</div>
+        <div class="section-label">Facturation Elite (TVA)</div>
         <div class="app" onclick="openApp('FACTURE', 'premium')"><div class="icon-box"><img src="facture.png"></div><span>Facture TVA</span></div>
         <div class="app" onclick="openApp('DEVIS', 'premium')"><div class="icon-box"><img src="devis.png"></div><span>Devis TVA</span></div>
         <div class="app" onclick="openApp('ACQUITTEE')"><div class="icon-box"><img src="acquittee.png"></div><span>Tampon PDF</span></div>
@@ -86,18 +92,27 @@
     <div class="win-body" id="win-content"></div>
     <div class="dock" id="win-dock" style="display:none;">
         <div id="dock-total" style="font-size:22px; font-weight:900;">0.00 €</div>
-        <button class="btn-mse" onclick="generatePreview()">GÉNÉRER PDF</button>
+        <button class="btn-mse" id="main-btn" onclick="generatePreview()">GÉNÉRER PDF</button>
+    </div>
+</div>
+
+<div id="archive-modal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content">
+        <h2 id="modal-title" style="margin-top:0; color:var(--mse-red); font-size:20px;"></h2>
+        <div id="modal-details" style="margin-bottom:20px;"></div>
+        <div id="modal-lines" style="margin-bottom:20px;"></div>
+        <button class="btn-mse" style="width:100%; margin-bottom:10px;" id="modal-download">RE-TÉLÉCHARGER LE PDF</button>
+        <button class="btn-mse" style="width:100%; background:none; border:1px solid var(--border);" onclick="closeModal(event)">FERMER</button>
     </div>
 </div>
 
 <div id="pdf-paper"></div>
 
 <script>
-/* --- DATA & CONFIG --- */
+/* --- CONFIG & DB --- */
 const USER = { 
-    name: "Sabri BENNACEUR EI", siren: "943032755", 
-    addr: "2 Résidence des Rosiers, 92800 Puteaux, FR", email: "serruremse@gmail.com",
-    dec: "RC décennale TETRIS police n° SV75018041T37384",
+    name: "Sabri BENNACEUR EI", siren: "943032755", addr: "2 Résidence des Rosiers, 92800 Puteaux, FR",
+    email: "serruremse@gmail.com", dec: "RC décennale TETRIS police n° SV75018041T37384",
     iban: "FR76 1695 8000 0159 6810 0824 765", bic: "ONTO FR P1 XXX" 
 };
 let db = { clients: JSON.parse(localStorage.getItem('mse_clients') || '[]'), history: JSON.parse(localStorage.getItem('mse_history') || '[]') };
@@ -130,59 +145,79 @@ function openApp(type, mode='premium'){
     else if(type === 'ACQUITTEE') renderAcquit(cont);
 }
 
-/* --- TAMPON PDF --- */
-function renderAcquit(c) {
-    c.innerHTML = `<div class="pro-card"><h4>Importer un PDF pour tamponner</h4><input type="file" id="pdf-up" accept="application/pdf" style="padding:30px; border:2px dashed var(--border);"><button class="btn-mse" style="width:100%; margin-top:15px;" onclick="processPdf()">APPOSER ACQUITTÉE</button></div>`;
-}
+/* --- TAMPON ACQUITTÉE NET --- */
 async function processPdf() {
     const f=document.getElementById('pdf-up').files[0]; if(!f) return;
     const r=new FileReader(); r.onload=async function(){
         const doc=await PDFLib.PDFDocument.load(new Uint8Array(this.result));
         const page=doc.getPages()[0]; const {width, height}=page.getSize();
-        page.drawText('ACQUITTÉE', {x:width-200, y:height-100, size:32, color:PDFLib.rgb(0.8,0.2,0.2), rotate:PDFLib.degrees(-15)});
+        page.drawText('ACQUITTÉE', {
+            x: width - 180, y: height - 60, size: 24,
+            color: PDFLib.rgb(0.8, 0.1, 0.1), 
+            font: await doc.embedFont(PDFLib.StandardFonts.HelveticaBold)
+        });
         const out=await doc.save(); const l=document.createElement("a"); l.href=URL.createObjectURL(new Blob([out],{type:"application/pdf"})); l.download=`ACQUITTEE_${Date.now()}.pdf`; l.click();
     }; r.readAsArrayBuffer(f);
 }
 
-/* --- GESTION CLIENTS --- */
-function renderClients(c) {
-    const tvaCli = db.clients.filter(cli => cli.type === 'premium');
-    const netCli = db.clients.filter(cli => cli.type === 'micro');
-    c.innerHTML = `
-        <div class="pro-card"><h4>Base Elite (TVA)</h4>${tvaCli.map(cli => `<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)"><b>${cli.name}</b><span onclick="delCli('${cli.name}')" style="color:red">✕</span></div>`).join('')}</div>
-        <div class="pro-card"><h4>Base Micro (TTC)</h4>${netCli.map(cli => `<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)"><b>${cli.name}</b><span onclick="delCli('${cli.name}')" style="color:red">✕</span></div>`).join('')}</div>`;
+/* --- GESTION ARCHIVES DÉTAILLÉES --- */
+function renderHistory(c) {
+    const rev = [...db.history].reverse();
+    c.innerHTML = `<div class="pro-card"><h4>Archives Historiques</h4>
+    ${rev.map((h, i) => `
+        <div class="list-item-clickable" onclick="openArchiveDetail(${db.history.length - 1 - i})">
+            <div><b>${h.num}</b><br><small>${h.client}</small></div>
+            <div style="text-align:right;"><b>${h.final.toFixed(2)}€</b><br><small>${h.date}</small></div>
+        </div>`).join('')}</div>`;
 }
-function delCli(name){ db.clients = db.clients.filter(c => c.name !== name); sync(); renderClients(document.getElementById('win-content')); }
-function renderHistory(c){ c.innerHTML=`<div class="pro-card"><h4>Archives</h4>${db.history.reverse().map(h=>`<div style="padding:10px 0;border-bottom:1px solid var(--border)"><b>${h.num}</b> - ${h.client} (${h.val.toFixed(2)}€)</div>`).join('')}</div>`;}
+
+function openArchiveDetail(idx) {
+    const h = db.history[idx];
+    document.getElementById('modal-title').innerText = `${h.type} N° ${h.num}`;
+    document.getElementById('modal-details').innerHTML = `<p style="font-size:13px; color:var(--text-dim);">${h.client}<br>${h.date}<br>Objet : ${h.obj}</p>`;
+    document.getElementById('modal-lines').innerHTML = h.lines.map(l => `<div class="archive-line"><span>${l.lt} (x${l.lq})</span><b>${(l.lq*l.lp).toFixed(2)}€</b></div>`).join('');
+    document.getElementById('modal-download').onclick = () => rebuildPDF(h);
+    document.getElementById('archive-modal').style.display = 'flex';
+}
+
+function closeModal(e) { if (e.target.id === 'archive-modal' || e.target.tagName === 'BUTTON') document.getElementById('archive-modal').style.display = 'none'; }
+
+function rebuildPDF(h) {
+    curType = h.type; curMode = h.mode;
+    renderPDFContent(h.num, h.client, h.addr, h.obj, h.ref, h.date, h.dueDate, h.lines, h.rate, h.val, h.final);
+    savePDF(h.num);
+}
 
 /* --- EDITEUR --- */
 function renderEditor(c) {
     const today = new Date().toISOString().split('T')[0];
     const filteredClients = db.clients.filter(cli => cli.type === curMode);
     c.innerHTML = `
-        <div class="pro-card"><h4>Dates & Admin</h4>
+        <div class="pro-card"><h4>Administration</h4>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                 <div><label style="font-size:10px;">ÉMISSION</label><input type="date" id="d-e" value="${today}"></div>
                 <div><label style="font-size:10px;">ÉCHÉANCE</label><input type="date" id="d-h" value="${today}"></div>
             </div>
             <input class="readonly" value="SIRET : ${USER.siren}" readonly><input class="readonly" value="${USER.dec}" readonly>
         </div>
-        <div class="pro-card"><h4>Client & Objet</h4>
-            <select onchange="fillCli(this.value)"><option value="">Reconnaître un client...</option>${filteredClients.map(cli=>`<option value="${cli.name}">${cli.name}</option>`).join('')}</select>
+        <div class="pro-card"><h4>Dossier Client</h4>
+            <select onchange="fillCli(this.value)"><option value="">Rechercher client...</option>${filteredClients.map(cli=>`<option value="${cli.name}">${cli.name}</option>`).join('')}</select>
             <input id="cn" placeholder="NOM CLIENT"><textarea id="ca" placeholder="ADRESSE" rows="2"></textarea>
-            <input id="ref" placeholder="Réf. dossier"><input id="dn" placeholder="N° DOCUMENT"><input id="do" placeholder="OBJET INTERVENTION">
+            <input id="ref" placeholder="Référence dossier"><input id="dn" placeholder="N° DOCUMENT"><input id="do" placeholder="OBJET">
         </div>
-        ${curMode==='premium'?`<div class="pro-card"><h4>Réglage TVA</h4><select id="tva" onchange="calc()"><option value="20">20%</option><option value="10">10%</option><option value="5.5">5.5%</option></select></div>`:''}
+        ${curMode==='premium'?`<div class="pro-card"><h4>TVA</h4><select id="tva" onchange="calc()"><option value="20">20%</option><option value="10">10%</option><option value="5.5">5.5%</option></select></div>`:''}
         <div class="pro-card"><h4>Prestations</h4><div id="lines"></div><button onclick="addLine()" style="width:100%;background:none;border:1px dashed var(--mse-red);padding:15px;border-radius:15px;">+ AJOUTER LIGNE</button></div>`;
     addLine();
 }
+
 function fillCli(name){ const cli = db.clients.find(c => c.name === name); if(cli){ document.getElementById('cn').value=cli.name; document.getElementById('ca').value=cli.addr; }}
 function addLine(){
     const d=document.createElement('div'); d.className="line-item";
-    d.innerHTML=`<input class="lt" placeholder="Désignation" style="font-weight:900;"><textarea class="ld" placeholder="Détails techniques" rows="1" style="font-style:italic;border:none;background:none;"></textarea>
+    d.innerHTML=`<input class="lt" placeholder="Désignation" style="font-weight:900;"><textarea class="ld" placeholder="Détails" rows="1" style="font-style:italic;border:none;background:none;"></textarea>
     <div style="display:flex;gap:10px;"><input type="number" class="lq" value="1" oninput="calc()"><input type="number" class="lp" placeholder="Prix" oninput="calc()"></div>`;
     document.getElementById('lines').appendChild(d);
 }
+
 function calc() {
     let tHT=0; document.querySelectorAll('.lq').forEach((q,i)=>{ tHT+=(q.value*document.querySelectorAll('.lp')[i].value); });
     const rate = curMode === 'premium' ? parseFloat(document.getElementById('tva').value) : 0;
@@ -190,38 +225,55 @@ function calc() {
     document.getElementById('dock-total').innerText = final.toFixed(2) + " €"; return {tHT, final, rate};
 }
 
-/* --- PDF ENGINE (TTC Strict Template) --- */
+/* --- ENGINE PDF UHD (Scale 3) --- */
 function generatePreview() {
     const data=calc(); const docNum=document.getElementById('dn').value || "SANS-NUM";
     const clientName = document.getElementById('cn').value;
-    const isPremium = (curMode === 'premium');
-    
-    if(!db.clients.some(c => c.name === clientName)){ db.clients.push({name: clientName, addr: document.getElementById('ca').value, type: curMode}); }
-    db.history.push({num:docNum, client:clientName, val:data.final, date: new Date().toLocaleDateString('fr-FR')}); sync();
+    const clientAddr = document.getElementById('ca').value;
+    const dateE = new Date(document.getElementById('d-e').value).toLocaleDateString('fr-FR');
+    const dateH = new Date(document.getElementById('d-h').value).toLocaleDateString('fr-FR');
+    const obj = document.getElementById('do').value;
+    const ref = document.getElementById('ref').value;
 
-    let rows = ""; document.querySelectorAll('.lt').forEach((t,i)=>{
-        const q=document.querySelectorAll('.lq')[i].value; const p=document.querySelectorAll('.lp')[i].value;
-        rows += `<tr><td style="padding:12px; border-bottom:1px solid #eee;"><strong>${t.value}</strong><br><span style="font-size:11px;color:#555;">${document.querySelectorAll('.ld')[i].value}</span></td>
-        <td style="text-align:center">${q}</td><td style="text-align:right">${parseFloat(p).toFixed(2)} €</td><td style="text-align:right">${(q*p).toFixed(2)} €</td>
-        ${isPremium?`<td style="text-align:center">${data.rate}%</td><td style="text-align:right">${(q*p*(data.rate/100)).toFixed(2)} €</td>`:''}</tr>`;
+    const lineData = Array.from(document.querySelectorAll('.line-item')).map(div => ({
+        lt: div.querySelector('.lt').value, ld: div.querySelector('.ld').value,
+        lq: div.querySelector('.lq').value, lp: div.querySelector('.lp').value
+    }));
+
+    db.history.push({
+        num: docNum, client: clientName, addr: clientAddr, obj: obj, ref: ref,
+        date: dateE, dueDate: dateH, val: data.tHT, final: data.final, rate: data.rate,
+        mode: curMode, type: curType, lines: lineData
     });
+    if(!db.clients.some(c => c.name === clientName)){ db.clients.push({name: clientName, addr: clientAddr, type: curMode}); }
+    sync();
+
+    renderPDFContent(docNum, clientName, clientAddr, obj, ref, dateE, dateH, lineData, data.rate, data.tHT, data.final);
+    savePDF(docNum);
+}
+
+function renderPDFContent(num, client, addr, obj, ref, dE, dH, lines, rate, tHT, final) {
+    const isPremium = (curMode === 'premium');
+    let rows = lines.map(l => `<tr><td style="padding:12px; border-bottom:1px solid #eee;"><strong>${l.lt}</strong><br><span style="font-size:11px;color:#555;">${l.ld}</span></td>
+    <td style="text-align:center">${l.lq}</td><td style="text-align:right">${parseFloat(l.lp).toFixed(2)} €</td><td style="text-align:right">${(l.lq*l.lp).toFixed(2)} €</td>
+    ${isPremium?`<td style="text-align:center">${rate}%</td><td style="text-align:right">${(l.lq*l.lp*(rate/100)).toFixed(2)} €</td>`:''}</tr>`).join('');
 
     document.getElementById('pdf-paper').innerHTML = `
     <div style="padding:40px; background:white; color:#333; width:100%; box-sizing:border-box;">
         <div style="display:flex; justify-content:space-between; border-bottom:2px solid #eee; padding-bottom:40px;">
             <div style="width:55%;"><img src="logo.png" style="max-width:280px; max-height:150px;">
             <div style="font-size:13px; color:#555; margin-top:20px;"><strong>${USER.name}</strong><br>${USER.addr}<br>Email : ${USER.email}<br>SIRET : ${USER.siren}<br>${USER.dec}</div></div>
-            <div style="background:#f8f8f8; color:#000; padding:20px; width:35%; border-radius:4px; border-left:4px solid #333;"><strong style="color:#D32F2F; font-size:10px; text-transform:uppercase;">Facturer à :</strong><br><br><strong>${clientName}</strong><br>${document.getElementById('ca').value.replace(/\n/g,'<br>')}</div>
+            <div style="background:#f8f8f8; color:#000; padding:20px; width:35%; border-radius:4px; border-left:4px solid #333;"><strong style="color:#D32F2F; font-size:10px; text-transform:uppercase;">Facturer à :</strong><br><br><strong>${client}</strong><br>${addr.replace(/\n/g,'<br>')}</div>
         </div>
         <div style="padding:40px 0;">
             <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px solid #D32F2F; padding-bottom:15px; margin-bottom:30px;">
-                <div><h1 style="margin:0; font-size:32px; color:#333;">${curType} N° ${docNum}</h1><div style="color:#D32F2F; font-weight:bold;">Objet : ${document.getElementById('do').value}</div></div>
-                <div style="text-align:right; font-size:13px;"><strong>Date :</strong> ${new Date(document.getElementById('d-e').value).toLocaleDateString('fr-FR')}<br><strong>Échéance :</strong> ${new Date(document.getElementById('d-h').value).toLocaleDateString('fr-FR')}</div>
+                <div><h1 style="margin:0; font-size:32px;">${curType} N° ${num}</h1><div style="color:#D32F2F; font-weight:bold;">Objet : ${obj}</div>${ref?`<div style="font-size:12px;">Réf : ${ref}</div>`:''}</div>
+                <div style="text-align:right; font-size:13px;"><strong>Date :</strong> ${dE}<br><strong>Échéance :</strong> ${dH}</div>
             </div>
             <table style="width:100%; border-collapse:collapse; font-size:13px;"><thead><tr style="background:#333; color:#fff; text-transform:uppercase;"><th style="padding:10px; text-align:left;">Désignation</th><th style="text-align:center;">Qté</th><th style="text-align:right;">${isPremium?'P.U HT':'P.U TTC'}</th><th style="text-align:right;">Total</th>${isPremium?'<th>TVA</th><th>Mt TVA</th>':''}</tr></thead><tbody>${rows}</tbody></table>
             <div style="display:flex; justify-content:flex-end; margin-top:30px;"><table style="width:300px; text-align:right;">
-                ${isPremium ? `<tr><td>Total HT</td><td>${data.tHT.toFixed(2)} €</td></tr><tr><td>Total TVA</td><td>${(data.final-data.tHT).toFixed(2)} €</td></tr>` : ''}
-                <tr style="font-size:18px; font-weight:bold; color:#D32F2F; border-top:2px solid #000; padding-top:10px;"><td>${isPremium?'TOTAL TTC':'TOTAL TTC'}</td><td>${data.final.toFixed(2)} €</td></tr>
+                ${isPremium ? `<tr><td>Total HT</td><td>${tHT.toFixed(2)} €</td></tr><tr><td>Total TVA</td><td>${(final-tHT).toFixed(2)} €</td></tr>` : ''}
+                <tr style="font-size:18px; font-weight:bold; color:#D32F2F; border-top:2px solid #000; padding-top:10px;"><td>TOTAL TTC</td><td>${final.toFixed(2)} €</td></tr>
             </table></div>
             <div style="margin-top:50px; border-top:1px solid #ddd; padding-top:20px; display:flex; justify-content:space-between; font-size:11px;">
                 <div style="width:55%;"><strong>Règlement :</strong> Réception immédiate.<br>IBAN : ${USER.iban}<br>BIC : ${USER.bic}</div>
@@ -230,9 +282,11 @@ function generatePreview() {
             <div style="margin-top:40px; text-align:center; font-size:11px; font-style:italic;">${!isPremium ? 'TVA non applicable, art. 293 B du CGI. | ' : ''}Prestation de service uniquement.</div>
         </div>
     </div>`;
+}
 
+function savePDF(num) {
     document.getElementById('pdf-paper').style.display = 'block';
-    html2pdf().set({ margin:0, filename:`${curType}_${docNum}.pdf`, html2canvas:{scale:3, useCORS:true}, jsPDF:{unit:'mm', format:'a4'} }).from(document.getElementById('pdf-paper')).save().then(() => {
+    html2pdf().set({ margin:0, filename:`${curType}_${num}.pdf`, html2canvas:{scale:3, useCORS:true}, jsPDF:{unit:'mm', format:'a4'} }).from(document.getElementById('pdf-paper')).save().then(() => {
         document.getElementById('pdf-paper').style.display = 'none';
         goBack();
     });
