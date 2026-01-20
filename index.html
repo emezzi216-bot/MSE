@@ -48,6 +48,7 @@
         .win-body { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 180px; }
         
         .pro-card { background: var(--card); border-radius: 28px; padding: 22px; margin-bottom: 16px; border: 1px solid var(--border); }
+        .pro-card h4 { margin: 0 0 12px; font-size: 10px; color: var(--mse-red); text-transform: uppercase; font-weight: 800; }
         input, textarea, select { width: 100%; background: rgba(128,128,128,0.05); border: 1px solid var(--border); border-radius: 16px; padding: 15px; color: var(--text); font-size: 15px; margin-bottom: 10px; outline: none; }
         .readonly { background: rgba(128,128,128,0.02) !important; color: var(--text-dim) !important; border-style: dashed !important; }
 
@@ -56,7 +57,6 @@
 
         #pdf-paper { width: 210mm; background: white !important; color: black !important; display: none; font-family: 'Roboto', sans-serif; }
         
-        /* MODALE ARCHIVE DÉTAILLÉE */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(10px); }
         .modal-content { background: var(--card); padding: 25px; border-radius: 28px; width: 100%; max-width: 450px; border: 1px solid var(--border); max-height: 80vh; overflow-y: auto; }
         .archive-line { font-size: 11px; padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
@@ -145,7 +145,7 @@ function openApp(type, mode='premium'){
     else if(type === 'ACQUITTEE') renderAcquit(cont);
 }
 
-/* --- TAMPON ACQUITTÉE NET --- */
+/* --- TAMPON PDF --- */
 async function processPdf() {
     const f=document.getElementById('pdf-up').files[0]; if(!f) return;
     const r=new FileReader(); r.onload=async function(){
@@ -163,7 +163,7 @@ async function processPdf() {
 /* --- GESTION ARCHIVES DÉTAILLÉES --- */
 function renderHistory(c) {
     const rev = [...db.history].reverse();
-    c.innerHTML = `<div class="pro-card"><h4>Archives Historiques</h4>
+    c.innerHTML = `<div class="pro-card"><h4>Historique MSE TOOL</h4>
     ${rev.map((h, i) => `
         <div class="list-item-clickable" onclick="openArchiveDetail(${db.history.length - 1 - i})">
             <div><b>${h.num}</b><br><small>${h.client}</small></div>
@@ -184,11 +184,11 @@ function closeModal(e) { if (e.target.id === 'archive-modal' || e.target.tagName
 
 function rebuildPDF(h) {
     curType = h.type; curMode = h.mode;
-    renderPDFContent(h.num, h.client, h.addr, h.obj, h.ref, h.date, h.dueDate, h.lines, h.rate, h.val, h.final);
+    renderPDFContent(h.num, h.client, h.addr, h.obj, h.ref, h.date, h.dueDate, h.lines, h.rate, h.val, h.final, h.c_siret, h.c_tva, h.c_legal);
     savePDF(h.num);
 }
 
-/* --- EDITEUR --- */
+/* --- EDITEUR (CHAMPS OPTIONNELS LÉGAUX) --- */
 function renderEditor(c) {
     const today = new Date().toISOString().split('T')[0];
     const filteredClients = db.clients.filter(cli => cli.type === curMode);
@@ -202,15 +202,32 @@ function renderEditor(c) {
         </div>
         <div class="pro-card"><h4>Dossier Client</h4>
             <select onchange="fillCli(this.value)"><option value="">Rechercher client...</option>${filteredClients.map(cli=>`<option value="${cli.name}">${cli.name}</option>`).join('')}</select>
-            <input id="cn" placeholder="NOM CLIENT"><textarea id="ca" placeholder="ADRESSE" rows="2"></textarea>
-            <input id="ref" placeholder="Référence dossier"><input id="dn" placeholder="N° DOCUMENT"><input id="do" placeholder="OBJET">
+            <input id="cn" placeholder="NOM DU CLIENT OU SOCIÉTÉ">
+            <textarea id="ca" placeholder="ADRESSE" rows="2"></textarea>
+            <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;">
+                <p style="font-size:10px; color:var(--mse-red); margin-bottom:10px; font-weight:bold;">INFOS SOCIÉTÉ (OPTIONNEL)</p>
+                <input id="c-legal" placeholder="Forme juridique & Capital (ex: SAS au capital de...)">
+                <input id="c-siret" placeholder="SIREN / SIRET">
+                <input id="c-tva" placeholder="N° TVA Intracommunautaire">
+            </div>
+            <input id="ref" placeholder="Référence dossier (optionnel)"><input id="dn" placeholder="N° DOCUMENT"><input id="do" placeholder="OBJET INTERVENTION">
         </div>
         ${curMode==='premium'?`<div class="pro-card"><h4>TVA</h4><select id="tva" onchange="calc()"><option value="20">20%</option><option value="10">10%</option><option value="5.5">5.5%</option></select></div>`:''}
         <div class="pro-card"><h4>Prestations</h4><div id="lines"></div><button onclick="addLine()" style="width:100%;background:none;border:1px dashed var(--mse-red);padding:15px;border-radius:15px;">+ AJOUTER LIGNE</button></div>`;
     addLine();
 }
 
-function fillCli(name){ const cli = db.clients.find(c => c.name === name); if(cli){ document.getElementById('cn').value=cli.name; document.getElementById('ca').value=cli.addr; }}
+function fillCli(name){ 
+    const cli = db.clients.find(c => c.name === name); 
+    if(cli){ 
+        document.getElementById('cn').value=cli.name; 
+        document.getElementById('ca').value=cli.addr; 
+        document.getElementById('c-siret').value=cli.siret || "";
+        document.getElementById('c-tva').value=cli.tva || "";
+        document.getElementById('c-legal').value=cli.legal || "";
+    }
+}
+
 function addLine(){
     const d=document.createElement('div'); d.className="line-item";
     d.innerHTML=`<input class="lt" placeholder="Désignation" style="font-weight:900;"><textarea class="ld" placeholder="Détails" rows="1" style="font-style:italic;border:none;background:none;"></textarea>
@@ -234,6 +251,11 @@ function generatePreview() {
     const dateH = new Date(document.getElementById('d-h').value).toLocaleDateString('fr-FR');
     const obj = document.getElementById('do').value;
     const ref = document.getElementById('ref').value;
+    
+    // Champs optionnels
+    const cSiret = document.getElementById('c-siret').value;
+    const cTva = document.getElementById('c-tva').value;
+    const cLegal = document.getElementById('c-legal').value;
 
     const lineData = Array.from(document.querySelectorAll('.line-item')).map(div => ({
         lt: div.querySelector('.lt').value, ld: div.querySelector('.ld').value,
@@ -243,16 +265,22 @@ function generatePreview() {
     db.history.push({
         num: docNum, client: clientName, addr: clientAddr, obj: obj, ref: ref,
         date: dateE, dueDate: dateH, val: data.tHT, final: data.final, rate: data.rate,
-        mode: curMode, type: curType, lines: lineData
+        mode: curMode, type: curType, lines: lineData,
+        c_siret: cSiret, c_tva: cTva, c_legal: cLegal
     });
-    if(!db.clients.some(c => c.name === clientName)){ db.clients.push({name: clientName, addr: clientAddr, type: curMode}); }
+    
+    // Update DB Client avec les infos légales
+    const cliIdx = db.clients.findIndex(c => c.name === clientName);
+    const cliData = {name: clientName, addr: clientAddr, type: curMode, siret: cSiret, tva: cTva, legal: cLegal};
+    if(cliIdx === -1) db.clients.push(cliData); else db.clients[cliIdx] = cliData;
+    
     sync();
 
-    renderPDFContent(docNum, clientName, clientAddr, obj, ref, dateE, dateH, lineData, data.rate, data.tHT, data.final);
+    renderPDFContent(docNum, clientName, clientAddr, obj, ref, dateE, dateH, lineData, data.rate, data.tHT, data.final, cSiret, cTva, cLegal);
     savePDF(docNum);
 }
 
-function renderPDFContent(num, client, addr, obj, ref, dE, dH, lines, rate, tHT, final) {
+function renderPDFContent(num, client, addr, obj, ref, dE, dH, lines, rate, tHT, final, siret, tva, legal) {
     const isPremium = (curMode === 'premium');
     let rows = lines.map(l => `<tr><td style="padding:12px; border-bottom:1px solid #eee;"><strong>${l.lt}</strong><br><span style="font-size:11px;color:#555;">${l.ld}</span></td>
     <td style="text-align:center">${l.lq}</td><td style="text-align:right">${parseFloat(l.lp).toFixed(2)} €</td><td style="text-align:right">${(l.lq*l.lp).toFixed(2)} €</td>
@@ -263,7 +291,14 @@ function renderPDFContent(num, client, addr, obj, ref, dE, dH, lines, rate, tHT,
         <div style="display:flex; justify-content:space-between; border-bottom:2px solid #eee; padding-bottom:40px;">
             <div style="width:55%;"><img src="logo.png" style="max-width:280px; max-height:150px;">
             <div style="font-size:13px; color:#555; margin-top:20px;"><strong>${USER.name}</strong><br>${USER.addr}<br>Email : ${USER.email}<br>SIRET : ${USER.siren}<br>${USER.dec}</div></div>
-            <div style="background:#f8f8f8; color:#000; padding:20px; width:35%; border-radius:4px; border-left:4px solid #333;"><strong style="color:#D32F2F; font-size:10px; text-transform:uppercase;">Facturer à :</strong><br><br><strong>${client}</strong><br>${addr.replace(/\n/g,'<br>')}</div>
+            <div style="background:#f8f8f8; color:#000; padding:20px; width:35%; border-radius:4px; border-left:4px solid #333;">
+                <strong style="color:#D32F2F; font-size:10px; text-transform:uppercase;">Facturer à :</strong><br><br>
+                <strong style="font-size:16px;">${client}</strong><br>
+                ${legal ? `<span style="font-size:11px; font-weight:bold;">${legal}</span><br>` : ''}
+                ${addr.replace(/\n/g,'<br>')}<br>
+                ${siret ? `<span style="font-size:11px;">SIREN/SIRET: ${siret}</span><br>` : ''}
+                ${tva ? `<span style="font-size:11px;">TVA: ${tva}</span>` : ''}
+            </div>
         </div>
         <div style="padding:40px 0;">
             <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px solid #D32F2F; padding-bottom:15px; margin-bottom:30px;">
