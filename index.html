@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>MSE TOOL Elite</title>
+    <title>MSE TOOL APEX</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
@@ -13,87 +13,159 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --mse-red: #D32F2F; --bg: #000000; --card: rgba(20, 20, 22, 0.95);
-            --text: #FFFFFF; --text-dim: #929297; --border: rgba(255, 255, 255, 0.1);
+            --mse-red: #D32F2F; --bg: #000000; --card: rgba(28, 28, 30, 0.75);
+            --text: #F2F2F7; --text-dim: #8E8E93; --border: rgba(255, 255, 255, 0.08);
+            --accent-gradient: linear-gradient(135deg, var(--mse-red), #FF5252);
+            --glass: blur(25px) saturate(180%);
         }
-        [data-theme="light"] {
-            --bg: #F2F2F7; --card: rgba(255, 255, 255, 0.95);
-            --text: #000000; --text-dim: #666666; --border: rgba(0, 0, 0, 0.08);
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Segoe UI', Roboto, sans-serif; transition: 0.2s; }
-        body { margin: 0; background-color: var(--bg); color: var(--text); height: 100vh; overflow: hidden; position: relative; }
 
-        /* FOND LOGO UHD [cite: 2026-01-02] */
+        [data-theme="light"] {
+            --bg: #F2F2F7; --card: rgba(255, 255, 255, 0.8);
+            --text: #1C1C1E; --text-dim: #636366; --border: rgba(0, 0, 0, 0.05);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
+        
+        body { 
+            margin: 0; background-color: var(--bg); color: var(--text); 
+            height: 100vh; overflow: hidden; position: relative;
+        }
+
+        /* BACKGROUND UHD CORE [cite: 2026-01-02] */
         body::before {
             content: ""; position: fixed; inset: 0; z-index: -1;
             background: url('logo.png') no-repeat center center; background-size: cover;
-            filter: blur(40px) grayscale(10%); opacity: 0.28; pointer-events: none;
+            filter: blur(50px) brightness(0.4); opacity: 0.4; transform: scale(1.1);
         }
 
-        header { padding: calc(env(safe-area-inset-top) + 20px) 24px 10px; display: flex; justify-content: space-between; align-items: center; }
-        .brand { font-size: 26px; font-weight: 900; letter-spacing: -1px; }
-        .brand span { color: var(--mse-red); }
-        .theme-toggle { width: 44px; height: 44px; border-radius: 14px; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
+        /* ULTIMATE HEADER */
+        header { 
+            padding: calc(env(safe-area-inset-top) + 25px) 24px 15px; 
+            display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .brand { font-size: 28px; font-weight: 900; letter-spacing: -1.5px; text-transform: uppercase; }
+        .brand span { color: var(--mse-red); filter: drop-shadow(0 0 10px var(--mse-red)); }
 
-        #hub { height: 100%; overflow-y: auto; padding: 0 16px 200px; }
-        .section-label { grid-column: span 3; font-size: 11px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; margin: 30px 0 12px 6px; }
-        .apps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-        .app { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
-        .icon-box { width: 92px; height: 92px; border-radius: 24px; overflow: hidden; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
-        .app:active .icon-box { transform: scale(0.92); }
+        .controls { display: flex; gap: 12px; }
+        .icon-btn { 
+            width: 46px; height: 46px; border-radius: 16px; background: var(--card); 
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+            font-size: 20px; cursor: pointer; backdrop-filter: var(--glass);
+        }
+
+        /* GRID DYNAMICS */
+        #hub { height: 100%; overflow-y: auto; padding: 10px 18px 220px; scroll-behavior: smooth; }
+        .section-header { 
+            font-size: 12px; font-weight: 800; color: var(--text-dim); 
+            text-transform: uppercase; margin: 35px 0 15px 8px; letter-spacing: 2px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .section-header::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+        .apps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+        .app { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; }
+        .icon-box { 
+            width: 100%; aspect-ratio: 1/1; border-radius: 28px; overflow: hidden; 
+            background: var(--card); border: 1px solid var(--border); 
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3); backdrop-filter: var(--glass);
+        }
+        .app:active { transform: scale(0.9); }
         .app img { width: 100%; height: 100%; object-fit: cover; }
-        .app span { font-size: 10px; font-weight: 800; text-align: center; color: var(--text); }
+        .app span { font-size: 11px; font-weight: 700; text-align: center; opacity: 0.9; }
 
-        /* SVG SETTINGS COLOR */
-        .svg-icon { width: 45px; height: 45px; fill: var(--text-dim); }
-
-        .window { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: none; flex-direction: column; }
-        .win-header { padding: calc(env(safe-area-inset-top) + 15px) 20px; display: flex; align-items: center; gap: 20px; border-bottom: 1px solid var(--border); background: var(--card); }
-        .win-body { flex: 1; overflow-y: auto; padding: 20px 20px 180px; }
-        .pro-card { background: var(--card); border-radius: 28px; padding: 24px; margin-bottom: 16px; border: 1px solid var(--border); backdrop-filter: blur(15px); }
-        .pro-card h4 { margin: 0 0 14px; font-size: 10px; color: var(--mse-red); text-transform: uppercase; font-weight: 900; }
+        /* WINDOW ARCHITECTURE */
+        .window { 
+            position: fixed; inset: 0; background: var(--bg); z-index: 1000; 
+            display: none; flex-direction: column; animation: modalIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes modalIn { from { opacity: 0; transform: scale(1.1); } to { opacity: 1; transform: scale(1); } }
         
-        input, textarea, select { width: 100%; background: rgba(128,128,128,0.08); border: 1px solid var(--border); border-radius: 18px; padding: 16px; color: var(--text); font-size: 15px; margin-bottom: 12px; }
-        .readonly { background: rgba(128,128,128,0.03) !important; color: var(--text-dim) !important; border-style: dashed !important; }
+        .win-header { 
+            padding: calc(env(safe-area-inset-top) + 15px) 20px; 
+            display: flex; align-items: center; gap: 20px; background: var(--card);
+            border-bottom: 1px solid var(--border); backdrop-filter: var(--glass);
+        }
+        .win-body { flex: 1; overflow-y: auto; padding: 25px 20px 200px; }
+        
+        /* PREMIUM CARDS */
+        .pro-card { 
+            background: var(--card); border-radius: 32px; padding: 26px; 
+            margin-bottom: 20px; border: 1px solid var(--border); backdrop-filter: var(--glass);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .pro-card h4 { margin: 0 0 18px; font-size: 11px; color: var(--mse-red); text-transform: uppercase; font-weight: 900; letter-spacing: 1px; }
+        
+        input, textarea, select { 
+            width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); 
+            border-radius: 20px; padding: 18px; color: var(--text); font-size: 16px; 
+            margin-bottom: 15px; transition: all 0.3s;
+        }
+        input:focus { border-color: var(--mse-red); background: rgba(255,255,255,0.06); }
+        .readonly { background: transparent !important; color: var(--text-dim) !important; border-style: dashed !important; opacity: 0.7; }
 
-        .dock { position: fixed; bottom: 30px; left: 20px; right: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 40px; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; z-index: 1100; backdrop-filter: blur(30px); }
-        .btn-mse { background: var(--mse-red); color: #fff; border: none; padding: 18px 35px; border-radius: 22px; font-weight: 900; cursor: pointer; }
+        /* ADVANCED DOCK */
+        .dock { 
+            position: fixed; bottom: 35px; left: 20px; right: 20px; 
+            background: var(--card); border: 1px solid var(--border); border-radius: 45px; 
+            padding: 22px 35px; display: flex; justify-content: space-between; align-items: center; 
+            z-index: 1100; backdrop-filter: blur(40px); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .total-badge { font-size: 24px; font-weight: 900; letter-spacing: -1px; }
+        .btn-mse { 
+            background: var(--accent-gradient); color: #fff; border: none; padding: 18px 40px; 
+            border-radius: 25px; font-weight: 900; cursor: pointer; box-shadow: 0 8px 20px rgba(211, 47, 47, 0.4);
+        }
 
-        #pdf-paper { width: 210mm; background: white !important; color: black !important; display: none; font-family: 'Roboto', sans-serif; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: var(--card); padding: 30px; border-radius: 32px; width: 100%; max-width: 450px; border: 1px solid var(--border); }
-        .list-item-clickable { display: flex; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+        /* MODALS & LISTS */
+        .modal-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 2000; 
+            display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(25px);
+        }
+        .modal-content { 
+            background: var(--card); padding: 35px; border-radius: 40px; width: 100%; 
+            max-width: 500px; border: 1px solid var(--border);
+        }
+        .item-row { 
+            display: flex; justify-content: space-between; padding: 20px 0; 
+            border-bottom: 1px solid var(--border); cursor: pointer; 
+        }
+        
+        #pdf-paper { width: 210mm; background: white !important; color: black !important; display: none; }
+        .svg-icon { width: 38px; height: 38px; fill: var(--text-dim); }
     </style>
 </head>
 <body>
 
 <header>
     <div class="brand">MSE <span>TOOL</span></div>
-    <div class="theme-toggle" onclick="App.toggleTheme()">🌓</div>
+    <div class="controls">
+        <div class="icon-btn" onclick="Core.toggleTheme()">🌓</div>
+    </div>
 </header>
 
 <div id="hub">
     <div class="apps-grid">
-        <div class="section-label" id="label-premium">Elite Invoicing</div>
-        <div class="app" onclick="App.open('FACTURE', 'premium')"><div class="icon-box"><img src="facture.png"></div><span class="txt-facture">Facture TVA</span></div>
-        <div class="app" onclick="App.open('DEVIS', 'premium')"><div class="icon-box"><img src="devis.png"></div><span class="txt-devis">Devis TVA</span></div>
-        <div class="app" onclick="App.open('ACQUITTEE')"><div class="icon-box"><img src="acquittee.png"></div><span class="txt-tampon">Tampon PDF</span></div>
+        <div class="section-header" id="label-premium">Invoicing Elite</div>
+        <div class="app" onclick="Core.open('FACTURE', 'premium')"><div class="icon-box"><img src="facture.png"></div><span class="txt-facture">Facture TVA</span></div>
+        <div class="app" onclick="Core.open('DEVIS', 'premium')"><div class="icon-box"><img src="devis.png"></div><span class="txt-devis">Devis TVA</span></div>
+        <div class="app" onclick="Core.open('ACQUITTEE')"><div class="icon-box"><img src="acquittee.png"></div><span class="txt-tampon">Tampon PDF</span></div>
 
-        <div class="section-label" id="label-micro">Micro Management</div>
-        <div class="app" onclick="App.open('FACTURE', 'micro')"><div class="icon-box"><img src="facture.png"></div><span class="txt-facture">Facture TTC</span></div>
-        <div class="app" onclick="App.open('DEVIS', 'micro')"><div class="icon-box"><img src="devis.png"></div><span class="txt-devis">Devis TTC</span></div>
+        <div class="section-header" id="label-micro">Micro Management</div>
+        <div class="app" onclick="Core.open('FACTURE', 'micro')"><div class="icon-box"><img src="facture.png"></div><span class="txt-facture">Facture TTC</span></div>
+        <div class="app" onclick="onclick=Core.open('DEVIS', 'micro')"><div class="icon-box"><img src="devis.png"></div><span class="txt-devis">Devis TTC</span></div>
 
-        <div class="section-label" id="label-data">Cloud Data & Settings</div>
-        <div class="app" onclick="App.open('CLIENTS')"><div class="icon-box"><img src="clients.png"></div><span id="txt-clients">Clients</span></div>
-        <div class="app" onclick="App.open('ARCHIVES')"><div class="icon-box"><img src="archives.png"></div><span id="txt-archives">Archives</span></div>
-        
-        <div class="app" onclick="App.open('SETTINGS')">
+        <div class="section-header" id="label-data">System & Core</div>
+        <div class="app" onclick="Core.open('CLIENTS')"><div class="icon-box"><img src="clients.png"></div><span id="txt-clients">Répertoire</span></div>
+        <div class="app" onclick="Core.open('ARCHIVES')"><div class="icon-box"><img src="archives.png"></div><span id="txt-archives">Historique</span></div>
+        <div class="app" onclick="Core.open('SETTINGS')">
             <div class="icon-box">
-                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.84,9.48l2.03,1.58C4.82,11.36,4.8,11.68,4.8,12c0,0.33,0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.84,9.48l2.03,1.58C4.82,11.36,4.8,11.68,4.8,12c0,0.33,0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z"/></svg>
             </div>
             <span id="txt-settings">Réglages</span>
         </div>
@@ -101,61 +173,90 @@
 </div>
 
 <div id="win" class="window">
-    <div class="win-header"><button class="back-btn" style="background:none;border:none;color:var(--text);font-size:30px;" onclick="App.back()">←</button><b id="win-title"></b></div>
+    <div class="win-header"><button class="icon-btn" onclick="Core.back()">←</button><b id="win-title" style="font-size:20px;"></b></div>
     <div class="win-body" id="win-content"></div>
     <div class="dock" id="win-dock" style="display:none;">
-        <div id="dock-total" style="font-size:22px; font-weight:900;">0.00 €</div>
-        <button class="btn-mse" onclick="App.generatePDF()">GÉNÉRER PDF</button>
+        <div id="dock-total" class="total-badge">0.00 €</div>
+        <button class="btn-mse" onclick="Core.generatePDF()">VALIDER PDF</button>
     </div>
 </div>
 
-<div id="archive-modal" class="modal-overlay" onclick="App.closeModal(event)">
+<div id="archive-modal" class="modal-overlay" onclick="Core.closeModal(event)">
     <div class="modal-content">
         <h2 id="modal-title" style="margin-top:0; color:var(--mse-red);"></h2>
-        <div id="modal-details"></div>
-        <div id="modal-lines" style="margin: 20px 0;"></div>
-        <button class="btn-mse" style="width:100%; margin-bottom:10px;" id="modal-download">RE-TÉLÉCHARGER</button>
-        <button class="btn-mse" style="width:100%; background:none; border:1px solid var(--border);" onclick="App.closeModal(event)">FERMER</button>
+        <div id="modal-details" style="opacity:0.8; font-size:14px;"></div>
+        <div id="modal-lines" style="margin: 25px 0; border-top:1px solid var(--border);"></div>
+        <button class="btn-mse" style="width:100%; margin-bottom:12px;" id="modal-download">TÉLÉCHARGER</button>
+        <button class="btn-mse" style="width:100%; background:none; border:1px solid var(--border);" onclick="Core.closeModal(event)">FERMER</button>
     </div>
 </div>
 
 <div id="pdf-paper"></div>
 
 <script>
+/** * MSE TOOL KERNEL v50.0
+ */
+
+const DICT = {
+    fr: {
+        facture: "Facture", devis: "Devis", clients: "Clients", archives: "Archives", settings: "Réglages",
+        col_main: "Couleur Principale", col_bg: "Fond d'écran", ttc: "TOTAL TTC", pu_ttc: "P.U TTC",
+        objet: "Objet", emission: "Date d'émission", echeance: "Date d'échéance", siret: "SIRET", dec: "Décennale",
+        leg_title: "Infos Entreprise (Optionnel)", c_legal: "Forme Juridique", c_siret: "SIRET Client", c_tva: "TVA Client"
+    },
+    en: {
+        facture: "Invoice", devis: "Quote", clients: "Contacts", archives: "History", settings: "Settings",
+        col_main: "Primary Color", col_bg: "Background", ttc: "TOTAL", pu_ttc: "U.P",
+        objet: "Object", emission: "Date", echeance: "Due Date", siret: "Tax ID", dec: "Insurance",
+        leg_title: "Corporate Info (Optional)", c_legal: "Legal Entity", c_siret: "Company ID", c_tva: "VAT Number"
+    }
+};
+
 const USER = { name: "Sabri BENNACEUR EI", siren: "943032755", addr: "2 Résidence des Rosiers, 92800 Puteaux, FR", email: "serruremse@gmail.com", dec: "RC décennale TETRIS SV75018041T37384", iban: "FR76 1695 8000 0159 6810 0824 765", bic: "ONTO FR P1 XXX" };
 
-const App = {
+const Core = {
     state: {
         lang: localStorage.getItem('mse_lang') || 'fr',
-        colors: JSON.parse(localStorage.getItem('mse_colors')) || { red: "#D32F2F", bg: "#000000", card: "#141416" },
+        colors: JSON.parse(localStorage.getItem('mse_colors')) || { red: "#D32F2F", bg: "#000000" },
         db: { clients: JSON.parse(localStorage.getItem('mse_clients') || '[]'), history: JSON.parse(localStorage.getItem('mse_history') || '[]') },
         curType: null, curMode: null
     },
 
     init() {
-        this.applyTheme();
-        window.addEventListener('popstate', () => document.getElementById('win').style.display = 'none');
+        this.applyStyle();
+        this.applyLang();
+        window.onpopstate = () => document.getElementById('win').style.display = 'none';
     },
 
-    applyTheme() {
+    t(k) { return DICT[this.state.lang][k] || DICT['fr'][k] || k; },
+
+    applyStyle() {
         const r = document.documentElement;
         r.style.setProperty('--mse-red', this.state.colors.red);
         r.style.setProperty('--bg', this.state.colors.bg);
-        r.style.setProperty('--card', this.state.colors.card);
+    },
+
+    applyLang() {
+        document.getElementById('txt-clients').innerText = this.t('clients');
+        document.getElementById('txt-archives').innerText = this.t('archives');
+        document.getElementById('txt-settings').innerText = this.t('settings');
+        document.querySelectorAll('.txt-facture').forEach(e => e.innerText = this.t('facture'));
+        document.querySelectorAll('.txt-devis').forEach(e => e.innerText = this.t('devis'));
     },
 
     open(type, mode='premium') {
         this.state.curType = type; this.state.curMode = mode;
-        history.pushState({view: 'app'}, '');
-        document.getElementById('win').style.display = 'flex';
-        document.getElementById('win-title').innerText = `${type} ${mode.toUpperCase()}`;
+        history.pushState({view: 'win'}, '');
+        const w = document.getElementById('win');
+        w.style.display = 'flex';
+        document.getElementById('win-title').innerText = `${this.t(type.toLowerCase())} ${mode.toUpperCase()}`;
         document.getElementById('win-dock').style.display = (['DEVIS','FACTURE'].includes(type)) ? 'flex' : 'none';
-        this.renderModule(type);
+        this.render(type);
     },
 
     back() { window.history.back(); },
 
-    renderModule(type) {
+    render(type) {
         const c = document.getElementById('win-content');
         if(['DEVIS','FACTURE'].includes(type)) this.renderEditor(c);
         else if(type === 'CLIENTS') this.renderClients(c);
@@ -166,38 +267,40 @@ const App = {
 
     renderEditor(c) {
         const today = new Date().toISOString().split('T')[0];
-        const clients = this.state.db.clients.filter(cli => cli.type === this.state.curMode);
+        const clis = this.state.db.clients.filter(cli => cli.type === this.state.curMode);
         c.innerHTML = `
-            <div class="pro-card"><h4>Administration</h4>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                    <div><label style="font-size:10px;">DATE</label><input type="date" id="d-e" value="${today}"></div>
-                    <div><label style="font-size:10px;">ÉCHÉANCE</label><input type="date" id="d-h" value="${today}"></div>
+            <div class="pro-card"><h4>Kernel Admin</h4>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                    <div><label style="font-size:10px;">${this.t('emission')}</label><input type="date" id="d-e" value="${today}"></div>
+                    <div><label style="font-size:10px;">${this.t('echeance')}</label><input type="date" id="d-h" value="${today}"></div>
                 </div>
                 <input class="readonly" value="SIRET : ${USER.siren}" readonly><input class="readonly" value="${USER.dec}" readonly>
             </div>
-            <div class="pro-card"><h4>Client & Dossier</h4>
-                <select onchange="App.fillCli(this.value)"><option value="">Rechercher...</option>${clients.map(cli=>`<option value="${cli.name}">${cli.name}</option>`).join('')}</select>
-                <input id="cn" placeholder="NOM CLIENT"><textarea id="ca" placeholder="ADRESSE" rows="2"></textarea>
-                <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:10px;">
-                    <input id="c-legal" placeholder="Forme Juridique"><input id="c-siret" placeholder="SIRET Client"><input id="c-tva" placeholder="TVA Client">
+            <div class="pro-card"><h4>Client & Object Detection</h4>
+                <select onchange="Core.fillCli(this.value)"><option value="">Préselection...</option>${clis.map(cli=>`<option value="${cli.name}">${cli.name}</option>`).join('')}</select>
+                <input id="cn" placeholder="Nom Client / Société">
+                <textarea id="ca" placeholder="Adresse complète" rows="2"></textarea>
+                <div style="border-top:1px solid var(--border);padding-top:15px;margin-top:5px;">
+                    <p style="font-size:9px;color:var(--mse-red);font-weight:900;">${this.t('leg_title')}</p>
+                    <input id="c-legal" placeholder="${this.t('c_legal')}"><input id="c-siret" placeholder="${this.t('c_siret')}"><input id="c-tva" placeholder="${this.t('c_tva')}">
                 </div>
-                <input id="ref" placeholder="Réf. dossier"><input id="dn" placeholder="N° DOC"><input id="do" placeholder="OBJET">
+                <input id="ref" placeholder="Réf. dossier"><input id="dn" placeholder="N° Document"><input id="do" placeholder="Objet d'intervention">
             </div>
-            ${this.state.curMode==='premium'?`<div class="pro-card"><h4>TVA</h4><select id="tva" onchange="App.calc()"><option value="20">20%</option><option value="10">10%</option><option value="5.5">5.5%</option></select></div>`:''}
-            <div class="pro-card"><h4>Prestations</h4><div id="lines"></div><button onclick="App.addLine()" style="width:100%;background:none;border:1px dashed var(--mse-red);padding:15px;border-radius:15px;">+ AJOUTER LIGNE</button></div>`;
+            ${this.state.curMode==='premium'?`<div class="pro-card"><h4>Fiscalité</h4><select id="tva" onchange="Core.calc()"><option value="20">20%</option><option value="10">10%</option><option value="5.5">5.5%</option></select></div>`:''}
+            <div class="pro-card"><h4>Lignes de Service</h4><div id="lines"></div><button onclick="Core.addLine()" style="width:100%;background:none;border:1px dashed var(--mse-red);padding:18px;border-radius:20px;color:var(--mse-red);font-weight:900;">+ AJOUTER PRESTATION</button></div>`;
         this.addLine();
     },
 
     addLine() {
-        const d = document.createElement('div'); d.className = "line-item"; d.style.marginBottom = "15px";
-        d.innerHTML = `<input class="lt" placeholder="Désignation" style="font-weight:900;"><textarea class="ld" placeholder="Détails" rows="1" style="font-style:italic;border:none;background:none;"></textarea>
-                       <div style="display:flex;gap:10px;"><input type="number" class="lq" value="1" oninput="App.calc()"><input type="number" class="lp" placeholder="Prix" oninput="App.calc()"></div>`;
+        const d = document.createElement('div'); d.className = "line-item";
+        d.innerHTML = `<input class="lt" placeholder="Désignation" style="font-weight:900;margin-bottom:5px;"><textarea class="ld" placeholder="Détails techniques" rows="1" style="font-style:italic;border:none;background:none;font-size:13px;"></textarea>
+                       <div style="display:flex;gap:12px;"><input type="number" class="lq" value="1" oninput="Core.calc()"><input type="number" class="lp" placeholder="Prix Unitaire" oninput="Core.calc()"></div>`;
         document.getElementById('lines').appendChild(d);
     },
 
-    fillCli(name) {
-        const cli = this.state.db.clients.find(c => c.name === name);
-        if(cli) { document.getElementById('cn').value = cli.name; document.getElementById('ca').value = cli.addr; document.getElementById('c-siret').value = cli.siret||""; document.getElementById('c-tva').value = cli.tva||""; document.getElementById('c-legal').value = cli.legal||""; }
+    fillCli(n) {
+        const c = this.state.db.clients.find(cli => cli.name === n);
+        if(c) { document.getElementById('cn').value=c.name; document.getElementById('ca').value=c.addr; document.getElementById('c-siret').value=c.siret||""; document.getElementById('c-tva').value=c.tva||""; document.getElementById('c-legal').value=c.legal||""; }
     },
 
     calc() {
@@ -207,48 +310,53 @@ const App = {
         document.getElementById('dock-total').innerText = total.toFixed(2) + " €"; return {ht, total, rate};
     },
 
-    renderSettings(c) {
-        c.innerHTML = `
-            <div class="pro-card"><h4>Couleurs</h4>
-                <div style="display:flex;justify-content:space-between;margin-bottom:15px;"><label>Principale</label><input type="color" value="${this.state.colors.red}" onchange="App.updateColor('red', this.value)"></div>
-                <div style="display:flex;justify-content:space-between;"><label>Fond</label><input type="color" value="${this.state.colors.bg}" onchange="App.updateColor('bg', this.value)"></div>
-            </div>`;
-    },
-
-    updateColor(k, v) { this.state.colors[k] = v; localStorage.setItem('mse_colors', JSON.stringify(this.state.colors)); this.applyTheme(); },
-
     generatePDF() {
-        const data = this.calc(); const docNum = document.getElementById('dn').value || "SN"; const clientName = document.getElementById('cn').value;
-        const lineData = Array.from(document.querySelectorAll('.line-item')).map(div => ({ lt: div.querySelector('.lt').value, ld: div.querySelector('.ld').value, lq: div.querySelector('.lq').value, lp: div.querySelector('.lp').value }));
-        const archive = { num: docNum, client: clientName, addr: document.getElementById('ca').value, obj: document.getElementById('do').value, date: new Date(document.getElementById('d-e').value).toLocaleDateString('fr-FR'), dueDate: new Date(document.getElementById('d-h').value).toLocaleDateString('fr-FR'), final: data.total, rate: data.rate, mode: this.state.curMode, type: this.state.curType, lines: lineData, c_siret: document.getElementById('c-siret').value, c_tva: document.getElementById('c-tva').value, c_legal: document.getElementById('c-legal').value };
-        this.state.db.history.push(archive);
-        const ci = this.state.db.clients.findIndex(c => c.name === clientName); const cd = {name: clientName, addr: archive.addr, type: archive.mode, siret: archive.c_siret, tva: archive.c_tva, legal: archive.c_legal};
-        if(ci === -1) this.state.db.clients.push(cd); else this.state.db.clients[ci] = cd;
-        this.sync(); this.renderPDFContent(archive); this.saveFinalPDF(docNum);
+        const d = this.calc(); const n = document.getElementById('dn').value || "SN";
+        const lines = Array.from(document.querySelectorAll('.line-item')).map(v => ({ lt: v.querySelector('.lt').value, ld: v.querySelector('.ld').value, lq: v.querySelector('.lq').value, lp: v.querySelector('.lp').value }));
+        const arch = { num: n, client: document.getElementById('cn').value, addr: document.getElementById('ca').value, obj: document.getElementById('do').value, date: new Date(document.getElementById('d-e').value).toLocaleDateString('fr-FR'), eche: new Date(document.getElementById('d-h').value).toLocaleDateString('fr-FR'), val: d.ht, final: d.total, rate: d.rate, mode: this.state.curMode, type: this.state.curType, lines: lines, c_siret: document.getElementById('c-siret').value, c_tva: document.getElementById('c-tva').value, c_legal: document.getElementById('c-legal').value };
+        this.state.db.history.push(arch);
+        const idx = this.state.db.clients.findIndex(c => c.name === arch.client);
+        const cd = {name: arch.client, addr: arch.addr, type: arch.mode, siret: arch.c_siret, tva: arch.c_tva, legal: arch.c_legal};
+        if(idx === -1) this.state.db.clients.push(cd); else this.state.db.clients[idx] = cd;
+        this.sync(); this.renderPDF(arch); this.save(n);
     },
 
-    renderPDFContent(h) {
+    renderPDF(h) {
         const isP = (h.mode === 'premium');
-        let rows = h.lines.map(l => `<tr><td style="padding:12px; border-bottom:1px solid #eee;"><strong>${l.lt}</strong><br><small>${l.ld}</small></td><td style="text-align:center">${l.lq}</td><td style="text-align:right">${parseFloat(l.lp).toFixed(2)} €</td><td style="text-align:right">${(l.lq*l.lp).toFixed(2)} €</td>${isP?`<td style="text-align:center">${h.rate}%</td><td style="text-align:right">${(l.lq*l.lp*(h.rate/100)).toFixed(2)} €</td>`:''}</tr>`).join('');
-        document.getElementById('pdf-paper').innerHTML = `<div style="padding:40px; background:white; color:#333;"><div style="display:flex; justify-content:space-between; border-bottom:2px solid #eee; padding-bottom:40px;"><div style="width:55%;"><img src="logo.png" style="max-width:280px; max-height:150px;"><div style="font-size:12px;margin-top:15px;"><strong>${USER.name}</strong><br>${USER.addr}<br>SIRET: ${USER.siren}<br>${USER.dec}</div></div><div style="background:#f8f8f8; padding:20px; width:35%; border-left:4px solid #333;"><strong>FACTURER À :</strong><br><br><strong>${h.client}</strong><br>${h.c_legal?`<b>${h.c_legal}</b><br>`:''}${h.addr.replace(/\n/g,'<br>')}</div></div><div style="padding:40px 0;"><div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px solid #D32F2F; padding-bottom:15px; margin-bottom:30px;"><div><h1 style="margin:0; font-size:32px;">${h.type} N° ${h.num}</h1><b>Objet : ${h.obj}</b></div><div style="text-align:right; font-size:12px;"><strong>Date :</strong> ${h.date}<br><strong>Échéance :</strong> ${h.dueDate}</div></div><table style="width:100%; border-collapse:collapse; font-size:13px;"><thead><tr style="background:#333; color:#fff;"><th>Désignation</th><th>Qté</th><th>${isP?'P.U HT':'P.U TTC'}</th><th>Total</th>${isP?'<th>TVA</th><th>Mt</th>':''}</tr></thead><tbody>${rows}</tbody></table><div style="display:flex; justify-content:flex-end; margin-top:30px;"><table style="width:300px; text-align:right;"><tr style="font-size:18px; font-weight:bold; color:#D32F2F; border-top:2px solid #000;"><td>TOTAL TTC</td><td>${h.final.toFixed(2)} €</td></tr></table></div><div style="margin-top:50px; border-top:1px solid #ddd; font-size:11px; padding-top:15px;">IBAN: ${USER.iban} | BIC: ${USER.bic}</div></div></div>`;
+        let rows = h.lines.map(l => `<tr><td style="padding:15px; border-bottom:1px solid #eee;"><strong>${l.lt}</strong><br><small>${l.ld}</small></td><td style="text-align:center">${l.lq}</td><td style="text-align:right">${parseFloat(l.lp).toFixed(2)} €</td><td style="text-align:right">${(l.lq*l.lp).toFixed(2)} €</td>${isP?`<td style="text-align:center">${h.rate}%</td><td style="text-align:right">${(l.lq*l.lp*(h.rate/100)).toFixed(2)} €</td>`:''}</tr>`).join('');
+        document.getElementById('pdf-paper').innerHTML = `<div style="padding:50px; background:white; color:#333;"><div style="display:flex; justify-content:space-between; border-bottom:3px solid #eee; padding-bottom:40px;"><div style="width:55%;"><img src="logo.png" style="max-width:300px; max-height:160px;"><div style="font-size:13px;margin-top:20px;"><strong>${USER.name}</strong><br>${USER.addr}<br>${USER.email}<br>SIRET: ${USER.siren}<br>${USER.dec}</div></div><div style="background:#f8f8f8; padding:25px; width:35%; border-left:5px solid #333;"><strong style="color:#D32F2F; font-size:11px;">CLIENT :</strong><br><br><strong>${h.client}</strong><br>${h.c_legal?`<b>${h.c_legal}</b><br>`:''}${h.addr.replace(/\n/g,'<br>')}<br>${h.c_siret?`<span>${h.c_siret}</span><br>`:''}${h.c_tva?`<span>${h.c_tva}</span>`:''}</div></div><div style="padding:40px 0;"><div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:4px solid #D32F2F; padding-bottom:15px; margin-bottom:35px;"><div><h1 style="margin:0; font-size:35px;">${h.type} N° ${h.num}</h1><b>Objet : ${h.obj}</b></div><div style="text-align:right; font-size:13px;"><strong>Date :</strong> ${h.date}<br><strong>Échéance :</strong> ${h.eche}</div></div><table style="width:100%; border-collapse:collapse; font-size:14px;"><thead><tr style="background:#333; color:#fff;"><th>Désignation</th><th>Qté</th><th>${isP?'P.U HT':this.t('pu_ttc')}</th><th>Total</th>${isP?'<th>TVA</th><th>Mt</th>':''}</tr></thead><tbody>${rows}</tbody></table><div style="display:flex; justify-content:flex-end; margin-top:40px;"><table style="width:320px; text-align:right;"><tr style="font-size:22px; font-weight:900; color:#D32F2F; border-top:3px solid #000;"><td>${this.t('ttc')}</td><td>${h.final.toFixed(2)} €</td></tr></table></div><div style="margin-top:60px; border-top:1px solid #ddd; font-size:12px; padding-top:20px;">IBAN: ${USER.iban} | BIC: ${USER.bic}<br><br><strong>Note :</strong> Réception immédiate. Signature et cachet : <div style="border:1px solid #ccc; height:80px; width:250px; margin-top:10px;"></div></div></div></div>`;
     },
 
-    saveFinalPDF(num) {
-        const paper = document.getElementById('pdf-paper'); paper.style.display = 'block';
-        html2pdf().set({ margin:0, filename:`${this.state.curType}_${num}.pdf`, html2canvas:{scale:3, useCORS:true}, jsPDF:{unit:'mm', format:'a4'} }).from(paper).save().then(() => { paper.style.display = 'none'; this.back(); });
+    save(num) {
+        const p = document.getElementById('pdf-paper'); p.style.display = 'block';
+        html2pdf().set({ margin:0, filename:`${this.state.curType}_${num}.pdf`, html2canvas:{scale:3, useCORS:true}, jsPDF:{unit:'mm', format:'a4'} }).from(p).save().then(() => { p.style.display = 'none'; this.back(); });
+    },
+
+    renderAcquit(c) {
+        c.innerHTML = `<div class="pro-card"><h4>Kernel PDF Stamping</h4><input type="file" id="pdf-up" accept="application/pdf" style="padding:40px; border:2px dashed var(--border);"><button class="btn-mse" style="width:100%; margin-top:20px;" onclick="Core.doStamp()">APPLIQUER MENTION ACQUITTÉE</button></div>`;
+    },
+
+    async doStamp() {
+        const f=document.getElementById('pdf-up').files[0]; if(!f) return;
+        const r=new FileReader(); r.onload=async function(){
+            const doc=await PDFLib.PDFDocument.load(new Uint8Array(this.result));
+            const page=doc.getPages()[0]; const {width, height}=page.getSize();
+            page.drawText("ACQUITTÉE", { x: width - 180, y: height - 70, size: 26, color: PDFLib.rgb(0.8, 0.1, 0.1), font: await doc.embedFont(PDFLib.StandardFonts.HelveticaBold) });
+            const out=await doc.save(); const l=document.createElement("a"); l.href=URL.createObjectURL(new Blob([out],{type:"application/pdf"})); l.download=`ACQUITTEE.pdf`; l.click();
+        }; r.readAsArrayBuffer(f);
     },
 
     renderHistory(c) {
         const rev = [...this.state.db.history].reverse();
-        c.innerHTML = `<div class="pro-card"><h4>Cloud Archives</h4>${rev.map((h, i) => `<div class="list-item-clickable" onclick="App.openDetail(${this.state.db.history.length-1-i})"><div><b>${h.num}</b><br><small>${h.client}</small></div><div style="text-align:right;"><b>${h.final.toFixed(2)}€</b><br><small>${h.date}</small></div></div>`).join('')}</div>`;
+        c.innerHTML = `<div class="pro-card"><h4>Archives MSE Cloud</h4>${rev.map((h, i) => `<div class="item-row" onclick="Core.viewArch(${this.state.db.history.length-1-i})"><div><b>${h.num}</b><br><small>${h.client}</small></div><div style="text-align:right;"><b>${h.final.toFixed(2)}€</b><br><small>${h.date}</small></div></div>`).join('')}</div>`;
     },
 
-    openDetail(idx) {
+    viewArch(idx) {
         const h = this.state.db.history[idx];
         document.getElementById('modal-title').innerText = `${h.type} N° ${h.num}`;
-        document.getElementById('modal-details').innerHTML = `<p>${h.client}<br>${h.date}</p>`;
-        document.getElementById('modal-lines').innerHTML = h.lines.map(l => `<div class="archive-line"><span>${l.lt}</span><b>${(l.lq*l.lp).toFixed(2)}€</b></div>`).join('');
-        document.getElementById('modal-download').onclick = () => { this.renderPDFContent(h); this.saveFinalPDF(h.num); };
+        document.getElementById('modal-details').innerHTML = `<p>${h.client}<br>${h.date}<br>Objet : ${h.obj}</p>`;
+        document.getElementById('modal-lines').innerHTML = h.lines.map(l => `<div style="display:flex;justify-content:space-between;font-size:12px;padding:8px 0;border-bottom:1px solid var(--border);"><span>${l.lt} (x${l.lq})</span><b>${(l.lq*l.lp).toFixed(2)}€</b></div>`).join('');
+        document.getElementById('modal-download').onclick = () => { this.renderPDF(h); this.save(h.num); };
         document.getElementById('archive-modal').style.display = 'flex';
     },
 
@@ -257,16 +365,27 @@ const App = {
     renderClients(c) {
         const tva = this.state.db.clients.filter(cli => cli.type === 'premium');
         const ttc = this.state.db.clients.filter(cli => cli.type === 'micro');
-        c.innerHTML = `<div class="pro-card"><h4>Elite Clients (TVA)</h4>${tva.map(cli => `<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)"><b>${cli.name}</b><span onclick="App.delCli('${cli.name}')" style="color:red">✕</span></div>`).join('')}</div>
-                       <div class="pro-card"><h4>Micro Clients (TTC)</h4>${ttc.map(cli => `<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)"><b>${cli.name}</b><span onclick="App.delCli('${cli.name}')" style="color:red">✕</span></div>`).join('')}</div>`;
+        c.innerHTML = `<div class="pro-card"><h4>Base Elite (TVA)</h4>${tva.map(cli => `<div class="item-row"><b>${cli.name}</b><span onclick="Core.delCli('${cli.name}')" style="color:var(--mse-red)">✕</span></div>`).join('')}</div>
+                       <div class="pro-card"><h4>Base Micro (TTC)</h4>${ttc.map(cli => `<div class="item-row"><b>${cli.name}</b><span onclick="Core.delCli('${cli.name}')" style="color:var(--mse-red)">✕</span></div>`).join('')}</div>`;
     },
 
+    renderSettings(c) {
+        c.innerHTML = `
+            <div class="pro-card"><h4>Global Language</h4><select onchange="Core.changeLang(this.value)"><option value="fr" ${this.state.lang==='fr'?'selected':''}>Français</option><option value="en" ${this.state.lang==='en'?'selected':''}>English</option></select></div>
+            <div class="pro-card"><h4>Color Space</h4>
+                <div style="display:flex;justify-content:space-between;margin-bottom:15px;"><label>MSE Red</label><input type="color" value="${this.state.colors.red}" onchange="Core.updateCol('red', this.value)"></div>
+                <div style="display:flex;justify-content:space-between;"><label>Background</label><input type="color" value="${this.state.colors.bg}" onchange="Core.updateCol('bg', this.value)"></div>
+            </div>`;
+    },
+
+    updateCol(k, v) { this.state.colors[k] = v; localStorage.setItem('mse_colors', JSON.stringify(this.state.colors)); this.applyStyle(); },
+    changeLang(v) { this.state.lang = v; localStorage.setItem('mse_lang', v); this.applyLang(); this.back(); },
     delCli(n) { this.state.db.clients = this.state.db.clients.filter(c => c.name !== n); this.sync(); this.renderModule('CLIENTS'); },
     sync() { localStorage.setItem('mse_clients', JSON.stringify(this.state.db.clients)); localStorage.setItem('mse_history', JSON.stringify(this.state.db.history)); },
     toggleTheme() { document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); localStorage.setItem('mse_theme', document.documentElement.getAttribute('data-theme')); }
 };
 
-App.init();
+Core.init();
 </script>
 </body>
 </html>
