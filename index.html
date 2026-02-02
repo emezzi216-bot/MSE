@@ -3,106 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MSE TOOL VISION</title>
+    <title>MSE TOOL ULTIMATE</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --mse-red: #D32F2F; 
-            --bg: linear-gradient(135deg, #2c2c2e 0%, #48484a 50%, #1c1c1e 100%);
-            --card: rgba(255, 255, 255, 0.08);
-            --text: #FFFFFF; --text-dim: #A1A1A6; --border: rgba(255, 255, 255, 0.15);
+            --mse-red: #E53935; /* Rouge plus vibrant */
+            --bg-metal: linear-gradient(135deg, #1e1e20 0%, #2a2a2d 50%, #151516 100%);
+            --card-bg: rgba(45, 45, 50, 0.85); /* Plus opaque pour le contraste */
+            --input-bg: rgba(0, 0, 0, 0.3); /* Contraste fort avec la card */
+            --text-main: #FFFFFF;
+            --text-sec: #B0B0B5;
+            --border: rgba(255, 255, 255, 0.15);
             --safe-top: env(safe-area-inset-top);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
 
         [data-theme="light"] {
-            --bg: linear-gradient(135deg, #e5e5ea 0%, #ffffff 100%);
-            --card: rgba(0, 0, 0, 0.05);
-            --text: #000000; --text-dim: #636366; --border: rgba(0, 0, 0, 0.1);
+            --bg-metal: linear-gradient(135deg, #f0f2f5 0%, #ffffff 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --input-bg: #F0F2F5;
+            --text-main: #1A1A1A;
+            --text-sec: #666666;
+            --border: rgba(0, 0, 0, 0.1);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body { 
-            margin: 0; background: var(--bg); background-attachment: fixed;
-            color: var(--text); font-family: 'Inter', sans-serif; height: 100vh; 
+            margin: 0; background: var(--bg-metal); background-attachment: fixed;
+            color: var(--text-main); font-family: 'Inter', sans-serif; height: 100vh; 
             overflow: hidden; position: relative; 
         }
 
+        /* Texture Métal brossé subtile */
         body::after {
             content: ""; position: fixed; inset: 0; z-index: -1;
             background-image: url('https://www.transparenttextures.com/patterns/brushed-alum.png');
-            opacity: 0.12; pointer-events: none;
+            opacity: 0.15; pointer-events: none; mix-blend-mode: overlay;
         }
 
-        header { padding: calc(var(--safe-top) + 25px) 24px 15px; display: flex; justify-content: space-between; align-items: center; }
-        .brand { font-size: 26px; font-weight: 900; letter-spacing: -1.5px; }
+        header { padding: calc(var(--safe-top) + 20px) 24px 15px; display: flex; justify-content: space-between; align-items: center; }
+        .brand { font-size: 24px; font-weight: 900; letter-spacing: -1px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         .brand span { color: var(--mse-red); }
-
+        
         .theme-btn { 
-            width: 48px; height: 48px; border-radius: 16px; 
-            background: var(--card); border: 1px solid var(--border); 
+            width: 44px; height: 44px; border-radius: 14px; 
+            background: var(--card-bg); border: 1px solid var(--border); 
             display: flex; align-items: center; justify-content: center; 
-            backdrop-filter: blur(20px); cursor: pointer;
+            backdrop-filter: blur(20px); cursor: pointer; box-shadow: var(--shadow);
         }
 
-        /* ANIMATIONS ONE UI 8 */
-        .window { 
-            position: fixed; inset: 0; background: var(--bg); z-index: 1000; 
-            display: none; flex-direction: column; transform-origin: center;
-        }
+        /* --- ONE UI ANIMATIONS --- */
+        .window { position: fixed; inset: 0; background: var(--bg-metal); z-index: 1000; display: none; flex-direction: column; }
+        
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); filter: blur(5px); } to { opacity: 1; transform: scale(1); filter: blur(0); } }
+        @keyframes zoomOut { from { opacity: 1; transform: scale(1); filter: blur(0); } to { opacity: 0; transform: scale(1.05); filter: blur(10px); } }
+        
+        .win-in { animation: zoomIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .win-out { animation: zoomOut 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-        @keyframes oneUI-In {
-            from { opacity: 0; transform: scale(0.92); filter: blur(10px); }
-            to { opacity: 1; transform: scale(1); filter: blur(0); }
-        }
+        .win-header { padding: calc(var(--safe-top) + 15px) 20px; display: flex; align-items: center; gap: 20px; background: var(--card-bg); border-bottom: 1px solid var(--border); backdrop-filter: blur(40px); z-index: 10; }
+        .win-body { flex: 1; overflow-y: auto; padding: 25px 20px 220px; }
 
-        @keyframes oneUI-Out {
-            from { opacity: 1; transform: scale(1); filter: blur(0); }
-            to { opacity: 0; transform: scale(1.05); filter: blur(15px); }
-        }
-
-        .win-animate-in { animation: oneUI-In 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-        .win-animate-out { animation: oneUI-Out 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-
+        /* --- UI ELEMENTS --- */
         #hub { height: 100%; overflow-y: auto; padding: 0 20px 240px; }
-        .section-header { font-size: 11px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; margin: 35px 0 15px 5px; letter-spacing: 1.5px; }
+        .section-title { font-size: 11px; font-weight: 800; color: var(--text-sec); text-transform: uppercase; margin: 30px 0 15px 5px; letter-spacing: 1.5px; opacity: 0.8; }
+
+        .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .app { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; }
+        .app:active { transform: scale(0.95); }
         
-        .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-        .app { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
         .icon { 
-            width: 100%; aspect-ratio: 1/1; border-radius: 26px; 
-            background: var(--card); border: 1px solid var(--border); 
+            width: 100%; aspect-ratio: 1/1; border-radius: 26px; overflow: hidden;
+            background: var(--card-bg); border: 1px solid var(--border); 
             display: flex; align-items: center; justify-content: center; 
-            backdrop-filter: blur(15px); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            overflow: hidden;
+            backdrop-filter: blur(20px); box-shadow: var(--shadow);
+            position: relative;
         }
-        .app:active .icon { transform: scale(0.92); }
         .icon img { width: 100%; height: 100%; object-fit: cover; }
-        .app span { font-size: 10px; font-weight: 700; text-align: center; color: var(--text); white-space: nowrap; }
+        .app span { font-size: 11px; font-weight: 600; color: var(--text-main); }
 
-        .card { background: var(--card); border-radius: 28px; padding: 22px; margin-bottom: 15px; border: 1px solid var(--border); backdrop-filter: blur(30px); }
-        .card h4 { margin: 0 0 15px; font-size: 10px; color: var(--mse-red); text-transform: uppercase; font-weight: 900; }
-        
-        input, textarea, select { 
-            width: 100%; background: rgba(255,255,255,0.05); 
-            border: 1px solid var(--border); border-radius: 18px; 
-            padding: 16px; color: var(--text); font-size: 16px; margin-bottom: 12px;
+        .card { 
+            background: var(--card-bg); border-radius: 24px; padding: 24px; 
+            margin-bottom: 16px; border: 1px solid var(--border); 
+            backdrop-filter: blur(30px); box-shadow: var(--shadow);
         }
+        .card h4 { margin: 0 0 15px; font-size: 11px; color: var(--mse-red); text-transform: uppercase; font-weight: 900; letter-spacing: 1px; }
 
-        .dock { position: fixed; bottom: 35px; left: 20px; right: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 35px; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(40px); z-index: 1100; }
-        .btn { background: var(--mse-red); color: #fff; border: none; padding: 16px 35px; border-radius: 22px; font-weight: 800; cursor: pointer; }
+        /* INPUTS OPTIMISÉS */
+        input, textarea, select { 
+            width: 100%; background: var(--input-bg); 
+            border: 1px solid var(--border); border-radius: 14px; 
+            padding: 16px; color: var(--text-main); font-size: 15px; 
+            margin-bottom: 12px; font-weight: 500; transition: 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        input:focus, textarea:focus { border-color: var(--mse-red); background: rgba(255,255,255,0.08); }
+        ::placeholder { color: var(--text-sec); opacity: 0.6; }
+
+        .search-bar { position: sticky; top: 0; z-index: 5; margin-bottom: 20px; backdrop-filter: blur(10px); }
         
-        #pdf-paper { width: 210mm; background: white !important; display: none; }
+        .dock { 
+            position: fixed; bottom: 30px; left: 20px; right: 20px; 
+            background: var(--card-bg); border: 1px solid var(--border); 
+            border-radius: 30px; padding: 18px 25px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            backdrop-filter: blur(40px); z-index: 1100; box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+        .btn { background: var(--mse-red); color: white; border: none; padding: 14px 30px; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 13px; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(229, 57, 53, 0.4); }
+
+        /* Archive Grid */
+        .archive-item { 
+            background: var(--card-bg); border-radius: 20px; padding: 15px; 
+            border: 1px solid var(--border); cursor: pointer; display: flex; 
+            flex-direction: column; position: relative; overflow: hidden;
+        }
+        .status-badge { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; border-radius: 50%; }
+        .paid { background: #4CAF50; box-shadow: 0 0 10px #4CAF50; }
+        .pending { background: #FF9800; box-shadow: 0 0 10px #FF9800; }
+
+        /* Modale */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 25px; backdrop-filter: blur(10px); }
+        .modal-content { background: #1a1a1a; padding: 30px; border-radius: 30px; width: 100%; max-width: 450px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
         
-        /* Archive Grid Custom */
-        .archive-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .visual-preview { width: 100%; aspect-ratio: 1/1.4; background: white; border-radius: 12px; margin-bottom: 8px; position: relative; padding: 10px; display: flex; flex-direction: column; gap: 5px; overflow: hidden; }
-        .v-line { width: 100%; height: 2px; background: #eee; }
-        .v-box { width: 40%; height: 12px; background: var(--mse-red); opacity: 0.1; }
+        #pdf-paper { width: 210mm; background: white !important; display: none; color: black; }
     </style>
 </head>
 <body>
@@ -113,58 +142,80 @@
 </header>
 
 <div id="hub">
-    <div class="section-header">Elite Invoicing</div>
+    <div class="section-title">Facturation Élite</div>
     <div class="grid-3x3">
         <div class="app" onclick="Core.open('FACTURE', 'premium')"><div class="icon"><img src="facture.png"></div><span>Facture TVA</span></div>
         <div class="app" onclick="Core.open('DEVIS', 'premium')"><div class="icon"><img src="devis.png"></div><span>Devis TVA</span></div>
         <div class="app" onclick="Core.open('ACQUITTEE')"><div class="icon"><img src="acquittee.png"></div><span>Acquittée</span></div>
     </div>
     
-    <div class="section-header">Micro Management</div>
+    <div class="section-title">Micro-Entreprise</div>
     <div class="grid-3x3">
         <div class="app" onclick="Core.open('FACTURE', 'micro')"><div class="icon"><img src="facture.png"></div><span>Facture TTC</span></div>
         <div class="app" onclick="Core.open('DEVIS', 'micro')"><div class="icon"><img src="devis.png"></div><span>Devis TTC</span></div>
-        <div class="app"></div> 
     </div>
 
-    <div class="section-header">Cloud & Archives</div>
+    <div class="section-title">Gestion & Cloud</div>
     <div class="grid-3x3">
         <div class="app" onclick="Core.open('CLIENTS')"><div class="icon"><img src="clients.png"></div><span>Clients</span></div>
         <div class="app" onclick="Core.open('ARCHIVES')"><div class="icon"><img src="archives.png"></div><span>Archives</span></div>
-        <div class="app" onclick="Core.open('SETTINGS')"><div class="icon" style="background:rgba(255,255,255,0.1)"><svg style="width:40%;fill:white" viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.84,9.48l2.03,1.58C4.82,11.36,4.8,11.68,4.8,12c0,0.33,0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z"/></svg></div><span>Cloud</span></div>
+        <div class="app" onclick="Core.open('SETTINGS')"><div class="icon" style="background:linear-gradient(45deg, #333, #444)"><svg style="width:30px;fill:white" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.5.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg></div><span>Réglages</span></div>
     </div>
 </div>
 
 <div id="win" class="window">
     <div class="win-header">
-        <button class="theme-btn" style="border:none; background:none; font-size:24px;" onclick="Core.back()">✕</button>
-        <b id="win-title"></b>
+        <button class="theme-btn" style="border:none; background:transparent; font-size:20px; color:var(--text-main);" onclick="Core.back()">✕</button>
+        <b id="win-title" style="font-size:16px; letter-spacing:1px; text-transform:uppercase;">TITRE</b>
     </div>
     <div class="win-body" id="win-content"></div>
     <div class="dock" id="win-dock" style="display:none;">
-        <div id="dock-total" style="font-size:22px; font-weight:900;">0.00 €</div>
-        <button class="btn" onclick="Core.generatePDF()">VALIDER & CLOUD</button>
+        <div style="display:flex; flex-direction:column;">
+            <span style="font-size:10px; color:var(--text-sec); font-weight:700;">TOTAL TTC</span>
+            <span id="dock-total" style="font-size:20px; font-weight:900; color:var(--mse-red);">0.00 €</span>
+        </div>
+        <button class="btn" onclick="Core.generatePDF()">VALIDER</button>
+    </div>
+</div>
+
+<div id="archive-modal" class="modal-overlay" onclick="Core.closeModal(event)">
+    <div class="modal-content">
+        <h2 id="modal-title" style="margin-top:0; color:var(--mse-red); text-transform:uppercase;"></h2>
+        <div id="modal-details" style="margin-bottom:20px; color:var(--text-sec); font-size:14px; line-height:1.6;"></div>
+        <div style="display:grid; gap:12px;">
+            <button class="btn" style="background:#fff; color:#000;" id="modal-download">TÉLÉCHARGER</button>
+            <button class="btn" style="background:transparent; border:1px solid var(--border);" id="modal-dup" onclick="">DUPLIQUER / ÉDITER</button>
+            <button class="btn" style="background:var(--mse-red); opacity:0.2;" onclick="Core.closeModal(event)">FERMER</button>
+        </div>
     </div>
 </div>
 
 <div id="pdf-paper"></div>
 
 <script>
+/** * MSE TOOL ULTIMATE - V8.0
+ * Cloud Native | High Contrast | One UI
+ */
+
 const USER = { 
     name: "Sabri BENNACEUR EI", 
     siren: "943032755", 
-    addr: "2 Résidence des Rosiers, 92800 Puteaux, FR",
-    iban: "FR76 1695 8000 0159 6810 0824 765",
-    bic: "ONTO FR P1 XXX",
-    dec: "RC décennale TETRIS SV75018041T37384"
+    addr: "2 Résidence des Rosiers, 92800 Puteaux, FR", 
+    email: "serruremse@gmail.com", 
+    dec: "RC décennale TETRIS SV75018041T37384", 
+    iban: "FR76 1695 8000 0159 6810 0824 765", 
+    bic: "ONTO FR P1 XXX" 
 };
+
+// Lien Google Script (Garde ton lien actuel)
 const CLOUD_URL = "https://script.google.com/macros/s/AKfycbzsNMAFSAolUijM6rh-G9RhzbpG4kSWjd7n_RMuQ6tY2I248YAugRQLVmvEfqNhx2ry/exec";
 
 const Core = {
     state: {
-        colors: JSON.parse(localStorage.getItem('mse_colors')) || { red: "#D32F2F", bg: "linear-gradient(135deg, #2c2c2e 0%, #48484a 50%, #1c1c1e 100%)" },
+        colors: JSON.parse(localStorage.getItem('mse_colors')) || { red: "#E53935", bg: "linear-gradient(135deg, #1e1e20 0%, #2a2a2d 50%, #151516 100%)" },
         db: { clients: JSON.parse(localStorage.getItem('mse_clients') || '[]'), history: JSON.parse(localStorage.getItem('mse_history') || '[]') },
-        curType: null, curMode: null
+        curType: null, curMode: null,
+        lastSync: localStorage.getItem('mse_last_sync') || 'Jamais'
     },
 
     init() { 
@@ -173,180 +224,82 @@ const Core = {
     },
 
     applyStyle() { 
-        const r = document.documentElement;
+        const r = document.documentElement; 
         r.style.setProperty('--mse-red', this.state.colors.red); 
         document.body.style.background = this.state.colors.bg;
     },
     
-    open(type, mode='premium') {
+    open(type, mode='premium', prefill=null) {
         this.state.curType = type; this.state.curMode = mode;
         const win = document.getElementById('win');
-        win.style.display = 'flex';
-        win.classList.remove('win-animate-out');
-        win.classList.add('win-animate-in');
         
-        document.getElementById('win-title').innerText = type + " " + mode.toUpperCase();
+        win.style.display = 'flex';
+        win.classList.remove('win-out');
+        win.classList.add('win-in');
+        
+        document.getElementById('win-title').innerText = `${type} ${mode ? mode.toUpperCase() : ''}`;
         document.getElementById('win-dock').style.display = (['DEVIS','FACTURE'].includes(type)) ? 'flex' : 'none';
         
         const c = document.getElementById('win-content');
-        if(['DEVIS','FACTURE'].includes(type)) this.renderEditor(c);
+        if(['DEVIS','FACTURE'].includes(type)) this.renderEditor(c, prefill);
         else if(type === 'CLIENTS') this.renderClients(c);
         else if(type === 'ARCHIVES') this.renderHistory(c);
         else if(type === 'SETTINGS') this.renderSettings(c);
+        else if(type === 'ACQUITTEE') this.renderAcquit(c);
         
         history.pushState({view: 'win'}, '');
     },
 
     back(isPop = false) {
         const win = document.getElementById('win');
-        win.classList.remove('win-animate-in');
-        win.classList.add('win-animate-out');
+        win.classList.remove('win-in');
+        win.classList.add('win-out');
         setTimeout(() => { 
             win.style.display = 'none'; 
-            if(!isPop && history.state?.view === 'win') history.back();
-        }, 300);
+            if(!isPop && history.state) history.back();
+        }, 250);
     },
 
-    renderEditor(c) {
+    // --- EDITOR V2 (Avec Auto-ID) ---
+    renderEditor(c, data=null) {
+        const clis = this.state.db.clients.filter(cli => cli.type === this.state.curMode);
+        const nextId = this.getNextId(this.state.curType);
+        
         c.innerHTML = `
-            <div class="card"><h4>Dossier Client</h4>
-                <input id="cn" placeholder="Nom du Client">
-                <textarea id="ca" placeholder="Adresse complète" rows="2"></textarea>
-                <input id="dn" placeholder="Numéro Document">
-                <input id="do" placeholder="Objet de l'intervention">
-            </div>
-            <div class="card"><h4>Prestations</h4><div id="lines"></div>
-                <button onclick="Core.addLine()" style="width:100%; padding:15px; background:none; border:1px dashed var(--border); color:var(--mse-red); border-radius:15px; font-weight:bold;">+ AJOUTER LIGNE</button>
-            </div>`;
-        this.addLine();
-        this.calc();
-    },
-
-    addLine() {
-        const d = document.createElement('div');
-        d.innerHTML = `<div class="line-item" style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:10px;">
-            <input class="lt" placeholder="Désignation">
-            <input type="number" class="lq" value="1" oninput="Core.calc()">
-            <input type="number" class="lp" placeholder="Prix HT" oninput="Core.calc()">
-        </div>`;
-        document.getElementById('lines').appendChild(d);
-    },
-
-    calc() {
-        let ht = 0;
-        document.querySelectorAll('.line-item').forEach(item => {
-            ht += (item.querySelector('.lq').value * item.querySelector('.lp').value);
-        });
-        const total = this.state.curMode === 'premium' ? ht * 1.2 : ht;
-        document.getElementById('dock-total').innerText = total.toFixed(2) + " €";
-        return {ht, total};
-    },
-
-    async generatePDF() {
-        const d = this.calc();
-        const n = document.getElementById('dn').value || "SN";
-        const arch = {
-            num: n, client: document.getElementById('cn').value, addr: document.getElementById('ca').value,
-            obj: document.getElementById('do').value, final: d.total, val: d.ht,
-            type: this.state.curType, mode: this.state.curMode, date: new Date().toLocaleDateString('fr-FR'),
-            lines: Array.from(document.querySelectorAll('.line-item')).map(v => ({ lt: v.querySelector('.lt').value, lq: v.querySelector('.lq').value, lp: v.querySelector('.lp').value }))
-        };
-        
-        this.state.db.history.push(arch);
-        this.sync();
-        this.pushToCloud();
-        
-        this.renderPDF(arch);
-        const p = document.getElementById('pdf-paper');
-        p.style.display = 'block';
-        html2pdf().from(p).set({margin:0, filename: n+'.pdf', jsPDF:{format:'a4'}}).save().then(() => {
-            p.style.display = 'none';
-            this.back();
-        });
-    },
-
-    renderPDF(h) {
-        const isP = (h.mode === 'premium');
-        document.getElementById('pdf-paper').innerHTML = `
-        <div style="padding:50px; background:white; color:#333; font-family:'Inter', sans-serif;">
-            <div style="display:flex; justify-content:space-between; border-bottom:3px solid #eee; padding-bottom:40px;">
-                <img src="logo.png" style="max-width:200px;">
-                <div style="text-align:right; font-size:12px;"><strong>${USER.name}</strong><br>${USER.addr}<br>SIRET: ${USER.siren}</div>
-            </div>
-            <div style="padding:40px 0;">
-                <div style="display:flex; justify-content:space-between;">
-                    <div><h1 style="margin:0; font-size:28px; color:var(--mse-red);">${h.type} N° ${h.num}</h1><b>Objet : ${h.obj}</b></div>
-                    <div style="text-align:right; background:#f9f9f9; padding:15px; border-radius:10px; min-width:200px;">
-                        <small>DESTINATAIRE</small><br><strong>${h.client}</strong><br>${h.addr}
-                    </div>
+            <div class="card">
+                <h4>Information Dossier</h4>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div><label style="font-size:10px; opacity:0.7;">DOCUMENT</label><input id="dn" value="${data ? data.num : nextId}" style="font-weight:900; color:var(--mse-red);"></div>
+                    <div><label style="font-size:10px; opacity:0.7;">RÉF</label><input id="ref" value="${data?data.ref||'':''}"></div>
                 </div>
-                <table style="width:100%; border-collapse:collapse; margin-top:30px;">
-                    <tr style="background:#333; color:#fff;"><th style="padding:10px; text-align:left;">Désignation</th><th style="text-align:right; padding:10px;">Total</th></tr>
-                    ${h.lines.map(l => `<tr><td style="padding:10px; border-bottom:1px solid #eee;">${l.lt} (x${l.lq})</td><td style="text-align:right; padding:10px; border-bottom:1px solid #eee;">${(l.lq*l.lp).toFixed(2)} €</td></tr>`).join('')}
-                </table>
-                <div style="text-align:right; margin-top:30px;">
-                    <h2 style="color:var(--mse-red);">TOTAL TTC : ${h.final.toFixed(2)} €</h2>
-                    <small>${isP ? 'TVA 20% incluse' : 'TVA non applicable'}</small>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:5px;">
+                     <div><label style="font-size:10px; opacity:0.7;">DATE</label><input type="date" id="d-e" value="${data?data.date_raw:new Date().toISOString().split('T')[0]}"></div>
+                     <div><label style="font-size:10px; opacity:0.7;">ÉCHÉANCE</label><input type="date" id="d-h" value="${data?data.eche_raw:new Date().toISOString().split('T')[0]}"></div>
                 </div>
             </div>
-        </div>`;
-    },
 
-    renderHistory(c) {
-        c.innerHTML = `<div class="archive-grid">` + [...this.state.db.history].reverse().map(h => `
-            <div class="card" style="padding:12px;">
-                <div class="visual-preview"><div class="v-box"></div><div class="v-line"></div><div class="v-line"></div></div>
-                <b style="font-size:12px;">${h.num}</b><br><small>${h.client}</small><br>
-                <b style="color:var(--mse-red);">${h.final.toFixed(2)}€</b>
-            </div>`).join('') + `</div>`;
-    },
-
-    renderSettings(c) {
-        c.innerHTML = `
-            <div class="card"><h4>Personnalisation</h4>
-                <label>Couleur d'accent</label><input type="color" value="${this.state.colors.red}" onchange="Core.updateColor('red', this.value)">
-                <label>Fond d'écran</label>
-                <select onchange="Core.updateColor('bg', this.value)">
-                    <option value="linear-gradient(135deg, #2c2c2e 0%, #48484a 50%, #1c1c1e 100%)">Gris Métal</option>
-                    <option value="#000000">Noir AMOLED</option>
-                    <option value="#2c2c2e">Gris Anthracite</option>
+            <div class="card">
+                <h4>Client & Objet</h4>
+                <select onchange="Core.fillCli(this.value)" style="margin-bottom:15px;">
+                    <option value="">📂 Charger un client existant...</option>
+                    ${clis.map(cli=>`<option value="${cli.name}">${cli.name}</option>`).join('')}
                 </select>
+                <input id="cn" placeholder="Nom du Client / Entreprise" value="${data?data.client:''}">
+                <textarea id="ca" placeholder="Adresse complète" rows="2">${data?data.addr:''}</textarea>
+                
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                     <input id="c-legal" placeholder="Forme (SAS..)" value="${data?data.c_legal||'':''}">
+                     <input id="c-siret" placeholder="SIRET" value="${data?data.c_siret||'':''}">
+                     <input id="c-tva" placeholder="N° TVA" value="${data?data.c_tva||'':''}">
+                </div>
+                
+                <input id="do" placeholder="Objet de l'intervention (ex: Remplacement serrure)" value="${data?data.obj:''}" style="margin-top:10px;">
             </div>
-            <div class="card"><h4>Cloud</h4>
-                <button class="btn" style="width:100%; background:#34A853;" onclick="Core.pushToCloud()">☁️ SYNCHRONISER DRIVE</button>
-                <button class="btn" style="width:100%; background:#4285F4; margin-top:10px;" onclick="Core.pullFromCloud()">🔄 RESTAURER DONNÉES</button>
-            </div>`;
-    },
 
-    updateColor(k, v) { this.state.colors[k] = v; localStorage.setItem('mse_colors', JSON.stringify(this.state.colors)); this.applyStyle(); },
-    
-    async pushToCloud() {
-        const data = { history: this.state.db.history, clients: this.state.db.clients, colors: this.state.colors };
-        fetch(CLOUD_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-    },
+            ${this.state.curMode==='premium' ? 
+            `<div class="card"><h4>TVA APPLICABLE</h4><select id="tva" onchange="Core.calc()"><option value="20" ${data&&data.rate==20?'selected':''}>TVA Normale (20%)</option><option value="10" ${data&&data.rate==10?'selected':''}>TVA Inter (10%)</option><option value="5.5" ${data&&data.rate==5.5?'selected':''}>TVA Réduite (5.5%)</option></select></div>` : ''}
 
-    async pullFromCloud() {
-        const res = await fetch(CLOUD_URL);
-        const data = await res.json();
-        if(data) {
-            this.state.db.history = data.history || [];
-            this.state.db.clients = data.clients || [];
-            this.sync(); location.reload();
-        }
-    },
-
-    sync() { 
-        localStorage.setItem('mse_history', JSON.stringify(this.state.db.history));
-        localStorage.setItem('mse_clients', JSON.stringify(this.state.db.clients));
-    },
-
-    toggleTheme() {
-        const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', t);
-    }
-};
-
-Core.init();
-</script>
-</body>
-</html>
+            <div class="card">
+                <h4>Lignes de facturation</h4>
+                <div id="lines"></div>
+                <button onclick="Core.addLine()" style="
