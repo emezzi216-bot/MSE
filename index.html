@@ -14,34 +14,31 @@
             --mse-red: #D32F2F;
             --gold: #D4AF37;
             --gold-glow: rgba(212, 175, 55, 0.4);
-            --bg-metal: linear-gradient(135deg, #000000 0%, #4a0000 40%, #2c2c2e 100%);
-            --card-bg: rgba(35, 35, 40, 0.85);
+            /* DÉGRADÉ FONCÉ NOIR -> ROUGE -> GRIS */
+            --bg-metal: linear-gradient(135deg, #000000 0%, #3a0000 50%, #1a1a1a 100%);
+            --card-bg: rgba(30, 30, 35, 0.9);
             --input-bg: rgba(0, 0, 0, 0.5);
             --text-main: #FFFFFF;
             --text-sec: #B0B0B5;
             --safe-top: env(safe-area-inset-top);
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
             --status-paid: #2ecc71;
             --status-pending: #f39c12;
         }
 
-        [data-theme="dark"] {
-            --bg-metal: linear-gradient(135deg, #F0F2F5 0%, #E6E9EF 100%);
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --input-bg: rgba(255, 255, 255, 0.95);
-            --text-main: #1A1A1A;
-            --text-sec: #555555;
-            --shadow: 0 10px 30px rgba(166, 145, 80, 0.15);
-        }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
-        body { margin: 0; background: var(--bg-metal); background-attachment: fixed; color: var(--text-main); font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; position: relative; }
+        body { 
+            margin: 0; background: var(--bg-metal); background-attachment: fixed;
+            color: var(--text-main); font-family: 'Inter', sans-serif; height: 100vh; 
+            overflow: hidden; position: relative; 
+        }
 
+        /* LIGNES DORÉES FLOUTÉES (Arrière-plan) */
         body::before { 
             content: ""; position: fixed; inset: 0; z-index: 0;
-            background: repeating-linear-gradient(45deg, transparent 0px, transparent 80px, rgba(212, 175, 55, 0.3) 80px, rgba(212, 175, 55, 0.1) 85px);
-            filter: blur(20px); pointer-events: none;
+            background: repeating-linear-gradient(45deg, transparent 0px, transparent 80px, rgba(212, 175, 55, 0.3) 80px, rgba(212, 175, 55, 0.05) 85px);
+            filter: blur(15px); pointer-events: none;
         }
         body::after {
             content: ""; position: fixed; inset: 0; z-index: 0;
@@ -49,56 +46,105 @@
             opacity: 0.2; pointer-events: none; mix-blend-mode: overlay;
         }
 
+        /* LAYOUT */
         header, #hub { position: relative; z-index: 2; }
 
         header { padding: calc(var(--safe-top) + 20px) 24px 15px; display: flex; justify-content: space-between; align-items: center; }
         .brand { font-size: 24px; font-weight: 900; letter-spacing: -1px; color: var(--text-main); }
-        .brand span { color: var(--gold); text-shadow: 0 1px 10px var(--gold-glow); }
+        .brand span { color: var(--gold); text-shadow: 0 0 15px var(--gold-glow); }
         
         .theme-btn { 
-            width: 44px; height: 44px; border-radius: 14px; background: var(--card-bg); border: 1px solid var(--gold);
-            display: flex; align-items: center; justify-content: center; backdrop-filter: blur(20px); cursor: pointer; box-shadow: var(--shadow); color: var(--gold); z-index: 10;
+            width: 44px; height: 44px; border-radius: 14px; 
+            background: var(--card-bg); border: 1px solid var(--gold);
+            display: flex; align-items: center; justify-content: center; 
+            backdrop-filter: blur(20px); cursor: pointer; box-shadow: var(--shadow);
+            color: var(--gold); z-index: 10;
         }
 
+        /* WINDOW & ANIMATIONS */
         .window { position: fixed; inset: 0; background: var(--bg-metal); z-index: 1000; display: none; flex-direction: column; }
+        
         @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); filter: blur(5px); } to { opacity: 1; transform: scale(1); filter: blur(0); } }
         @keyframes zoomOut { from { opacity: 1; transform: scale(1); filter: blur(0); } to { opacity: 0; transform: scale(1.05); filter: blur(10px); } }
-        .win-in { animation: zoomIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        .win-in { animation: zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .win-out { animation: zoomOut 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-        .win-header { padding: calc(var(--safe-top) + 15px) 20px; display: flex; align-items: center; gap: 20px; background: var(--card-bg); border-bottom: 1px solid var(--gold); backdrop-filter: blur(40px); z-index: 10; box-shadow: 0 5px 15px var(--gold-glow); }
+        .win-header { 
+            padding: calc(var(--safe-top) + 15px) 20px; display: flex; align-items: center; gap: 20px; 
+            background: var(--card-bg); border-bottom: 1px solid var(--gold); 
+            backdrop-filter: blur(40px); z-index: 10; box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
         .win-body { flex: 1; overflow-y: auto; padding: 25px 20px 220px; }
 
+        /* UI COMPONENTS */
         #hub { height: 100%; overflow-y: auto; padding: 0 20px 240px; }
         .section-title { font-size: 11px; font-weight: 800; color: var(--gold); text-transform: uppercase; margin: 30px 0 15px 5px; letter-spacing: 1.5px; text-shadow: 0 0 10px var(--gold-glow); }
 
         .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
         .app { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; position: relative; z-index: 5; }
         .app:active { transform: scale(0.95); }
-        .icon { width: 100%; aspect-ratio: 1/1; border-radius: 26px; overflow: hidden; background: var(--card-bg); border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(20px); box-shadow: var(--shadow); }
+        
+        .icon { 
+            width: 100%; aspect-ratio: 1/1; border-radius: 26px; overflow: hidden;
+            background: var(--card-bg); border: 1px solid var(--gold);
+            display: flex; align-items: center; justify-content: center; 
+            backdrop-filter: blur(20px); box-shadow: var(--shadow);
+        }
         .icon img { width: 100%; height: 100%; object-fit: cover; }
         .app span { font-size: 11px; font-weight: 700; color: var(--text-main); }
 
-        .card { background: var(--card-bg); border-radius: 24px; padding: 24px; margin-bottom: 16px; border: 1px solid var(--gold); backdrop-filter: blur(30px); box-shadow: var(--shadow); }
+        .card { 
+            background: var(--card-bg); border-radius: 24px; padding: 24px; 
+            margin-bottom: 16px; border: 1px solid var(--gold);
+            backdrop-filter: blur(30px); box-shadow: var(--shadow);
+        }
         .card h4 { margin: 0 0 15px; font-size: 11px; color: var(--gold); text-transform: uppercase; font-weight: 900; letter-spacing: 1px; }
 
-        input, textarea, select { width: 100%; background: var(--input-bg); border: 1px solid var(--gold); border-radius: 14px; padding: 16px; color: var(--text-main); font-size: 15px; margin-bottom: 12px; font-weight: 600; font-family: 'Inter', sans-serif; }
+        input, textarea, select { 
+            width: 100%; background: var(--input-bg); 
+            border: 1px solid var(--gold); border-radius: 14px; 
+            padding: 16px; color: var(--text-main); font-size: 15px; 
+            margin-bottom: 12px; font-weight: 600; transition: 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
         input:focus, textarea:focus { border-color: var(--mse-red); box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.2); }
-        
-        .dock { position: fixed; bottom: 30px; left: 20px; right: 20px; background: var(--card-bg); border: 1px solid var(--gold); border-radius: 30px; padding: 18px 25px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(40px); z-index: 1100; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
-        .btn { background: linear-gradient(135deg, #D32F2F 0%, #B71C1C 100%); color: white; border: none; padding: 14px 30px; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 13px; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(211, 47, 47, 0.3); border: 1px solid rgba(255,255,255,0.1); }
+        ::placeholder { color: var(--text-sec); opacity: 0.6; }
 
-        /* Archives améliorées */
-        .archive-item { background: var(--card-bg); border-radius: 20px; padding: 15px; border: 1px solid var(--gold); cursor: pointer; display: flex; flex-direction: column; position: relative; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: 0.3s; }
-        .archive-item.paid-bg { border-color: var(--status-paid); box-shadow: 0 0 10px rgba(46, 204, 113, 0.2); }
+        .search-bar { position: sticky; top: 0; z-index: 50; margin-bottom: 20px; backdrop-filter: blur(10px); }
+        
+        .dock { 
+            position: fixed; bottom: 30px; left: 20px; right: 20px; 
+            background: var(--card-bg); border: 1px solid var(--gold);
+            border-radius: 30px; padding: 18px 25px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            backdrop-filter: blur(40px); z-index: 1100; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .btn { 
+            background: linear-gradient(135deg, #D32F2F 0%, #B71C1C 100%); 
+            color: white; border: none; padding: 14px 30px; border-radius: 18px; 
+            font-weight: 800; cursor: pointer; font-size: 13px; letter-spacing: 0.5px; 
+            box-shadow: 0 4px 15px rgba(211, 47, 47, 0.3); border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .archive-item { 
+            background: var(--card-bg); border-radius: 20px; padding: 15px; 
+            border: 1px solid var(--gold); cursor: pointer; 
+            display: flex; flex-direction: column; position: relative; overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.2s;
+        }
+        .archive-item:active { transform: scale(0.98); }
+        .paid-bg { border-color: var(--status-paid); box-shadow: 0 0 15px rgba(46, 204, 113, 0.1); }
         .status-dot { position: absolute; top: 15px; right: 15px; width: 10px; height: 10px; border-radius: 50%; }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 25px; backdrop-filter: blur(15px); }
-        .modal-content { background: var(--card-bg); padding: 30px; border-radius: 30px; width: 100%; max-width: 450px; border: 2px solid var(--gold); box-shadow: 0 25px 60px rgba(0,0,0,0.5); color: var(--text-main); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 25px; backdrop-filter: blur(15px); }
+        .modal-content { 
+            background: var(--card-bg); padding: 30px; border-radius: 30px; width: 100%; max-width: 450px; 
+            border: 2px solid var(--gold); box-shadow: 0 25px 60px rgba(0,0,0,0.8); color: var(--text-main);
+        }
+        .toggle-status { width: 100%; padding: 15px; border-radius: 15px; font-weight: bold; cursor: pointer; border: 1px solid var(--gold); margin-bottom: 10px; transition: 0.2s; }
         
         #pdf-paper { width: 210mm; background: white !important; display: none; color: black; }
-        
-        .toggle-status { width: 100%; padding: 15px; border-radius: 15px; font-weight: bold; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px; transition: 0.2s; }
     </style>
 </head>
 <body>
@@ -115,11 +161,13 @@
         <div class="app" onclick="Core.open('DEVIS', 'premium')"><div class="icon"><img src="devis.png"></div><span>Devis TVA</span></div>
         <div class="app" onclick="Core.open('ACQUITTEE')"><div class="icon"><img src="acquittee.png"></div><span>Acquittée</span></div>
     </div>
+    
     <div class="section-title">Micro-Entreprise</div>
     <div class="grid-3x3">
         <div class="app" onclick="Core.open('FACTURE', 'micro')"><div class="icon"><img src="facture.png"></div><span>Facture TTC</span></div>
         <div class="app" onclick="Core.open('DEVIS', 'micro')"><div class="icon"><img src="devis.png"></div><span>Devis TTC</span></div>
     </div>
+
     <div class="section-title">Gestion & Cloud</div>
     <div class="grid-3x3">
         <div class="app" onclick="Core.open('CLIENTS')"><div class="icon"><img src="clients.png"></div><span>Clients</span></div>
@@ -156,7 +204,7 @@
         <div style="display:grid; gap:10px;">
             <button class="btn" style="background:var(--text-main); color:var(--card-bg);" id="modal-download">TÉLÉCHARGER</button>
             <button class="btn" style="background:transparent; border:1px solid var(--gold); color:var(--text-main);" id="modal-dup">✏️ MODIFIER / CORRIGER</button>
-            <button class="btn" style="background:#000; color:#E53935; border:1px solid #E53935;" onclick="Core.deleteArch()">🗑️ SUPPRIMER</button>
+            <button class="btn" style="background:var(--mse-red); opacity:0.8;" onclick="Core.deleteArch()">🗑️ SUPPRIMER</button>
         </div>
         <div style="text-align:center; margin-top:15px; cursor:pointer; opacity:0.6; font-size:12px;" onclick="Core.closeModal({target:{id:'archive-modal'}})">Fermer la fenêtre</div>
     </div>
@@ -266,11 +314,18 @@ const Core = {
             eche: new Date(document.getElementById('d-h').value).toLocaleDateString('fr-FR'), eche_raw: document.getElementById('d-h').value, 
             val: d.ht, final: d.total, rate: d.rate, mode: this.state.curMode, type: this.state.curType, lines: lines, 
             c_siret: document.getElementById('c-siret').value, c_tva: document.getElementById('c-tva').value, c_legal: document.getElementById('c-legal').value,
-            status: 'pending' // Default status
+            status: 'pending'
         };
-        this.state.db.history = this.state.db.history.filter(h => h.num !== n); this.state.db.history.push(arch);
+        // Replace logic for updates
+        this.state.db.history = this.state.db.history.filter(h => h.num !== n); 
+        this.state.db.history.push(arch);
+        
         if(!this.state.db.clients.find(c => c.name === arch.client)) { this.state.db.clients.push({name: arch.client, addr: arch.addr, type: arch.mode, siret: arch.c_siret, tva: arch.c_tva, legal: arch.c_legal}); }
-        this.sync(); this.pushToCloud(false); this.renderPDF(arch); this.save(n);
+        
+        this.sync(); // IMPORTANT: Save locally immediately
+        this.pushToCloud(false); 
+        this.renderPDF(arch); 
+        this.save(n);
     },
 
     renderPDF(h) {
@@ -295,25 +350,25 @@ const Core = {
 
     save(num) { const p = document.getElementById('pdf-paper'); p.style.display = 'block'; html2pdf().set({ margin:0, filename:`${num}.pdf`, html2canvas:{scale:2}, jsPDF:{unit:'mm', format:'a4'} }).from(p).save().then(() => { p.style.display = 'none'; this.back(); }); },
 
-    // --- ARCHIVES AVANCÉES ---
+    // --- ARCHIVES FIX ---
     renderHistory(c) {
-        // Calcul du CA Total
-        let totalCA = 0;
-        this.state.db.history.forEach(h => totalCA += h.final);
-
-        c.innerHTML = `
-        <div class="card" style="text-align:center;">
-            <div style="font-size:12px; opacity:0.7;">CHIFFRE D'AFFAIRES TOTAL</div>
-            <div style="font-size:24px; font-weight:900; color:var(--mse-red);">${totalCA.toFixed(2)} €</div>
-        </div>
-        <div class="search-bar"><input placeholder="🔍 Rechercher client, numéro..." oninput="Core.filterArch(this.value)"></div>
-        <div class="archive-grid" id="arch-list">${[...this.state.db.history].reverse().map((h, i) => this.archItem(h, this.state.db.history.length-1-i)).join('')}</div>`;
+        let totalCA = 0; this.state.db.history.forEach(h => totalCA += h.final);
+        
+        // CHECK IF EMPTY
+        let content = `<div class="card" style="text-align:center;"><div style="font-size:12px; opacity:0.7;">CHIFFRE D'AFFAIRES TOTAL</div><div style="font-size:24px; font-weight:900; color:var(--mse-red);">${totalCA.toFixed(2)} €</div></div>`;
+        content += `<div class="search-bar"><input placeholder="🔍 Rechercher..." oninput="Core.filterArch(this.value)"></div>`;
+        
+        if(this.state.db.history.length === 0) {
+            content += `<div style="text-align:center; opacity:0.5; padding:40px; border:1px dashed var(--gold); border-radius:20px;">Aucune archive pour le moment.<br>Créez une facture pour voir l'historique ici.</div>`;
+        } else {
+            content += `<div class="archive-grid" id="arch-list">${[...this.state.db.history].reverse().map((h, i) => this.archItem(h, this.state.db.history.length-1-i)).join('')}</div>`;
+        }
+        c.innerHTML = content;
     },
 
     archItem(h, idx) { 
         const statusColor = h.status === 'paid' ? 'var(--status-paid)' : 'var(--status-pending)';
-        return `
-        <div class="archive-item ${h.status === 'paid' ? 'paid-bg' : ''}" onclick="Core.viewArch(${idx})">
+        return `<div class="archive-item ${h.status === 'paid' ? 'paid-bg' : ''}" onclick="Core.viewArch(${idx})">
             <div class="status-dot" style="background:${statusColor}"></div>
             <div style="font-size:10px; opacity:0.6; margin-bottom:4px; color:var(--text-sec);">${h.date}</div>
             <div style="font-weight:800; font-size:14px; margin-bottom:2px; color:var(--text-main);">${h.num}</div>
@@ -323,7 +378,7 @@ const Core = {
     },
 
     filterArch(q) {
-        const list = document.getElementById('arch-list');
+        const list = document.getElementById('arch-list'); if(!list) return;
         const filtered = [...this.state.db.history].reverse().filter(h => h.client.toLowerCase().includes(q.toLowerCase()) || h.num.toLowerCase().includes(q.toLowerCase()));
         list.innerHTML = filtered.map((h, i) => this.archItem(h, i)).join('');
     },
@@ -331,100 +386,85 @@ const Core = {
     viewArch(idx) {
         this.state.currentArchIdx = idx;
         const h = this.state.db.history[idx];
-        
         document.getElementById('modal-title').innerText = h.num;
         document.getElementById('modal-details').innerHTML = `<b style="color:var(--text-main);">${h.client}</b><br>${h.obj}<br><span style="color:var(--mse-red); font-weight:bold; font-size:18px;">${h.final.toFixed(2)} €</span>`;
         
-        // Gestion des boutons de statut
         const btnPending = document.getElementById('btn-pending');
         const btnPaid = document.getElementById('btn-paid');
-        
-        // Reset styles
         btnPending.style.background = 'var(--input-bg)'; btnPending.style.color = 'var(--text-sec)';
         btnPaid.style.background = 'var(--input-bg)'; btnPaid.style.color = 'var(--text-sec)';
 
-        if(h.status === 'paid') {
-            btnPaid.style.background = 'var(--status-paid)';
-            btnPaid.style.color = '#fff';
-        } else {
-            btnPending.style.background = 'var(--status-pending)';
-            btnPending.style.color = '#fff';
-        }
+        if(h.status === 'paid') { btnPaid.style.background = 'var(--status-paid)'; btnPaid.style.color = '#fff'; } else { btnPending.style.background = 'var(--status-pending)'; btnPending.style.color = '#fff'; }
 
-        // Actions
         btnPending.onclick = () => Core.setStatus(idx, 'pending');
         btnPaid.onclick = () => Core.setStatus(idx, 'paid');
-
         document.getElementById('modal-download').onclick = () => { this.renderPDF(h); this.save(h.num); };
         document.getElementById('modal-dup').onclick = () => { document.getElementById('archive-modal').style.display='none'; this.open(h.type, h.mode, h); };
-        
         document.getElementById('archive-modal').style.display = 'flex';
     },
 
     setStatus(idx, status) {
         this.state.db.history[idx].status = status;
-        this.sync();
-        this.pushToCloud(false); // Sync silencieuse
-        this.viewArch(idx); // Refresh modal UI
-        if(document.getElementById('arch-list')) this.renderHistory(document.getElementById('win-content')); // Refresh list if visible
-        if(document.getElementById('cli-list')) this.viewClientHistory(this.state.db.history[idx].client); // Refresh client view if visible
+        this.sync(); this.pushToCloud(false); this.viewArch(idx);
+        if(document.getElementById('arch-list')) this.renderHistory(document.getElementById('win-content'));
+        if(document.getElementById('cli-list')) this.renderClients(document.getElementById('win-content'));
     },
 
     deleteArch() {
         if(!confirm("Supprimer définitivement ce document ?")) return;
         this.state.db.history.splice(this.state.currentArchIdx, 1);
-        this.sync();
-        this.pushToCloud(false);
+        this.sync(); this.pushToCloud(false);
         document.getElementById('archive-modal').style.display = 'none';
         
-        // Refresh views
-        const c = document.getElementById('win-content');
-        if(c.innerHTML.includes('Historique :')) {
-             // On était dans la vue client, on y retourne pas (compliqué), on retourne aux clients
-             this.open('CLIENTS');
-        } else {
-             this.renderHistory(c);
-        }
+        // Refresh correct view
+        if(document.getElementById('arch-list')) this.renderHistory(document.getElementById('win-content'));
+        else this.open('CLIENTS');
     },
 
     closeModal(e) { if(e.target.id === 'archive-modal' || e.target.tagName === 'BUTTON') document.getElementById('archive-modal').style.display = 'none'; },
 
+    // --- CLIENTS FIX ---
     renderClients(c) {
-        c.innerHTML = `
-        <div class="search-bar"><input placeholder="🔍 Rechercher un client..." oninput="Core.filterCli(this.value)"></div>
-        <div id="cli-list">
-            ${this.state.db.clients.map(cli => `
-                <div class="card" onclick="Core.viewClientHistory('${cli.name}')" style="padding:15px; display:flex; justify-content:space-between; cursor:pointer;">
-                    <b style="color:var(--text-main);">${cli.name}</b>
-                    <span style="opacity:0.5; font-size:12px; color:var(--text-sec);">Voir historique →</span>
-                </div>
-            `).join('')}
-        </div>`;
+        c.innerHTML = `<div class="search-bar"><input placeholder="🔍 Rechercher un client..." oninput="Core.filterCli(this.value)"></div><div id="cli-list"></div>`;
+        this.renderClientList();
+    },
+
+    renderClientList(filter = "") {
+        const list = this.state.db.clients.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()));
+        const container = document.getElementById('cli-list');
+        
+        if(list.length === 0) {
+            container.innerHTML = `<div style="text-align:center; opacity:0.5; padding:20px;">Aucun client trouvé.</div>`;
+            return;
+        }
+
+        // IMPORTANT: On n'utilise plus onclick avec string interpolation pour éviter les bugs d'apostrophe
+        container.innerHTML = "";
+        list.forEach(cli => {
+            const el = document.createElement('div');
+            el.className = "card";
+            el.style = "padding:15px; display:flex; justify-content:space-between; cursor:pointer;";
+            el.innerHTML = `<b style="color:var(--text-main);">${cli.name}</b><span style="opacity:0.5; font-size:12px; color:var(--text-sec);">Voir historique →</span>`;
+            el.onclick = () => Core.viewClientHistory(cli.name);
+            container.appendChild(el);
+        });
     },
     
     viewClientHistory(name) {
         const c = document.getElementById('win-content');
-        // Find real documents
         const docs = this.state.db.history.map((h, i) => ({...h, originalIdx: i})).filter(h => h.client === name).reverse();
 
-        let html = `<button class="btn" style="margin-bottom:15px; padding:10px 20px; font-size:12px; background:transparent; border:1px solid var(--gold); color:var(--text-main);" onclick="Core.open('CLIENTS')">← RETOUR CLIENTS</button>
+        let html = `<button class="btn" style="margin-bottom:15px; padding:10px 20px; font-size:12px; background:transparent; border:1px solid var(--gold); color:var(--text-main);" onclick="Core.open('CLIENTS')">← RETOUR</button>
             <div class="card"><h4>Historique : ${name}</h4></div><div class="archive-grid">`;
             
-        if(docs.length === 0) html += `<div style="grid-column:1/-1; text-align:center; opacity:0.5; padding:20px;">Aucun document trouvé.</div>`;
+        if(docs.length === 0) html += `<div style="grid-column:1/-1; text-align:center; opacity:0.5; padding:20px;">Aucun document pour ce client.</div>`;
         else html += docs.map(h => this.archItem(h, h.originalIdx)).join('');
         
         html += `</div>`;
         c.innerHTML = html;
     },
     
-    filterCli(val) {
-        const res = this.state.db.clients.filter(c => c.name.toLowerCase().includes(val.toLowerCase()));
-        document.getElementById('cli-list').innerHTML = res.map(cli => `
-            <div class="card" onclick="Core.viewClientHistory('${cli.name}')" style="padding:15px; display:flex; justify-content:space-between; cursor:pointer;">
-                <b style="color:var(--text-main);">${cli.name}</b>
-                <span style="opacity:0.5; font-size:12px; color:var(--text-sec);">Voir historique →</span>
-            </div>`).join('');
-    },
+    filterCli(val) { this.renderClientList(val); },
 
     renderSettings(c) {
         c.innerHTML = `<div class="card"><h4>Apparence</h4><div style="display:flex; gap:10px;"><button class="theme-btn" style="background:#D32F2F;" onclick="Core.updateCol('red', '#D32F2F')"></button><button class="theme-btn" style="background:#1976D2;" onclick="Core.updateCol('red', '#1976D2')"></button><button class="theme-btn" style="background:#388E3C;" onclick="Core.updateCol('red', '#388E3C')"></button></div></div><div class="card"><h4>Cloud Sync (Google)</h4><p style="font-size:12px; opacity:0.7; margin-bottom:15px; color:var(--text-sec);">Dernière synchro : ${this.state.lastSync}</p><button class="btn" style="width:100%; background:#27ae60;" onclick="Core.pushToCloud(true)">☁️ SAUVEGARDER MAINTENANT</button><button class="btn" style="width:100%; background:#34495e; margin-top:10px;" onclick="Core.pullFromCloud()">🔄 RESTAURER DEPUIS LE DRIVE</button></div>`;
