@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="fr" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>MSE TOOL ULTIMATE</title>
+    <title>MSE GOLD EDITION</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -11,25 +11,32 @@
     
     <style>
         :root {
-            --mse-red: #E53935; /* Rouge plus vibrant */
-            --bg-metal: linear-gradient(135deg, #1e1e20 0%, #2a2a2d 50%, #151516 100%);
-            --card-bg: rgba(45, 45, 50, 0.85); /* Plus opaque pour le contraste */
-            --input-bg: rgba(0, 0, 0, 0.3); /* Contraste fort avec la card */
-            --text-main: #FFFFFF;
-            --text-sec: #B0B0B5;
-            --border: rgba(255, 255, 255, 0.15);
+            /* --- COULEURS GOLD EDITION --- */
+            --mse-red: #D32F2F;
+            --gold: #D4AF37; /* Or Métallique */
+            --gold-glow: rgba(212, 175, 55, 0.25); /* Lueur dorée */
+            
+            /* Fond Clair Argenté */
+            --bg-metal: linear-gradient(135deg, #F0F2F5 0%, #E6E9EF 50%, #D8DCE3 100%);
+            
+            --card-bg: rgba(255, 255, 255, 0.85); /* Blanc vitré */
+            --input-bg: rgba(255, 255, 255, 0.9);
+            
+            --text-main: #1A1A1A; /* Noir profond */
+            --text-sec: #555555;
+            
             --safe-top: env(safe-area-inset-top);
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow: 0 10px 30px rgba(166, 145, 80, 0.15); /* Ombre chaude */
         }
 
-        [data-theme="light"] {
-            --bg-metal: linear-gradient(135deg, #f0f2f5 0%, #ffffff 100%);
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --input-bg: #F0F2F5;
-            --text-main: #1A1A1A;
-            --text-sec: #666666;
-            --border: rgba(0, 0, 0, 0.1);
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        /* Mode Sombre (Optionnel via le bouton) */
+        [data-theme="dark"] {
+            --bg-metal: linear-gradient(135deg, #1e1e20 0%, #151516 100%);
+            --card-bg: rgba(30, 30, 35, 0.9);
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --text-main: #FFFFFF;
+            --text-sec: #B0B0B5;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -40,25 +47,37 @@
             overflow: hidden; position: relative; 
         }
 
-        /* Texture Métal brossé subtile */
+        /* Arrière-plan texture (Click-through) */
+        body::before { 
+            content: ""; position: fixed; inset: 0; z-index: 0;
+            background: url('logo.png') no-repeat center center; background-size: cover; 
+            filter: blur(60px) grayscale(100%) opacity(0.15); 
+            pointer-events: none;
+        }
         body::after {
-            content: ""; position: fixed; inset: 0; z-index: -1;
+            content: ""; position: fixed; inset: 0; z-index: 0;
             background-image: url('https://www.transparenttextures.com/patterns/brushed-alum.png');
-            opacity: 0.15; pointer-events: none; mix-blend-mode: overlay;
+            opacity: 0.4; pointer-events: none; mix-blend-mode: multiply;
         }
 
+        /* Contenu au premier plan */
+        header, #hub { position: relative; z-index: 2; }
+
         header { padding: calc(var(--safe-top) + 20px) 24px 15px; display: flex; justify-content: space-between; align-items: center; }
-        .brand { font-size: 24px; font-weight: 900; letter-spacing: -1px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        .brand span { color: var(--mse-red); }
+        .brand { font-size: 24px; font-weight: 900; letter-spacing: -1px; color: var(--text-main); }
+        .brand span { color: var(--gold); text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         
         .theme-btn { 
             width: 44px; height: 44px; border-radius: 14px; 
-            background: var(--card-bg); border: 1px solid var(--border); 
+            background: var(--card-bg); 
+            border: 1px solid var(--gold); /* Contour OR */
             display: flex; align-items: center; justify-content: center; 
             backdrop-filter: blur(20px); cursor: pointer; box-shadow: var(--shadow);
+            color: var(--gold);
+            z-index: 10;
         }
 
-        /* --- ONE UI ANIMATIONS --- */
+        /* --- WINDOW --- */
         .window { position: fixed; inset: 0; background: var(--bg-metal); z-index: 1000; display: none; flex-direction: column; }
         
         @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); filter: blur(5px); } to { opacity: 1; transform: scale(1); filter: blur(0); } }
@@ -67,69 +86,85 @@
         .win-in { animation: zoomIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .win-out { animation: zoomOut 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-        .win-header { padding: calc(var(--safe-top) + 15px) 20px; display: flex; align-items: center; gap: 20px; background: var(--card-bg); border-bottom: 1px solid var(--border); backdrop-filter: blur(40px); z-index: 10; }
+        .win-header { 
+            padding: calc(var(--safe-top) + 15px) 20px; display: flex; align-items: center; gap: 20px; 
+            background: var(--card-bg); 
+            border-bottom: 1px solid var(--gold); /* Contour OR */
+            backdrop-filter: blur(40px); z-index: 10; box-shadow: 0 5px 15px var(--gold-glow);
+        }
         .win-body { flex: 1; overflow-y: auto; padding: 25px 20px 220px; }
 
         /* --- UI ELEMENTS --- */
         #hub { height: 100%; overflow-y: auto; padding: 0 20px 240px; }
-        .section-title { font-size: 11px; font-weight: 800; color: var(--text-sec); text-transform: uppercase; margin: 30px 0 15px 5px; letter-spacing: 1.5px; opacity: 0.8; }
+        .section-title { font-size: 11px; font-weight: 800; color: var(--gold); text-transform: uppercase; margin: 30px 0 15px 5px; letter-spacing: 1.5px; opacity: 1; text-shadow: 0 0 10px var(--gold-glow); }
 
         .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-        .app { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; }
+        .app { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; position: relative; z-index: 5; }
         .app:active { transform: scale(0.95); }
         
         .icon { 
             width: 100%; aspect-ratio: 1/1; border-radius: 26px; overflow: hidden;
-            background: var(--card-bg); border: 1px solid var(--border); 
+            background: var(--card-bg); 
+            border: 1px solid var(--gold); /* Contour OR */
             display: flex; align-items: center; justify-content: center; 
             backdrop-filter: blur(20px); box-shadow: var(--shadow);
             position: relative;
         }
         .icon img { width: 100%; height: 100%; object-fit: cover; }
-        .app span { font-size: 11px; font-weight: 600; color: var(--text-main); }
+        .app span { font-size: 11px; font-weight: 700; color: var(--text-main); }
 
         .card { 
             background: var(--card-bg); border-radius: 24px; padding: 24px; 
-            margin-bottom: 16px; border: 1px solid var(--border); 
+            margin-bottom: 16px; 
+            border: 1px solid var(--gold); /* Contour OR */
             backdrop-filter: blur(30px); box-shadow: var(--shadow);
         }
-        .card h4 { margin: 0 0 15px; font-size: 11px; color: var(--mse-red); text-transform: uppercase; font-weight: 900; letter-spacing: 1px; }
+        .card h4 { margin: 0 0 15px; font-size: 11px; color: var(--gold); text-transform: uppercase; font-weight: 900; letter-spacing: 1px; }
 
-        /* INPUTS OPTIMISÉS */
         input, textarea, select { 
             width: 100%; background: var(--input-bg); 
-            border: 1px solid var(--border); border-radius: 14px; 
+            border: 1px solid var(--gold); /* Contour OR */
+            border-radius: 14px; 
             padding: 16px; color: var(--text-main); font-size: 15px; 
-            margin-bottom: 12px; font-weight: 500; transition: 0.2s;
+            margin-bottom: 12px; font-weight: 600; transition: 0.2s;
             font-family: 'Inter', sans-serif;
         }
-        input:focus, textarea:focus { border-color: var(--mse-red); background: rgba(255,255,255,0.08); }
+        input:focus, textarea:focus { border-color: var(--mse-red); box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1); }
         ::placeholder { color: var(--text-sec); opacity: 0.6; }
 
-        .search-bar { position: sticky; top: 0; z-index: 5; margin-bottom: 20px; backdrop-filter: blur(10px); }
+        .search-bar { position: sticky; top: 0; z-index: 50; margin-bottom: 20px; backdrop-filter: blur(10px); }
         
         .dock { 
             position: fixed; bottom: 30px; left: 20px; right: 20px; 
-            background: var(--card-bg); border: 1px solid var(--border); 
+            background: var(--card-bg); 
+            border: 1px solid var(--gold); /* Contour OR */
             border-radius: 30px; padding: 18px 25px; 
             display: flex; justify-content: space-between; align-items: center; 
-            backdrop-filter: blur(40px); z-index: 1100; box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            backdrop-filter: blur(40px); z-index: 1100; box-shadow: 0 10px 40px rgba(212, 175, 55, 0.2);
         }
-        .btn { background: var(--mse-red); color: white; border: none; padding: 14px 30px; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 13px; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(229, 57, 53, 0.4); }
+        .btn { 
+            background: linear-gradient(135deg, #D32F2F 0%, #B71C1C 100%); 
+            color: white; border: none; padding: 14px 30px; border-radius: 18px; 
+            font-weight: 800; cursor: pointer; font-size: 13px; letter-spacing: 0.5px; 
+            box-shadow: 0 4px 15px rgba(211, 47, 47, 0.3); border: 1px solid rgba(255,255,255,0.2);
+        }
 
-        /* Archive Grid */
         .archive-item { 
             background: var(--card-bg); border-radius: 20px; padding: 15px; 
-            border: 1px solid var(--border); cursor: pointer; display: flex; 
-            flex-direction: column; position: relative; overflow: hidden;
+            border: 1px solid var(--gold); /* Contour OR */
+            cursor: pointer; display: flex; flex-direction: column; position: relative; overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
         .status-badge { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; border-radius: 50%; }
-        .paid { background: #4CAF50; box-shadow: 0 0 10px #4CAF50; }
-        .pending { background: #FF9800; box-shadow: 0 0 10px #FF9800; }
+        .paid { background: #4CAF50; box-shadow: 0 0 5px #4CAF50; }
+        .pending { background: #FF9800; box-shadow: 0 0 5px #FF9800; }
 
-        /* Modale */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 25px; backdrop-filter: blur(10px); }
-        .modal-content { background: #1a1a1a; padding: 30px; border-radius: 30px; width: 100%; max-width: 450px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.6); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 25px; backdrop-filter: blur(15px); }
+        .modal-content { 
+            background: #fff; padding: 30px; border-radius: 30px; width: 100%; max-width: 450px; 
+            border: 2px solid var(--gold); /* Contour OR */
+            box-shadow: 0 25px 60px rgba(0,0,0,0.15); 
+        }
         
         #pdf-paper { width: 210mm; background: white !important; display: none; color: black; }
     </style>
@@ -137,7 +172,7 @@
 <body>
 
 <header>
-    <div class="brand">MSE <span>TOOL</span></div>
+    <div class="brand">MSE <span>GOLD</span></div>
     <div class="theme-btn" onclick="Core.toggleTheme()">🌓</div>
 </header>
 
@@ -159,14 +194,14 @@
     <div class="grid-3x3">
         <div class="app" onclick="Core.open('CLIENTS')"><div class="icon"><img src="clients.png"></div><span>Clients</span></div>
         <div class="app" onclick="Core.open('ARCHIVES')"><div class="icon"><img src="archives.png"></div><span>Archives</span></div>
-        <div class="app" onclick="Core.open('SETTINGS')"><div class="icon" style="background:linear-gradient(45deg, #333, #444)"><svg style="width:30px;fill:white" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.5.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg></div><span>Réglages</span></div>
+        <div class="app" onclick="Core.open('SETTINGS')"><div class="icon" style="background: linear-gradient(135deg, #333, #555); border:1px solid var(--gold)"><svg style="width:30px;fill:var(--gold)" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.5.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg></div><span>Réglages</span></div>
     </div>
 </div>
 
 <div id="win" class="window">
     <div class="win-header">
-        <button class="theme-btn" style="border:none; background:transparent; font-size:20px; color:var(--text-main);" onclick="Core.back()">✕</button>
-        <b id="win-title" style="font-size:16px; letter-spacing:1px; text-transform:uppercase;">TITRE</b>
+        <button class="theme-btn" style="border:none; background:transparent; font-size:22px; color:var(--text-main); border:none; box-shadow:none;" onclick="Core.back()">✕</button>
+        <b id="win-title" style="font-size:16px; letter-spacing:1px; text-transform:uppercase; color:var(--text-main);">TITRE</b>
     </div>
     <div class="win-body" id="win-content"></div>
     <div class="dock" id="win-dock" style="display:none;">
@@ -183,9 +218,9 @@
         <h2 id="modal-title" style="margin-top:0; color:var(--mse-red); text-transform:uppercase;"></h2>
         <div id="modal-details" style="margin-bottom:20px; color:var(--text-sec); font-size:14px; line-height:1.6;"></div>
         <div style="display:grid; gap:12px;">
-            <button class="btn" style="background:#fff; color:#000;" id="modal-download">TÉLÉCHARGER</button>
-            <button class="btn" style="background:transparent; border:1px solid var(--border);" id="modal-dup" onclick="">DUPLIQUER / ÉDITER</button>
-            <button class="btn" style="background:var(--mse-red); opacity:0.2;" onclick="Core.closeModal(event)">FERMER</button>
+            <button class="btn" style="background:#1A1A1A; color:#fff;" id="modal-download">TÉLÉCHARGER</button>
+            <button class="btn" style="background:transparent; border:1px solid var(--gold); color:var(--text-main);" id="modal-dup">DUPLIQUER / ÉDITER</button>
+            <button class="btn" style="background:var(--mse-red); opacity:0.8;" onclick="Core.closeModal(event)">FERMER</button>
         </div>
     </div>
 </div>
@@ -193,10 +228,6 @@
 <div id="pdf-paper"></div>
 
 <script>
-/** * MSE TOOL ULTIMATE - V8.0
- * Cloud Native | High Contrast | One UI
- */
-
 const USER = { 
     name: "Sabri BENNACEUR EI", 
     siren: "943032755", 
@@ -207,36 +238,25 @@ const USER = {
     bic: "ONTO FR P1 XXX" 
 };
 
-// Lien Google Script (Garde ton lien actuel)
 const CLOUD_URL = "https://script.google.com/macros/s/AKfycbzsNMAFSAolUijM6rh-G9RhzbpG4kSWjd7n_RMuQ6tY2I248YAugRQLVmvEfqNhx2ry/exec";
 
 const Core = {
     state: {
-        colors: JSON.parse(localStorage.getItem('mse_colors')) || { red: "#E53935", bg: "linear-gradient(135deg, #1e1e20 0%, #2a2a2d 50%, #151516 100%)" },
+        colors: JSON.parse(localStorage.getItem('mse_colors')) || { red: "#D32F2F" },
         db: { clients: JSON.parse(localStorage.getItem('mse_clients') || '[]'), history: JSON.parse(localStorage.getItem('mse_history') || '[]') },
         curType: null, curMode: null,
         lastSync: localStorage.getItem('mse_last_sync') || 'Jamais'
     },
 
-    init() { 
-        this.applyStyle(); 
-        window.onpopstate = () => this.back(true); 
-    },
-
+    init() { this.applyStyle(); window.onpopstate = () => this.back(true); },
     applyStyle() { 
-        const r = document.documentElement; 
-        r.style.setProperty('--mse-red', this.state.colors.red); 
-        document.body.style.background = this.state.colors.bg;
+        document.documentElement.style.setProperty('--mse-red', this.state.colors.red); 
     },
     
     open(type, mode='premium', prefill=null) {
         this.state.curType = type; this.state.curMode = mode;
         const win = document.getElementById('win');
-        
-        win.style.display = 'flex';
-        win.classList.remove('win-out');
-        win.classList.add('win-in');
-        
+        win.style.display = 'flex'; win.classList.remove('win-out'); win.classList.add('win-in');
         document.getElementById('win-title').innerText = `${type} ${mode ? mode.toUpperCase() : ''}`;
         document.getElementById('win-dock').style.display = (['DEVIS','FACTURE'].includes(type)) ? 'flex' : 'none';
         
@@ -252,24 +272,17 @@ const Core = {
 
     back(isPop = false) {
         const win = document.getElementById('win');
-        win.classList.remove('win-in');
-        win.classList.add('win-out');
-        setTimeout(() => { 
-            win.style.display = 'none'; 
-            if(!isPop && history.state) history.back();
-        }, 250);
+        win.classList.remove('win-in'); win.classList.add('win-out');
+        setTimeout(() => { win.style.display = 'none'; if(!isPop && history.state) history.back(); }, 250);
     },
 
-    // --- EDITOR V2 (Avec Auto-ID) ---
     renderEditor(c, data=null) {
         const clis = this.state.db.clients.filter(cli => cli.type === this.state.curMode);
-        const nextId = this.getNextId(this.state.curType);
-        
         c.innerHTML = `
             <div class="card">
                 <h4>Information Dossier</h4>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                    <div><label style="font-size:10px; opacity:0.7;">DOCUMENT</label><input id="dn" value="${data ? data.num : nextId}" style="font-weight:900; color:var(--mse-red);"></div>
+                    <div><label style="font-size:10px; opacity:0.7;">DOCUMENT</label><input id="dn" value="${data ? data.num : ''}" style="font-weight:900; color:var(--mse-red);"></div>
                     <div><label style="font-size:10px; opacity:0.7;">RÉF</label><input id="ref" value="${data?data.ref||'':''}"></div>
                 </div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:5px;">
@@ -277,29 +290,142 @@ const Core = {
                      <div><label style="font-size:10px; opacity:0.7;">ÉCHÉANCE</label><input type="date" id="d-h" value="${data?data.eche_raw:new Date().toISOString().split('T')[0]}"></div>
                 </div>
             </div>
-
             <div class="card">
                 <h4>Client & Objet</h4>
                 <select onchange="Core.fillCli(this.value)" style="margin-bottom:15px;">
-                    <option value="">📂 Charger un client existant...</option>
-                    ${clis.map(cli=>`<option value="${cli.name}">${cli.name}</option>`).join('')}
+                    <option value="">📂 Charger un client existant...</option>${clis.map(cli=>`<option value="${cli.name}">${cli.name}</option>`).join('')}
                 </select>
-                <input id="cn" placeholder="Nom du Client / Entreprise" value="${data?data.client:''}">
+                <input id="cn" placeholder="Nom du Client" value="${data?data.client:''}">
                 <textarea id="ca" placeholder="Adresse complète" rows="2">${data?data.addr:''}</textarea>
-                
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-                     <input id="c-legal" placeholder="Forme (SAS..)" value="${data?data.c_legal||'':''}">
+                     <input id="c-legal" placeholder="Forme" value="${data?data.c_legal||'':''}">
                      <input id="c-siret" placeholder="SIRET" value="${data?data.c_siret||'':''}">
                      <input id="c-tva" placeholder="N° TVA" value="${data?data.c_tva||'':''}">
                 </div>
-                
-                <input id="do" placeholder="Objet de l'intervention (ex: Remplacement serrure)" value="${data?data.obj:''}" style="margin-top:10px;">
+                <input id="do" placeholder="Objet de l'intervention" value="${data?data.obj:''}" style="margin-top:10px;">
             </div>
+            ${this.state.curMode==='premium' ? `<div class="card"><h4>TVA APPLICABLE</h4><select id="tva" onchange="Core.calc()"><option value="20" ${data&&data.rate==20?'selected':''}>TVA Normale (20%)</option><option value="10" ${data&&data.rate==10?'selected':''}>TVA Inter (10%)</option><option value="5.5" ${data&&data.rate==5.5?'selected':''}>TVA Réduite (5.5%)</option></select></div>` : ''}
+            <div class="card"><h4>Lignes</h4><div id="lines"></div><button onclick="Core.addLine()" style="width:100%; padding:15px; border:1px dashed var(--mse-red); color:var(--mse-red); background:transparent; border-radius:15px; font-weight:bold;">+ AJOUTER LIGNE</button></div>`;
+        if(data && data.lines) data.lines.forEach(l => this.addLine(l)); else this.addLine();
+        this.calc();
+    },
 
-            ${this.state.curMode==='premium' ? 
-            `<div class="card"><h4>TVA APPLICABLE</h4><select id="tva" onchange="Core.calc()"><option value="20" ${data&&data.rate==20?'selected':''}>TVA Normale (20%)</option><option value="10" ${data&&data.rate==10?'selected':''}>TVA Inter (10%)</option><option value="5.5" ${data&&data.rate==5.5?'selected':''}>TVA Réduite (5.5%)</option></select></div>` : ''}
+    addLine(l=null) {
+        const d = document.createElement('div'); d.className = "line-item";
+        d.innerHTML = `<div style="display:grid; grid-template-columns: 1fr 80px 90px; gap:10px; margin-bottom:12px;"><input class="lt" placeholder="Description" value="${l?l.lt:''}" style="margin:0;"><input type="number" class="lq" value="${l?l.lq:1}" oninput="Core.calc()" style="margin:0; text-align:center;"><input type="number" class="lp" placeholder="Prix" value="${l?l.lp:''}" oninput="Core.calc()" style="margin:0; text-align:right;"></div>`;
+        document.getElementById('lines').appendChild(d);
+    },
 
-            <div class="card">
-                <h4>Lignes de facturation</h4>
-                <div id="lines"></div>
-                <button onclick="Core.addLine()" style="
+    fillCli(n) { const c = this.state.db.clients.find(cli => cli.name === n); if(c) { document.getElementById('cn').value=c.name; document.getElementById('ca').value=c.addr; document.getElementById('c-siret').value=c.siret||""; document.getElementById('c-tva').value=c.tva||""; document.getElementById('c-legal').value=c.legal||""; } },
+    
+    calc() { 
+        let ht = 0; document.querySelectorAll('.line-item').forEach(d => { ht += (d.querySelector('.lq').value * d.querySelector('.lp').value); });
+        const rate = this.state.curMode === 'premium' ? parseFloat(document.getElementById('tva').value || 20) : 0; 
+        const total = ht * (1 + rate/100); document.getElementById('dock-total').innerText = total.toFixed(2) + " €"; 
+        return {ht, total, rate}; 
+    },
+
+    async generatePDF() {
+        const d = this.calc(); const n = document.getElementById('dn').value || `D-${Date.now()}`;
+        const lines = Array.from(document.querySelectorAll('.line-item')).map(v => ({ lt: v.querySelector('.lt').value, lq: v.querySelector('.lq').value, lp: v.querySelector('.lp').value }));
+        const arch = { 
+            num: n, client: document.getElementById('cn').value, addr: document.getElementById('ca').value, 
+            obj: document.getElementById('do').value, ref: document.getElementById('ref').value, 
+            date: new Date(document.getElementById('d-e').value).toLocaleDateString('fr-FR'), date_raw: document.getElementById('d-e').value, 
+            eche: new Date(document.getElementById('d-h').value).toLocaleDateString('fr-FR'), eche_raw: document.getElementById('d-h').value, 
+            val: d.ht, final: d.total, rate: d.rate, mode: this.state.curMode, type: this.state.curType, lines: lines, 
+            c_siret: document.getElementById('c-siret').value, c_tva: document.getElementById('c-tva').value, c_legal: document.getElementById('c-legal').value 
+        };
+        this.state.db.history = this.state.db.history.filter(h => h.num !== n); this.state.db.history.push(arch);
+        if(!this.state.db.clients.find(c => c.name === arch.client)) { this.state.db.clients.push({name: arch.client, addr: arch.addr, type: arch.mode, siret: arch.c_siret, tva: arch.c_tva, legal: arch.c_legal}); }
+        this.sync(); this.pushToCloud(false); this.renderPDF(arch); this.save(n);
+    },
+
+    renderPDF(h) {
+        const isP = (h.mode === 'premium');
+        let rows = h.lines.map(l => `<tr><td style="padding:12px; border-bottom:1px solid #eee;">${l.lt}</td><td style="text-align:center; padding:12px; border-bottom:1px solid #eee;">${l.lq}</td><td style="text-align:right; padding:12px; border-bottom:1px solid #eee;">${parseFloat(l.lp).toFixed(2)}</td><td style="text-align:right; padding:12px; border-bottom:1px solid #eee;">${(l.lq*l.lp).toFixed(2)}</td></tr>`).join('');
+        document.getElementById('pdf-paper').innerHTML = `
+        <div style="padding:50px; background:white; color:#111; font-family:'Inter', sans-serif;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:50px;">
+                <img src="logo.png" style="height:80px; object-fit:contain;">
+                <div style="text-align:right; font-size:11px; line-height:1.5; color:#555;"><strong style="color:var(--mse-red); font-size:14px;">${USER.name}</strong><br>${USER.addr}<br>SIRET: ${USER.siren}<br>${USER.dec}</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:40px;">
+                <div><h1 style="margin:0; font-size:32px; color:var(--mse-red); text-transform:uppercase;">${h.type}</h1><span style="font-size:14px; color:#666;">N° ${h.num}</span><br><br><div style="font-size:12px;"><strong>Date d'émission :</strong> ${h.date}<br><strong>Date d'échéance :</strong> ${h.eche}</div></div>
+                <div style="width:280px; background:#f8f9fa; border:1px solid #eee; border-radius:12px; padding:20px;"><div style="font-size:10px; color:#888; text-transform:uppercase; font-weight:bold; margin-bottom:5px;">Destinataire</div><strong style="font-size:15px; display:block; margin-bottom:5px;">${h.client}</strong><div style="font-size:12px; color:#444; line-height:1.4;">${h.addr}<br>${h.c_siret ? `SIRET: ${h.c_siret}` : ''}</div></div>
+            </div>
+            <div style="margin-bottom:30px; padding:15px; border-left:4px solid var(--mse-red); background:#fff5f5;"><strong style="color:var(--mse-red);">Objet :</strong> ${h.obj} ${h.ref ? `<span style="color:#666;">(Réf: ${h.ref})</span>` : ''}</div>
+            <table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:40px;"><thead><tr style="background:#222; color:white;"><th style="padding:12px; text-align:left;">Description</th><th style="padding:12px; text-align:center;">Qté</th><th style="padding:12px; text-align:right;">P.U HT</th><th style="padding:12px; text-align:right;">Total HT</th></tr></thead><tbody>${rows}</tbody></table>
+            <div style="display:flex; justify-content:flex-end;"><div style="width:250px; text-align:right;"><div style="padding:10px 0; border-bottom:1px solid #eee; font-size:13px;">Total HT : <strong>${h.val.toFixed(2)} €</strong></div>${isP ? `<div style="padding:10px 0; border-bottom:1px solid #eee; font-size:13px;">TVA (${h.rate}%) : <strong>${(h.final - h.val).toFixed(2)} €</strong></div>` : ''}<div style="padding:15px 0; font-size:18px; color:var(--mse-red); font-weight:900;">NET À PAYER : ${h.final.toFixed(2)} €</div></div></div>
+            <div style="position:fixed; bottom:40px; left:50px; right:50px; text-align:center; font-size:10px; color:#999; border-top:1px solid #eee; padding-top:15px;">Règlement par virement bancaire<br><strong>IBAN : ${USER.iban} | BIC : ${USER.bic}</strong><br>${!isP ? "TVA non applicable, art. 293 B du CGI" : "Serrurerie MSE - Document généré par MSE Tool Vision"}</div>
+        </div>`;
+    },
+
+    save(num) { const p = document.getElementById('pdf-paper'); p.style.display = 'block'; html2pdf().set({ margin:0, filename:`${num}.pdf`, html2canvas:{scale:2}, jsPDF:{unit:'mm', format:'a4'} }).from(p).save().then(() => { p.style.display = 'none'; this.back(); }); },
+
+    renderHistory(c) {
+        c.innerHTML = `<div class="search-bar"><input placeholder="🔍 Rechercher client, numéro..." oninput="Core.filterArch(this.value)"></div><div class="archive-grid" id="arch-list">${[...this.state.db.history].reverse().map((h, i) => this.archItem(h, this.state.db.history.length-1-i)).join('')}</div>`;
+    },
+
+    archItem(h, idx) { return `<div class="archive-item" onclick="Core.viewArch(${idx})"><div class="status-badge ${h.status || 'pending'}"></div><div style="font-size:10px; opacity:0.6; margin-bottom:4px; color:var(--text-sec);">${h.date}</div><div style="font-weight:800; font-size:14px; margin-bottom:2px; color:var(--text-main);">${h.num}</div><div style="font-size:12px; color:var(--text-sec); margin-bottom:10px;">${h.client}</div><div style="margin-top:auto; font-weight:900; color:var(--mse-red); font-size:16px;">${h.final.toFixed(2)} €</div></div>`; },
+
+    filterArch(q) {
+        const list = document.getElementById('arch-list');
+        const filtered = [...this.state.db.history].reverse().filter(h => h.client.toLowerCase().includes(q.toLowerCase()) || h.num.toLowerCase().includes(q.toLowerCase()));
+        list.innerHTML = filtered.map((h, i) => this.archItem(h, i)).join('');
+    },
+
+    viewArch(idx) {
+        const h = this.state.db.history[idx];
+        document.getElementById('modal-title').innerText = h.num;
+        document.getElementById('modal-details').innerHTML = `<b style="color:var(--text-main);">${h.client}</b><br>${h.obj}<br><span style="color:var(--mse-red); font-weight:bold; font-size:18px;">${h.final.toFixed(2)} €</span>`;
+        document.getElementById('modal-download').onclick = () => { this.renderPDF(h); this.save(h.num); };
+        document.getElementById('modal-dup').onclick = () => { document.getElementById('archive-modal').style.display='none'; this.open(h.type, h.mode, h); };
+        document.getElementById('archive-modal').style.display = 'flex';
+    },
+
+    closeModal(e) { if(e.target.id === 'archive-modal' || e.target.tagName === 'BUTTON') document.getElementById('archive-modal').style.display = 'none'; },
+
+    renderClients(c) {
+        c.innerHTML = `<input class="search-bar" placeholder="🔍 Rechercher un client..." oninput="Core.filterCli(this.value)"><div id="cli-list">${this.state.db.clients.map(cli => `<div class="card" style="padding:15px; display:flex; justify-content:space-between;"><b style="color:var(--text-main);">${cli.name}</b><span style="opacity:0.5; font-size:12px; color:var(--text-sec);">${cli.type}</span></div>`).join('')}</div>`;
+    },
+    
+    filterCli(val) {
+        const res = this.state.db.clients.filter(c => c.name.toLowerCase().includes(val.toLowerCase()));
+        document.getElementById('cli-list').innerHTML = res.map(cli => `<div class="card" style="padding:15px; display:flex; justify-content:space-between;"><b style="color:var(--text-main);">${cli.name}</b><span style="opacity:0.5; font-size:12px; color:var(--text-sec);">${cli.type}</span></div>`).join('');
+    },
+
+    renderSettings(c) {
+        c.innerHTML = `<div class="card"><h4>Apparence</h4><div style="display:flex; gap:10px;"><button class="theme-btn" style="background:#D32F2F;" onclick="Core.updateCol('red', '#D32F2F')"></button><button class="theme-btn" style="background:#1976D2;" onclick="Core.updateCol('red', '#1976D2')"></button><button class="theme-btn" style="background:#388E3C;" onclick="Core.updateCol('red', '#388E3C')"></button></div></div><div class="card"><h4>Cloud Sync (Google)</h4><p style="font-size:12px; opacity:0.7; margin-bottom:15px; color:var(--text-sec);">Dernière synchro : ${this.state.lastSync}</p><button class="btn" style="width:100%; background:#27ae60;" onclick="Core.pushToCloud(true)">☁️ SAUVEGARDER MAINTENANT</button><button class="btn" style="width:100%; background:#34495e; margin-top:10px;" onclick="Core.pullFromCloud()">🔄 RESTAURER DEPUIS LE DRIVE</button></div>`;
+    },
+
+    renderAcquit(c) { c.innerHTML = `<div class="card"><h4>Tampon Acquittée</h4><input type="file" id="pdf-up" accept="application/pdf" style="padding:40px; border:2px dashed var(--gold); background:var(--input-bg);"><button class="btn" style="width:100%; margin-top:20px;" onclick="Core.doStamp()">APPLIQUER TAMPON</button></div>`; },
+    
+    async doStamp() {
+        const f=document.getElementById('pdf-up').files[0]; if(!f) return;
+        const r=new FileReader(); r.onload=async function(){
+            const doc=await PDFLib.PDFDocument.load(new Uint8Array(this.result));
+            const page=doc.getPages()[0]; const {width, height}=page.getSize();
+            page.drawText("ACQUITTÉE", { x: width - 180, y: height - 70, size: 26, color: PDFLib.rgb(0.8, 0.1, 0.1), font: await doc.embedFont(PDFLib.StandardFonts.HelveticaBold) });
+            const out=await doc.save(); const l=document.createElement("a"); l.href=URL.createObjectURL(new Blob([out],{type:"application/pdf"})); l.download=`ACQUITTEE.pdf`; l.click();
+        }; r.readAsArrayBuffer(f);
+    },
+
+    async pushToCloud(show) {
+        const d = { clients: this.state.db.clients, history: this.state.db.history, colors: this.state.colors };
+        try { await fetch(CLOUD_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(d) }); this.state.lastSync = new Date().toLocaleString(); localStorage.setItem('mse_last_sync', this.state.lastSync); if(show) alert("✅ Données sécurisées sur Google Drive !"); } catch(e) { if(show) alert("❌ Erreur de connexion Cloud"); }
+    },
+
+    async pullFromCloud() {
+        if(!confirm("Attention : Cela va écraser les données locales par celles du Cloud.")) return;
+        try { const res = await fetch(CLOUD_URL); const data = await res.json(); this.state.db = { clients: data.clients || [], history: data.history || [] }; this.state.colors = data.colors || this.state.colors; this.sync(); location.reload(); } catch(e) { alert("❌ Impossible de récupérer les données."); }
+    },
+
+    updateCol(k, v) { this.state.colors[k] = v; localStorage.setItem('mse_colors', JSON.stringify(this.state.colors)); this.applyStyle(); },
+    sync() { localStorage.setItem('mse_clients', JSON.stringify(this.state.db.clients)); localStorage.setItem('mse_history', JSON.stringify(this.state.db.history)); },
+    toggleTheme() { document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+};
+Core.init();
+</script>
+</body>
+</html>
