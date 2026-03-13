@@ -3,239 +3,421 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Gestion MSE</title>
+    <title>MSE</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBr2hGP6txnX804_hfoF2qkvkNYoe7T21s&libraries=places"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy, addDoc, getDocs, doc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJPsY_PaMVtUa6pSWPQZ0d_6upylKgQco",
+            authDomain: "mseg-bec3b.firebaseapp.com",
+            projectId: "mseg-bec3b",
+            storageBucket: "mseg-bec3b.firebasestorage.app",
+            messagingSenderId: "941297392464",
+            appId: "1:941297392464:web:6974cd937647834d442a55",
+            measurementId: "G-2MN7CKVRJ4"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        window.dbFirebase = getFirestore(app);
+        window.storageFirebase = getStorage(app);
+        window.fb = { collection, onSnapshot, query, orderBy, addDoc, getDocs, doc, setDoc, deleteDoc, updateDoc };
+        window.fbStorage = { ref, uploadBytesResumable, getDownloadURL, deleteObject };
+    </script>
+
     <style>
         :root {
-            --mse-red: #D32F2F;
-            --gold: #D4AF37;
-            --gold-glow: rgba(212, 175, 55, 0.4);
-            /* DÉGRADÉ FONCÉ NOIR -> ROUGE -> GRIS */
-            --bg-metal: linear-gradient(135deg, #000000 0%, #3a0000 50%, #1a1a1a 100%);
-            --card-bg: rgba(30, 30, 35, 0.9);
-            --input-bg: rgba(0, 0, 0, 0.5);
-            --text-main: #FFFFFF;
-            --text-sec: #B0B0B5;
-            --safe-top: env(safe-area-inset-top);
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-            --status-paid: #2ecc71;
-            --status-pending: #f39c12;
+            --primary: #dc2626; 
+            --primary-hover: #b91c1c;
+            --bg-body: #f4f5f7;
+            --bg-surface: #ffffff;
+            --bg-input: #f9fafb;
+            --border: #e5e7eb;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+            --radius: 16px;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --status-paid: #10b981; 
+            --status-pending: #f59e0b;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        [data-theme="dark"] {
+            --bg-body: #0f1115;
+            --bg-surface: #1a1d24;
+            --bg-input: #252a33;
+            --border: #2d3748;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body { 
-            margin: 0; background: var(--bg-metal); background-attachment: fixed;
-            color: var(--text-main); font-family: 'Inter', sans-serif; height: 100vh; 
-            overflow: hidden; position: relative; 
+            background: var(--bg-body); color: var(--text-main); 
+            line-height: 1.5; -webkit-font-smoothing: antialiased;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
-        /* LIGNES DORÉES FLOUTÉES (Arrière-plan) */
-        body::before { 
-            content: ""; position: fixed; inset: 0; z-index: 0;
-            background: repeating-linear-gradient(45deg, transparent 0px, transparent 80px, rgba(212, 175, 55, 0.3) 80px, rgba(212, 175, 55, 0.05) 85px);
-            filter: blur(15px); pointer-events: none;
-        }
-        body::after {
-            content: ""; position: fixed; inset: 0; z-index: 0;
-            background-image: url('https://www.transparenttextures.com/patterns/brushed-alum.png');
-            opacity: 0.2; pointer-events: none; mix-blend-mode: overlay;
-        }
+        .app-container { max-width: 1200px; margin: 0 auto; padding: calc(var(--safe-top) + 20px) 20px 40px; }
 
-        /* LAYOUT */
-        header, #hub { position: relative; z-index: 2; }
+        /* VECTEURS SVG GLOBALES */
+        svg { stroke-width: 2; stroke: currentColor; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        .icon-sm { width: 16px; height: 16px; display: inline-block; vertical-align: text-bottom; margin-right: 6px; }
+        .icon-md { width: 24px; height: 24px; }
 
-        header { padding: calc(var(--safe-top) + 20px) 24px 15px; display: flex; justify-content: space-between; align-items: center; }
-        .brand { font-size: 24px; font-weight: 900; letter-spacing: -1px; color: var(--text-main); }
-        .brand span { color: var(--gold); text-shadow: 0 0 15px var(--gold-glow); }
+        /* LOGIN SCREEN */
+        #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .login-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 40px; width: 100%; max-width: 400px; box-shadow: var(--shadow-md); text-align: center; }
+        .login-card h1 { color: var(--primary); font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
+        .login-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 30px; }
+
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+        .brand { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+        .brand span { color: var(--primary); }
         
         .theme-btn { 
-            width: 44px; height: 44px; border-radius: 14px; 
-            background: var(--card-bg); border: 1px solid var(--gold);
-            display: flex; align-items: center; justify-content: center; 
-            backdrop-filter: blur(20px); cursor: pointer; box-shadow: var(--shadow);
-            color: var(--gold); z-index: 10;
+            width: 44px; height: 44px; border-radius: 12px; background: var(--bg-surface); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-main); box-shadow: var(--shadow-sm); transition: 0.2s;
         }
+        .theme-btn:active { transform: scale(0.95); }
 
-        /* WINDOW & ANIMATIONS */
-        .window { position: fixed; inset: 0; background: var(--bg-metal); z-index: 1000; display: none; flex-direction: column; }
+        .section-title { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin: 0 0 16px 0; letter-spacing: 1px; }
+
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 40px; }
+        .menu-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; align-items: center; cursor: pointer; box-shadow: var(--shadow-sm); transition: 0.2s; }
+        .menu-card:hover { border-color: var(--primary); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+        .menu-card:active { transform: scale(0.98); }
         
-        @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); filter: blur(5px); } to { opacity: 1; transform: scale(1); filter: blur(0); } }
-        @keyframes zoomOut { from { opacity: 1; transform: scale(1); filter: blur(0); } to { opacity: 0; transform: scale(1.05); filter: blur(10px); } }
+        .menu-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--bg-input); display: flex; align-items: center; justify-content: center; margin-right: 16px; flex-shrink: 0; color: var(--primary); }
+        .menu-text { font-size: 15px; font-weight: 600; color: var(--text-main); flex: 1; }
+        .menu-arrow { color: var(--text-muted); }
+
+        .window { position: fixed; inset: 0; background: var(--bg-body); z-index: 1000; display: none; overflow-y: auto; }
+        .win-container { max-width: 800px; margin: 0 auto; padding: calc(var(--safe-top) + 20px) 20px 40px; min-height: 100vh; display: flex; flex-direction: column; }
+
+        .win-header { display: flex; align-items: center; gap: 16px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+        .win-header h2 { font-size: 20px; font-weight: 700; margin: 0; flex: 1; }
+
+        .form-card { background: var(--bg-surface); border-radius: var(--radius); padding: 24px; margin-bottom: 24px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+        .form-card h4 { margin: 0 0 20px; font-size: 14px; color: var(--text-main); font-weight: 700; border-bottom: 2px solid var(--border); padding-bottom: 8px; display: inline-block; }
+
+        .form-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }
+        .form-grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 16px; }
+
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        .input-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+
+        input, textarea, select { width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; color: var(--text-main); font-size: 14px; font-family: inherit; transition: 0.2s; min-width: 0; }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1); }
         
-        .win-in { animation: zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .win-out { animation: zoomOut 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .btn { background: var(--primary); color: white; border: none; padding: 14px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s; text-align: center; display: inline-flex; align-items: center; justify-content: center; }
+        .btn:hover { background: var(--primary-hover); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { background: var(--bg-input); }
 
-        .win-header { 
-            padding: calc(var(--safe-top) + 15px) 20px; display: flex; align-items: center; gap: 20px; 
-            background: var(--card-bg); border-bottom: 1px solid var(--gold); 
-            backdrop-filter: blur(40px); z-index: 10; box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        .line-item { display: grid; grid-template-columns: 1fr 80px 100px; gap: 12px; margin-bottom: 12px; align-items: start; }
+        @media (max-width: 480px) {
+            .line-item { grid-template-columns: 1fr; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 10px; }
+            .line-item input { margin-bottom: 0; }
+            .app-container, .win-container { padding: calc(var(--safe-top) + 20px) 20px 20px; }
         }
-        .win-body { flex: 1; overflow-y: auto; padding: 25px 20px 220px; }
 
-        /* UI COMPONENTS */
-        #hub { height: 100%; overflow-y: auto; padding: 0 20px 240px; }
-        .section-title { font-size: 11px; font-weight: 800; color: var(--gold); text-transform: uppercase; margin: 30px 0 15px 5px; letter-spacing: 1.5px; text-shadow: 0 0 10px var(--gold-glow); }
+        .validation-dock { position: sticky; bottom: 20px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-md); margin-top: auto; z-index: 100; }
+        .validation-total { display: flex; flex-direction: column; }
+        .validation-total span { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+        .validation-total strong { font-size: 24px; font-weight: 800; color: var(--primary); }
 
-        .grid-3x3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-        .app { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; position: relative; z-index: 5; }
-        .app:active { transform: scale(0.95); }
+        .data-list { display: flex; flex-direction: column; gap: 12px; }
+        .data-item { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+        .data-item:hover { border-color: var(--primary); }
+        .data-item.paid { border-left: 4px solid var(--status-paid); }
+        .data-item.pending { border-left: 4px solid var(--status-pending); }
         
-        .icon { 
-            width: 100%; aspect-ratio: 1/1; border-radius: 26px; overflow: hidden;
-            background: var(--card-bg); border: 1px solid var(--gold);
-            display: flex; align-items: center; justify-content: center; 
-            backdrop-filter: blur(20px); box-shadow: var(--shadow);
-        }
-        .icon img { width: 100%; height: 100%; object-fit: cover; }
-        .app span { font-size: 11px; font-weight: 700; color: var(--text-main); }
+        .search-bar { margin-bottom: 20px; }
 
-        .card { 
-            background: var(--card-bg); border-radius: 24px; padding: 24px; 
-            margin-bottom: 16px; border: 1px solid var(--gold);
-            backdrop-filter: blur(30px); box-shadow: var(--shadow);
-        }
-        .card h4 { margin: 0 0 15px; font-size: 11px; color: var(--gold); text-transform: uppercase; font-weight: 900; letter-spacing: 1px; }
-
-        input, textarea, select { 
-            width: 100%; background: var(--input-bg); 
-            border: 1px solid var(--gold); border-radius: 14px; 
-            padding: 16px; color: var(--text-main); font-size: 15px; 
-            margin-bottom: 12px; font-weight: 600; transition: 0.2s;
-            font-family: 'Inter', sans-serif;
-        }
-        input:focus, textarea:focus { border-color: var(--mse-red); box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.2); }
-        ::placeholder { color: var(--text-sec); opacity: 0.6; }
-
-        .search-bar { position: sticky; top: 0; z-index: 50; margin-bottom: 20px; backdrop-filter: blur(10px); }
-        
-        .dock { 
-            position: fixed; bottom: 30px; left: 20px; right: 20px; 
-            background: var(--card-bg); border: 1px solid var(--gold);
-            border-radius: 30px; padding: 18px 25px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            backdrop-filter: blur(40px); z-index: 1100; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-        }
-        .btn { 
-            background: linear-gradient(135deg, #D32F2F 0%, #B71C1C 100%); 
-            color: white; border: none; padding: 14px 30px; border-radius: 18px; 
-            font-weight: 800; cursor: pointer; font-size: 13px; letter-spacing: 0.5px; 
-            box-shadow: 0 4px 15px rgba(211, 47, 47, 0.3); border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .archive-item { 
-            background: var(--card-bg); border-radius: 20px; padding: 15px; 
-            border: 1px solid var(--gold); cursor: pointer; 
-            display: flex; flex-direction: column; position: relative; overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.2s;
-        }
-        .archive-item:active { transform: scale(0.98); }
-        .paid-bg { border-color: var(--status-paid); box-shadow: 0 0 15px rgba(46, 204, 113, 0.1); }
-        .status-dot { position: absolute; top: 15px; right: 15px; width: 10px; height: 10px; border-radius: 50%; }
-
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 25px; backdrop-filter: blur(15px); }
-        .modal-content { 
-            background: var(--card-bg); padding: 30px; border-radius: 30px; width: 100%; max-width: 450px; 
-            border: 2px solid var(--gold); box-shadow: 0 25px 60px rgba(0,0,0,0.8); color: var(--text-main);
-        }
-        .toggle-status { width: 100%; padding: 15px; border-radius: 15px; font-weight: bold; cursor: pointer; border: 1px solid var(--gold); margin-bottom: 10px; transition: 0.2s; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: var(--bg-surface); padding: 32px; border-radius: var(--radius); width: 100%; max-width: 500px; box-shadow: var(--shadow-md); }
         
         #pdf-paper { width: 210mm; background: white !important; display: none; color: black; }
+        
+        #map-container { width: 100%; height: 400px; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+        .adp { color: var(--text-main); font-family: inherit; }
+        .adp-directions { border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: var(--bg-surface); margin-top: 16px; }
+        
+        .day-block { margin-bottom: 30px; }
+        .day-header { font-size: 14px; font-weight: 800; color: var(--primary); border-bottom: 2px solid var(--border); padding-bottom: 8px; margin-bottom: 16px; }
+        .classeur-badge { font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
+        .badge-rdv { background: rgba(37, 99, 235, 0.1); color: #2563eb; border: 1px solid #2563eb; }
+        .badge-doc { background: rgba(220, 38, 38, 0.1); color: var(--primary); border: 1px solid var(--primary); }
+        .badge-file { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border: 1px solid #8b5cf6; }
+
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: var(--bg-input); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+        .stat-card span { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+        .stat-card strong { display: block; font-size: 32px; font-weight: 800; color: var(--primary); margin-top: 8px; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="brand">Gestion <span>MSE</span></div>
-    <div class="theme-btn" onclick="Core.toggleTheme()">🌓</div>
-</header>
+<script>
+const SVG = {
+    invoice: `<svg class="icon-md" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`,
+    quote: `<svg class="icon-md" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M12 18l-2-4 4-2-2 6z"></path></svg>`,
+    doc: `<svg class="icon-md" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>`,
+    stamp: `<svg class="icon-md" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`,
+    binder: `<svg class="icon-md" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`,
+    editCard: `<svg class="icon-md" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
+    calendar: `<svg class="icon-md" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
+    map: `<svg class="icon-md" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`,
+    users: `<svg class="icon-md" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
+    folder: `<svg class="icon-md" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`,
+    upload: `<svg class="icon-md" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`,
+    cog: `<svg class="icon-md" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
+    arrowRight: `<svg class="icon-md" style="color:var(--text-muted); opacity:0.5;" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>`,
+    arrowLeft: `<svg class="icon-md" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>`,
+    moon: `<svg class="icon-md" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
+    trash: `<svg class="icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
+    editSm: `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
+    pinSm: `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`,
+    sync: `<svg class="icon-sm" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`,
+    lock: `<svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
+    check: `<svg class="icon-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+    wait: `<svg class="icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`,
+    save: `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`,
+    download: `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`
+};
+</script>
 
-<div id="hub">
-    <div class="section-title">Facturation Élite</div>
-    <div class="grid-3x3">
-        <div class="app" onclick="Core.open('FACTURE', 'premium')"><div class="icon"><img src="facture.png"></div><span>Facture TVA</span></div>
-        <div class="app" onclick="Core.open('DEVIS', 'premium')"><div class="icon"><img src="devis.png"></div><span>Devis TVA</span></div>
-        <div class="app" onclick="Core.open('ACQUITTEE')"><div class="icon"><img src="acquittee.png"></div><span>Acquittée</span></div>
+<div id="login-screen">
+    <div class="login-card">
+        <h1>MSE<span>.</span></h1>
+        <p>Espace professionnel sécurisé</p>
+        <div class="input-group" style="margin-bottom: 20px; text-align: left;">
+            <label>Mot de passe</label>
+            <input type="password" id="auth-pwd" placeholder="Entrez le code d'accès" onkeypress="if(event.key === 'Enter') Core.login()">
+        </div>
+        <button class="btn" style="width: 100%;" onclick="Core.login()">Se Connecter</button>
+        <div id="login-error" style="color: var(--primary); font-size: 13px; margin-top: 12px; font-weight: 600; display: none;">Mot de passe incorrect.</div>
     </div>
-    
-    <div class="section-title">Micro-Entreprise</div>
-    <div class="grid-3x3">
-        <div class="app" onclick="Core.open('FACTURE', 'micro')"><div class="icon"><img src="facture.png"></div><span>Facture TTC</span></div>
-        <div class="app" onclick="Core.open('DEVIS', 'micro')"><div class="icon"><img src="devis.png"></div><span>Devis TTC</span></div>
-    </div>
+</div>
 
-    <div class="section-title">Gestion & Cloud</div>
-    <div class="grid-3x3">
-        <div class="app" onclick="Core.open('CLIENTS')"><div class="icon"><img src="clients.png"></div><span>Clients</span></div>
-        <div class="app" onclick="Core.open('ARCHIVES')"><div class="icon"><img src="archives.png"></div><span>Archives</span></div>
-        <div class="app" onclick="Core.open('SETTINGS')"><div class="icon" style="background: linear-gradient(135deg, #333, #555); border:1px solid var(--gold)"><svg style="width:30px;fill:var(--gold)" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.5.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg></div><span>Réglages</span></div>
+<div id="main-app" style="display: none;">
+    <div class="app-container">
+        <header>
+            <div class="brand">MSE<span>.</span></div>
+            <button class="theme-btn" onclick="Core.toggleTheme()" id="btn-theme"></button>
+        </header>
+
+        <div id="hub">
+            <h3 class="section-title">Facturation & Devis</h3>
+            <div class="menu-grid">
+                <div class="menu-card" onclick="Core.open('FACTURE', 'premium')"><div class="menu-icon" id="ic-inv1"></div><div class="menu-text">Facture (TVA)</div><div class="menu-arrow" id="ar-1"></div></div>
+                <div class="menu-card" onclick="Core.open('DEVIS', 'premium')"><div class="menu-icon" id="ic-quo1"></div><div class="menu-text">Devis (TVA)</div><div class="menu-arrow" id="ar-2"></div></div>
+                <div class="menu-card" onclick="Core.open('FACTURE', 'micro')"><div class="menu-icon" id="ic-inv2"></div><div class="menu-text">Facture (Micro - TTC)</div><div class="menu-arrow" id="ar-3"></div></div>
+                <div class="menu-card" onclick="Core.open('DEVIS', 'micro')"><div class="menu-icon" id="ic-quo2"></div><div class="menu-text">Devis (Micro - TTC)</div><div class="menu-arrow" id="ar-4"></div></div>
+            </div>
+
+            <h3 class="section-title">Suivi & Modifications</h3>
+            <div class="menu-grid">
+                <div class="menu-card" onclick="Core.open('CLASSEUR')"><div class="menu-icon" style="color:#8b5cf6;" id="ic-bind"></div><div class="menu-text">Classeur Journalier</div><div class="menu-arrow" id="ar-5"></div></div>
+                <div class="menu-card" onclick="Core.open('CORRECTION')"><div class="menu-icon" style="color:#f59e0b;" id="ic-edit"></div><div class="menu-text">Correction de Document</div><div class="menu-arrow" id="ar-6"></div></div>
+            </div>
+
+            <h3 class="section-title">Équipe & Logistique</h3>
+            <div class="menu-grid">
+                <div class="menu-card" onclick="Core.open('PLANNING')"><div class="menu-icon" style="color:#2563eb;" id="ic-cal"></div><div class="menu-text">Planning Cloud</div><div class="menu-arrow" id="ar-7"></div></div>
+                <div class="menu-card" onclick="Core.open('MAPS')"><div class="menu-icon" style="color:#16a34a;" id="ic-map"></div><div class="menu-text">Optimisation Trajets</div><div class="menu-arrow" id="ar-8"></div></div>
+            </div>
+
+            <h3 class="section-title">Administration</h3>
+            <div class="menu-grid">
+                <div class="menu-card" onclick="Core.open('CLIENTS')"><div class="menu-icon" style="color:#4b5563;" id="ic-usr"></div><div class="menu-text">Base Clients</div><div class="menu-arrow" id="ar-9"></div></div>
+                <div class="menu-card" onclick="Core.open('ARCHIVES')"><div class="menu-icon" style="color:#4b5563;" id="ic-fol"></div><div class="menu-text">Archives & CA</div><div class="menu-arrow" id="ar-10"></div></div>
+                <div class="menu-card" onclick="Core.open('IMPORT')"><div class="menu-icon" style="color:#8b5cf6;" id="ic-upl"></div><div class="menu-text">Import de Fichiers</div><div class="menu-arrow" id="ar-11"></div></div>
+                <div class="menu-card" onclick="Core.open('ACQUITTEE')"><div class="menu-icon" style="color:#4b5563;" id="ic-sta"></div><div class="menu-text">Tampon Acquittée</div><div class="menu-arrow" id="ar-12"></div></div>
+                <div class="menu-card" onclick="Core.open('SETTINGS')"><div class="menu-icon" style="color:#4b5563;" id="ic-cog"></div><div class="menu-text">Paramètres & Stats</div><div class="menu-arrow" id="ar-13"></div></div>
+            </div>
+        </div>
     </div>
 </div>
 
 <div id="win" class="window">
-    <div class="win-header">
-        <button class="theme-btn" style="border:none; background:transparent; font-size:22px; color:var(--text-main); border:none; box-shadow:none;" onclick="Core.back()">✕</button>
-        <b id="win-title" style="font-size:16px; letter-spacing:1px; text-transform:uppercase; color:var(--text-main);">TITRE</b>
-    </div>
-    <div class="win-body" id="win-content"></div>
-    <div class="dock" id="win-dock" style="display:none;">
-        <div style="display:flex; flex-direction:column;">
-            <span style="font-size:10px; color:var(--text-sec); font-weight:700;">TOTAL TTC</span>
-            <span id="dock-total" style="font-size:20px; font-weight:900; color:var(--mse-red);">0.00 €</span>
+    <div class="win-container">
+        <div class="win-header">
+            <button class="theme-btn" style="border:none; box-shadow:none; background:transparent;" onclick="Core.back()" id="btn-back"></button>
+            <h2 id="win-title">Titre</h2>
         </div>
-        <button class="btn" onclick="Core.generatePDF()">VALIDER</button>
+        <div id="win-content" style="flex: 1;"></div>
+        
+        <div class="validation-dock" id="win-dock" style="display:none;">
+            <div class="validation-total">
+                <span>NET À PAYER</span>
+                <strong id="dock-total">0.00 €</strong>
+            </div>
+            <button class="btn" onclick="Core.generatePDF()" id="btn-gen-save"></button>
+        </div>
     </div>
 </div>
 
 <div id="archive-modal" class="modal-overlay" onclick="Core.closeModal(event)">
     <div class="modal-content">
-        <h2 id="modal-title" style="margin-top:0; color:var(--mse-red); text-transform:uppercase;"></h2>
-        <div id="modal-details" style="margin-bottom:20px; color:var(--text-sec); font-size:14px; line-height:1.6;"></div>
+        <h2 id="modal-title" style="margin:0 0 10px; font-size:24px; color:var(--primary);"></h2>
+        <div id="modal-details" style="margin-bottom:24px; color:var(--text-muted); font-size:14px; line-height:1.6;"></div>
         
-        <div style="margin-bottom:20px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <button id="btn-pending" class="toggle-status" style="background:var(--input-bg); color:var(--text-sec);">En attente ⏳</button>
-            <button id="btn-paid" class="toggle-status" style="background:var(--input-bg); color:var(--text-sec);">Payée ✅</button>
+        <div class="form-grid-2">
+            <button id="btn-pending" class="btn btn-outline" style="border-color:var(--status-pending); color:var(--status-pending);"></button>
+            <button id="btn-paid" class="btn btn-outline" style="border-color:var(--status-paid); color:var(--status-paid);"></button>
         </div>
 
-        <div style="display:grid; gap:10px;">
-            <button class="btn" style="background:var(--text-main); color:var(--card-bg);" id="modal-download">TÉLÉCHARGER</button>
-            <button class="btn" style="background:transparent; border:1px solid var(--gold); color:var(--text-main);" id="modal-dup">✏️ MODIFIER / CORRIGER</button>
-            <button class="btn" style="background:var(--mse-red); opacity:0.8;" onclick="Core.deleteArch()">🗑️ SUPPRIMER</button>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            <button class="btn" id="modal-download"></button>
+            <button class="btn btn-outline" id="modal-dup"></button>
+            <button class="btn btn-outline" style="color:var(--primary); border-color:var(--primary);" onclick="Core.deleteArch()" id="modal-del"></button>
         </div>
-        <div style="text-align:center; margin-top:15px; cursor:pointer; opacity:0.6; font-size:12px;" onclick="Core.closeModal({target:{id:'archive-modal'}})">Fermer la fenêtre</div>
     </div>
 </div>
 
 <div id="pdf-paper"></div>
 
 <script>
+// Injection des SVGs initiaux
+document.getElementById('btn-theme').innerHTML = SVG.moon;
+document.getElementById('ic-inv1').innerHTML = SVG.invoice;
+document.getElementById('ic-quo1').innerHTML = SVG.quote;
+document.getElementById('ic-inv2').innerHTML = SVG.doc;
+document.getElementById('ic-quo2').innerHTML = SVG.doc;
+document.getElementById('ic-bind').innerHTML = SVG.binder;
+document.getElementById('ic-edit').innerHTML = SVG.editCard;
+document.getElementById('ic-cal').innerHTML = SVG.calendar;
+document.getElementById('ic-map').innerHTML = SVG.map;
+document.getElementById('ic-usr').innerHTML = SVG.users;
+document.getElementById('ic-fol').innerHTML = SVG.folder;
+document.getElementById('ic-upl').innerHTML = SVG.upload;
+document.getElementById('ic-sta').innerHTML = SVG.stamp;
+document.getElementById('ic-cog').innerHTML = SVG.cog;
+document.getElementById('btn-back').innerHTML = SVG.arrowLeft;
+document.getElementById('btn-gen-save').innerHTML = SVG.save + " Générer & Sauvegarder";
+document.getElementById('modal-download').innerHTML = SVG.download + " Télécharger PDF";
+document.getElementById('modal-dup').innerHTML = SVG.editSm + " Ouvrir pour modification";
+document.getElementById('modal-del').innerHTML = SVG.trash + " Supprimer définitivement";
+for(let i=1; i<=13; i++) document.getElementById('ar-'+i).innerHTML = SVG.arrowRight;
+
 const USER = { 
     name: "Sabri BENNACEUR EI", siren: "943032755", addr: "2 Résidence des Rosiers, 92800 Puteaux, FR", 
     email: "serruremse@gmail.com", dec: "RC décennale TETRIS SV75018041T37384", 
     iban: "FR76 1695 8000 0159 6810 0824 765", bic: "ONTO FR P1 XXX" 
 };
 
-const CLOUD_URL = "https://script.google.com/macros/s/AKfycbzsNMAFSAolUijM6rh-G9RhzbpG4kSWjd7n_RMuQ6tY2I248YAugRQLVmvEfqNhx2ry/exec";
-
 const Core = {
     state: {
-        colors: JSON.parse(localStorage.getItem('mse_colors')) || { red: "#D32F2F" },
-        db: { clients: JSON.parse(localStorage.getItem('mse_clients') || '[]'), history: JSON.parse(localStorage.getItem('mse_history') || '[]') },
-        curType: null, curMode: null, currentArchIdx: null,
-        lastSync: localStorage.getItem('mse_last_sync') || 'Jamais'
+        colors: JSON.parse(localStorage.getItem('mse_colors')) || { red: "#dc2626" },
+        font: localStorage.getItem('mse_font') || "Inter",
+        db: { clients: [], history: [], planning: [], files: [] },
+        curType: null, curMode: null, currentArchIdx: null, currentEditRDV: null
+    },
+    map: null, directionsService: null, directionsRenderer: null,
+
+    init() { 
+        this.applyStyle(); 
+        window.onpopstate = () => this.back(true); 
+        this.checkAuth();
     },
 
-    init() { this.applyStyle(); window.onpopstate = () => this.back(true); },
-    applyStyle() { document.documentElement.style.setProperty('--mse-red', this.state.colors.red); },
+    checkAuth() {
+        const isLogged = localStorage.getItem('mse_auth');
+        if (isLogged === 'true') {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            this.initCloud();
+        } else {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'none';
+        }
+    },
+
+    login() {
+        const pwd = document.getElementById('auth-pwd').value;
+        const err = document.getElementById('login-error');
+        if (pwd === "MSE2026") {
+            localStorage.setItem('mse_auth', 'true');
+            err.style.display = 'none';
+            this.checkAuth();
+        } else { err.style.display = 'block'; }
+    },
+
+    logout() { localStorage.removeItem('mse_auth'); location.reload(); },
+    
+    initCloud() {
+        if(!window.fb) return setTimeout(() => this.initCloud(), 100);
+        window.fb.onSnapshot(window.fb.collection(window.dbFirebase, "history"), (snap) => {
+            this.state.db.history = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            if(document.getElementById('arch-list')) this.renderHistory(document.getElementById('win-content'));
+            if(document.getElementById('correction-list')) this.renderCorrectionList();
+            if(document.getElementById('classeur-container')) this.renderClasseur(document.getElementById('win-content'));
+            if(document.getElementById('stat-docs')) document.getElementById('stat-docs').innerText = this.state.db.history.length;
+        });
+        window.fb.onSnapshot(window.fb.collection(window.dbFirebase, "clients"), (snap) => {
+            this.state.db.clients = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            if(document.getElementById('cli-list')) this.renderClients(document.getElementById('win-content'));
+        });
+        window.fb.onSnapshot(window.fb.query(window.fb.collection(window.dbFirebase, "planning"), window.fb.orderBy("time", "asc")), (snap) => {
+            this.state.db.planning = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            if(document.getElementById('rdv-list')) this.renderPlanningList();
+            if(document.getElementById('classeur-container')) this.renderClasseur(document.getElementById('win-content'));
+            if(document.getElementById('stat-trajets')) document.getElementById('stat-trajets').innerText = this.state.db.planning.length;
+        });
+        window.fb.onSnapshot(window.fb.query(window.fb.collection(window.dbFirebase, "files"), window.fb.orderBy("date", "desc")), (snap) => {
+            this.state.db.files = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            if(document.getElementById('files-list')) this.renderFileList();
+            if(document.getElementById('classeur-container')) this.renderClasseur(document.getElementById('win-content'));
+        });
+    },
+
+    forceSync() {
+        const btn = document.getElementById('btn-sync');
+        btn.innerHTML = SVG.sync + " Synchronisation en cours...";
+        btn.disabled = true;
+        setTimeout(() => {
+            this.initCloud();
+            btn.innerHTML = SVG.check + " Synchronisation réussie";
+            setTimeout(() => { btn.innerHTML = SVG.sync + " Forcer la Synchronisation Cloud"; btn.disabled = false; }, 2000);
+        }, 800);
+    },
+
+    applyStyle() { 
+        document.documentElement.style.setProperty('--primary', this.state.colors.red); 
+        document.body.style.fontFamily = `'${this.state.font}', sans-serif`;
+    },
+
+    toggleTheme() { 
+        const root = document.documentElement;
+        root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); 
+    },
     
     open(type, mode='premium', prefill=null) {
         this.state.curType = type; this.state.curMode = mode;
         const win = document.getElementById('win');
-        win.style.display = 'flex'; win.classList.remove('win-out'); win.classList.add('win-in');
+        win.style.display = 'block';
         document.getElementById('win-title').innerText = `${type} ${mode ? mode.toUpperCase() : ''}`;
         document.getElementById('win-dock').style.display = (['DEVIS','FACTURE'].includes(type)) ? 'flex' : 'none';
         
@@ -245,53 +427,69 @@ const Core = {
         else if(type === 'ARCHIVES') this.renderHistory(c);
         else if(type === 'SETTINGS') this.renderSettings(c);
         else if(type === 'ACQUITTEE') this.renderAcquit(c);
+        else if(type === 'PLANNING') { this.state.currentEditRDV = null; this.renderPlanning(c); }
+        else if(type === 'MAPS') this.renderMaps(c);
+        else if(type === 'CORRECTION') this.renderCorrection(c);
+        else if(type === 'CLASSEUR') this.renderClasseur(c);
+        else if(type === 'IMPORT') this.renderImport(c);
         
         history.pushState({view: 'win'}, '');
     },
 
     back(isPop = false) {
-        const win = document.getElementById('win');
-        win.classList.remove('win-in'); win.classList.add('win-out');
-        setTimeout(() => { win.style.display = 'none'; if(!isPop && history.state) history.back(); }, 250);
+        const win = document.getElementById('win'); win.style.display = 'none';
+        if(!isPop && history.state) history.back();
     },
 
     renderEditor(c, data=null) {
         const clis = this.state.db.clients.filter(cli => cli.type === this.state.curMode);
+        const isEditing = data ? true : false;
         c.innerHTML = `
-            <div class="card">
-                <h4>Information Dossier</h4>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                    <div><label style="font-size:10px; opacity:0.7;">DOCUMENT</label><input id="dn" value="${data ? data.num : ''}" style="font-weight:900; color:var(--mse-red);"></div>
-                    <div><label style="font-size:10px; opacity:0.7;">RÉF</label><input id="ref" value="${data?data.ref||'':''}"></div>
+            ${isEditing ? `<div style="background:var(--status-pending); color:white; padding:10px 16px; border-radius:var(--radius); margin-bottom:20px; font-weight:600; font-size:14px;">${SVG.editSm} Mode Correction. Écrasement du document existant.</div>` : ''}
+            <div class="form-card">
+                <h4>1. Références du Document</h4>
+                <div class="form-grid-2">
+                    <div class="input-group"><label>N° Document</label><input id="dn" value="${data ? data.num : ''}" ${isEditing ? 'readonly style="opacity:0.7;"' : ''} style="font-weight:700; color:var(--primary);"></div>
+                    <div class="input-group"><label>Référence Interne</label><input id="ref" value="${data?data.ref||'':''}"></div>
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:5px;">
-                     <div><label style="font-size:10px; opacity:0.7;">DATE</label><input type="date" id="d-e" value="${data?data.date_raw:new Date().toISOString().split('T')[0]}"></div>
-                     <div><label style="font-size:10px; opacity:0.7;">ÉCHÉANCE</label><input type="date" id="d-h" value="${data?data.eche_raw:new Date().toISOString().split('T')[0]}"></div>
+                <div class="form-grid-2">
+                     <div class="input-group"><label>Date d'émission</label><input type="date" id="d-e" value="${data?data.date_raw:new Date().toISOString().split('T')[0]}"></div>
+                     <div class="input-group"><label>Date d'échéance</label><input type="date" id="d-h" value="${data?data.eche_raw:new Date().toISOString().split('T')[0]}"></div>
                 </div>
             </div>
-            <div class="card">
-                <h4>Client & Objet</h4>
-                <select onchange="Core.fillCli(this.value)" style="margin-bottom:15px;">
-                    <option value="">📂 Charger un client existant...</option>${clis.map(cli=>`<option value="${cli.name}">${cli.name}</option>`).join('')}
+
+            <div class="form-card">
+                <h4>2. Informations Client</h4>
+                <select onchange="Core.fillCli(this.value)" style="margin-bottom:16px; font-weight:600;">
+                    <option value="">Charger un client existant...</option>${clis.map(cli=>`<option value="${cli.name}">${cli.name}</option>`).join('')}
                 </select>
-                <input id="cn" placeholder="Nom du Client" value="${data?data.client:''}">
-                <textarea id="ca" placeholder="Adresse complète" rows="2">${data?data.addr:''}</textarea>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-                     <input id="c-legal" placeholder="Forme" value="${data?data.c_legal||'':''}">
-                     <input id="c-siret" placeholder="SIRET" value="${data?data.c_siret||'':''}">
-                     <input id="c-tva" placeholder="N° TVA" value="${data?data.c_tva||'':''}">
+                <div class="input-group" style="margin-bottom:12px;"><label>Nom du Client / Raison Sociale</label><input id="cn" value="${data?data.client:''}"></div>
+                <div class="input-group" style="margin-bottom:16px;"><label>Adresse Postale</label><textarea id="ca" rows="2">${data?data.addr:''}</textarea></div>
+                <div class="form-grid-3">
+                     <div class="input-group"><label>Forme Légale</label><input id="c-legal" value="${data?data.c_legal||'':''}"></div>
+                     <div class="input-group"><label>N° SIRET</label><input id="c-siret" value="${data?data.c_siret||'':''}"></div>
+                     <div class="input-group"><label>N° TVA</label><input id="c-tva" value="${data?data.c_tva||'':''}"></div>
                 </div>
-                <input id="do" placeholder="Objet de l'intervention" value="${data?data.obj:''}" style="margin-top:10px;">
             </div>
-            ${this.state.curMode==='premium' ? `<div class="card"><h4>TVA APPLICABLE</h4><select id="tva" onchange="Core.calc()"><option value="20" ${data&&data.rate==20?'selected':''}>TVA Normale (20%)</option><option value="10" ${data&&data.rate==10?'selected':''}>TVA Inter (10%)</option><option value="5.5" ${data&&data.rate==5.5?'selected':''}>TVA Réduite (5.5%)</option></select></div>` : ''}
-            <div class="card"><h4>Lignes</h4><div id="lines"></div><button onclick="Core.addLine()" style="width:100%; padding:15px; border:1px dashed var(--mse-red); color:var(--mse-red); background:transparent; border-radius:15px; font-weight:bold;">+ AJOUTER LIGNE</button></div>`;
+
+            <div class="form-card">
+                <h4>3. Détails de l'Intervention</h4>
+                <div class="input-group" style="margin-bottom:16px;"><label>Objet principal de la facture</label><input id="do" value="${data?data.obj:''}"></div>
+                ${this.state.curMode==='premium' ? `<div class="input-group"><label>Taux de TVA Global</label><select id="tva" onchange="Core.calc()"><option value="20" ${data&&data.rate==20?'selected':''}>TVA Normale (20%)</option><option value="10" ${data&&data.rate==10?'selected':''}>TVA Intermédiaire (10%)</option><option value="5.5" ${data&&data.rate==5.5?'selected':''}>TVA Réduite (5.5%)</option></select></div>` : ''}
+            </div>
+
+            <div class="form-card">
+                <h4>4. Lignes de facturation</h4>
+                <div id="lines"></div>
+                <button onclick="Core.addLine()" class="btn btn-outline" style="width:100%; margin-top:10px; border-style:dashed;">+ Ajouter une ligne</button>
+            </div>`;
         if(data && data.lines) data.lines.forEach(l => this.addLine(l)); else this.addLine();
         this.calc();
     },
 
     addLine(l=null) {
         const d = document.createElement('div'); d.className = "line-item";
-        d.innerHTML = `<div style="display:grid; grid-template-columns: 1fr 80px 90px; gap:10px; margin-bottom:12px;"><input class="lt" placeholder="Description" value="${l?l.lt:''}" style="margin:0;"><input type="number" class="lq" value="${l?l.lq:1}" oninput="Core.calc()" style="margin:0; text-align:center;"><input type="number" class="lp" placeholder="Prix" value="${l?l.lp:''}" oninput="Core.calc()" style="margin:0; text-align:right;"></div>`;
+        d.innerHTML = `<input class="lt" placeholder="Description de la prestation" value="${l?l.lt:''}"><input type="number" class="lq" placeholder="Qté" value="${l?l.lq:1}" oninput="Core.calc()"><input type="number" class="lp" placeholder="Prix Unitaire HT" value="${l?l.lp:''}" oninput="Core.calc()">`;
         document.getElementById('lines').appendChild(d);
     },
 
@@ -299,7 +497,7 @@ const Core = {
     
     calc() { 
         let ht = 0; document.querySelectorAll('.line-item').forEach(d => { ht += (d.querySelector('.lq').value * d.querySelector('.lp').value); });
-        const rate = this.state.curMode === 'premium' ? parseFloat(document.getElementById('tva').value || 20) : 0; 
+        const rate = this.state.curMode === 'premium' ? parseFloat(document.getElementById('tva')?.value || 20) : 0; 
         const total = ht * (1 + rate/100); document.getElementById('dock-total').innerText = total.toFixed(2) + " €"; 
         return {ht, total, rate}; 
     },
@@ -316,16 +514,13 @@ const Core = {
             c_siret: document.getElementById('c-siret').value, c_tva: document.getElementById('c-tva').value, c_legal: document.getElementById('c-legal').value,
             status: 'pending'
         };
-        // Replace logic for updates
-        this.state.db.history = this.state.db.history.filter(h => h.num !== n); 
-        this.state.db.history.push(arch);
-        
-        if(!this.state.db.clients.find(c => c.name === arch.client)) { this.state.db.clients.push({name: arch.client, addr: arch.addr, type: arch.mode, siret: arch.c_siret, tva: arch.c_tva, legal: arch.c_legal}); }
-        
-        this.sync(); // IMPORTANT: Save locally immediately
-        this.pushToCloud(false); 
-        this.renderPDF(arch); 
-        this.save(n);
+        try {
+            await window.fb.setDoc(window.fb.doc(window.dbFirebase, "history", n), arch);
+            if(!this.state.db.clients.find(c => c.name === arch.client)) {
+                await window.fb.setDoc(window.fb.doc(window.dbFirebase, "clients", arch.client), {name: arch.client, addr: arch.addr, type: arch.mode, siret: arch.c_siret, tva: arch.c_tva, legal: arch.c_legal});
+            }
+            this.renderPDF(arch); this.save(n);
+        } catch(e) { alert("Erreur de sauvegarde Cloud."); }
     },
 
     renderPDF(h) {
@@ -334,47 +529,49 @@ const Core = {
         document.getElementById('pdf-paper').innerHTML = `
         <div style="padding:50px; background:white; color:#111; font-family:'Inter', sans-serif;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:50px;">
-                <img src="logo.png" style="height:80px; object-fit:contain;">
-                <div style="text-align:right; font-size:11px; line-height:1.5; color:#555;"><strong style="color:var(--mse-red); font-size:14px;">${USER.name}</strong><br>${USER.addr}<br>SIRET: ${USER.siren}<br>${USER.dec}</div>
+                <div style="font-size:36px; font-weight:800; color:var(--primary); letter-spacing:-1px;">MSE</div>
+                <div style="text-align:right; font-size:11px; line-height:1.5; color:#555;"><strong style="color:var(--primary); font-size:14px;">${USER.name}</strong><br>${USER.addr}<br>SIRET: ${USER.siren}<br>${USER.dec}</div>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:40px;">
-                <div><h1 style="margin:0; font-size:32px; color:var(--mse-red); text-transform:uppercase;">${h.type}</h1><span style="font-size:14px; color:#666;">N° ${h.num}</span><br><br><div style="font-size:12px;"><strong>Date d'émission :</strong> ${h.date}<br><strong>Date d'échéance :</strong> ${h.eche}</div></div>
-                <div style="width:280px; background:#f8f9fa; border:1px solid #eee; border-radius:12px; padding:20px;"><div style="font-size:10px; color:#888; text-transform:uppercase; font-weight:bold; margin-bottom:5px;">Destinataire</div><strong style="font-size:15px; display:block; margin-bottom:5px;">${h.client}</strong><div style="font-size:12px; color:#444; line-height:1.4;">${h.addr}<br>${h.c_siret ? `SIRET: ${h.c_siret}` : ''}</div></div>
+                <div><h1 style="margin:0; font-size:32px; color:var(--primary); text-transform:uppercase;">${h.type}</h1><span style="font-size:14px; color:#666;">N° ${h.num}</span><br><br><div style="font-size:12px;"><strong>Date :</strong> ${h.date}<br><strong>Échéance :</strong> ${h.eche}</div></div>
+                <div style="width:280px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:20px;"><div style="font-size:10px; color:#6b7280; text-transform:uppercase; font-weight:700; margin-bottom:5px;">Destinataire</div><strong style="font-size:15px; display:block; margin-bottom:5px;">${h.client}</strong><div style="font-size:12px; color:#374151; line-height:1.4;">${h.addr}<br>${h.c_siret ? `SIRET: ${h.c_siret}` : ''}</div></div>
             </div>
-            <div style="margin-bottom:30px; padding:15px; border-left:4px solid var(--mse-red); background:#fff5f5;"><strong style="color:var(--mse-red);">Objet :</strong> ${h.obj} ${h.ref ? `<span style="color:#666;">(Réf: ${h.ref})</span>` : ''}</div>
-            <table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:40px;"><thead><tr style="background:#222; color:white;"><th style="padding:12px; text-align:left;">Description</th><th style="padding:12px; text-align:center;">Qté</th><th style="padding:12px; text-align:right;">P.U HT</th><th style="padding:12px; text-align:right;">Total HT</th></tr></thead><tbody>${rows}</tbody></table>
-            <div style="display:flex; justify-content:flex-end;"><div style="width:250px; text-align:right;"><div style="padding:10px 0; border-bottom:1px solid #eee; font-size:13px;">Total HT : <strong>${h.val.toFixed(2)} €</strong></div>${isP ? `<div style="padding:10px 0; border-bottom:1px solid #eee; font-size:13px;">TVA (${h.rate}%) : <strong>${(h.final - h.val).toFixed(2)} €</strong></div>` : ''}<div style="padding:15px 0; font-size:18px; color:var(--mse-red); font-weight:900;">NET À PAYER : ${h.final.toFixed(2)} €</div></div></div>
-            <div style="position:fixed; bottom:40px; left:50px; right:50px; text-align:center; font-size:10px; color:#999; border-top:1px solid #eee; padding-top:15px;">Règlement par virement bancaire<br><strong>IBAN : ${USER.iban} | BIC : ${USER.bic}</strong><br>${!isP ? "TVA non applicable, art. 293 B du CGI" : "Serrurerie MSE - Document généré par MSE Tool Vision"}</div>
+            <div style="margin-bottom:30px; padding:15px; border-left:4px solid var(--primary); background:#fef2f2;"><strong style="color:var(--primary);">Objet :</strong> ${h.obj} ${h.ref ? `<span style="color:#6b7280;">(Réf: ${h.ref})</span>` : ''}</div>
+            <table style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:40px;"><thead><tr style="background:#111827; color:white;"><th style="padding:12px; text-align:left;">Description</th><th style="padding:12px; text-align:center;">Qté</th><th style="padding:12px; text-align:right;">P.U HT</th><th style="padding:12px; text-align:right;">Total HT</th></tr></thead><tbody>${rows}</tbody></table>
+            <div style="display:flex; justify-content:flex-end;"><div style="width:250px; text-align:right;"><div style="padding:10px 0; border-bottom:1px solid #e5e7eb; font-size:13px;">Total HT : <strong>${h.val.toFixed(2)} €</strong></div>${isP ? `<div style="padding:10px 0; border-bottom:1px solid #e5e7eb; font-size:13px;">TVA (${h.rate}%) : <strong>${(h.final - h.val).toFixed(2)} €</strong></div>` : ''}<div style="padding:15px 0; font-size:18px; color:var(--primary); font-weight:800;">NET À PAYER : ${h.final.toFixed(2)} €</div></div></div>
+            <div style="position:fixed; bottom:40px; left:50px; right:50px; text-align:center; font-size:10px; color:#6b7280; border-top:1px solid #e5e7eb; padding-top:15px;">Règlement par virement bancaire<br><strong>IBAN : ${USER.iban} | BIC : ${USER.bic}</strong><br>${!isP ? "TVA non applicable, art. 293 B du CGI" : "Serrurerie MSE - Édité par le système cloud"}</div>
         </div>`;
     },
 
     save(num) { const p = document.getElementById('pdf-paper'); p.style.display = 'block'; html2pdf().set({ margin:0, filename:`${num}.pdf`, html2canvas:{scale:2}, jsPDF:{unit:'mm', format:'a4'} }).from(p).save().then(() => { p.style.display = 'none'; this.back(); }); },
 
-    // --- ARCHIVES FIX ---
     renderHistory(c) {
         let totalCA = 0; this.state.db.history.forEach(h => totalCA += h.final);
-        
-        // CHECK IF EMPTY
-        let content = `<div class="card" style="text-align:center;"><div style="font-size:12px; opacity:0.7;">CHIFFRE D'AFFAIRES TOTAL</div><div style="font-size:24px; font-weight:900; color:var(--mse-red);">${totalCA.toFixed(2)} €</div></div>`;
-        content += `<div class="search-bar"><input placeholder="🔍 Rechercher..." oninput="Core.filterArch(this.value)"></div>`;
+        let content = `
+            <div class="form-card" style="text-align:center; border-bottom: 4px solid var(--primary);">
+                <div style="font-size:12px; font-weight:700; color:var(--text-muted); margin-bottom:8px;">CHIFFRE D'AFFAIRES GLOBAL</div>
+                <div style="font-size:36px; font-weight:800; color:var(--primary);">${totalCA.toFixed(2)} €</div>
+            </div>
+            <div class="search-bar"><input type="text" placeholder="Rechercher une facture ou un client..." oninput="Core.filterArch(this.value)"></div>`;
         
         if(this.state.db.history.length === 0) {
-            content += `<div style="text-align:center; opacity:0.5; padding:40px; border:1px dashed var(--gold); border-radius:20px;">Aucune archive pour le moment.<br>Créez une facture pour voir l'historique ici.</div>`;
+            content += `<div class="form-card" style="text-align:center; padding:40px; border-style:dashed;">Aucune archive trouvée.</div>`;
         } else {
-            content += `<div class="archive-grid" id="arch-list">${[...this.state.db.history].reverse().map((h, i) => this.archItem(h, this.state.db.history.length-1-i)).join('')}</div>`;
+            content += `<div class="data-list" id="arch-list">${[...this.state.db.history].reverse().map((h, i) => this.archItem(h, this.state.db.history.length-1-i)).join('')}</div>`;
         }
         c.innerHTML = content;
     },
 
     archItem(h, idx) { 
-        const statusColor = h.status === 'paid' ? 'var(--status-paid)' : 'var(--status-pending)';
-        return `<div class="archive-item ${h.status === 'paid' ? 'paid-bg' : ''}" onclick="Core.viewArch(${idx})">
-            <div class="status-dot" style="background:${statusColor}"></div>
-            <div style="font-size:10px; opacity:0.6; margin-bottom:4px; color:var(--text-sec);">${h.date}</div>
-            <div style="font-weight:800; font-size:14px; margin-bottom:2px; color:var(--text-main);">${h.num}</div>
-            <div style="font-size:12px; color:var(--text-sec); margin-bottom:10px;">${h.client}</div>
-            <div style="margin-top:auto; font-weight:900; color:var(--mse-red); font-size:16px;">${h.final.toFixed(2)} €</div>
-        </div>`; 
+        const isPaid = h.status === 'paid';
+        return `
+            <div class="data-item ${isPaid ? 'paid' : 'pending'}" onclick="Core.viewArch(${idx})">
+                <div style="flex:1;">
+                    <div style="font-weight:700; font-size:15px; margin-bottom:4px;">${h.num} <span style="font-size:12px; font-weight:500; color:var(--text-muted); margin-left:8px;">${h.date}</span></div>
+                    <div style="font-size:13px; color:var(--text-main); opacity:0.8;">${h.client}</div>
+                </div>
+                <div style="font-size:16px; font-weight:800; color:var(--primary);">${h.final.toFixed(2)} €</div>
+            </div>`; 
     },
 
     filterArch(q) {
@@ -387,64 +584,194 @@ const Core = {
         this.state.currentArchIdx = idx;
         const h = this.state.db.history[idx];
         document.getElementById('modal-title').innerText = h.num;
-        document.getElementById('modal-details').innerHTML = `<b style="color:var(--text-main);">${h.client}</b><br>${h.obj}<br><span style="color:var(--mse-red); font-weight:bold; font-size:18px;">${h.final.toFixed(2)} €</span>`;
+        document.getElementById('modal-details').innerHTML = `<strong>${h.client}</strong><br>${h.obj}<br><br><span style="font-size:24px; font-weight:800; color:var(--primary);">${h.final.toFixed(2)} €</span>`;
         
-        const btnPending = document.getElementById('btn-pending');
-        const btnPaid = document.getElementById('btn-paid');
-        btnPending.style.background = 'var(--input-bg)'; btnPending.style.color = 'var(--text-sec)';
-        btnPaid.style.background = 'var(--input-bg)'; btnPaid.style.color = 'var(--text-sec)';
+        const bp = document.getElementById('btn-pending');
+        const bd = document.getElementById('btn-paid');
+        bp.innerHTML = SVG.wait + " En attente";
+        bd.innerHTML = SVG.check + " Payée";
 
-        if(h.status === 'paid') { btnPaid.style.background = 'var(--status-paid)'; btnPaid.style.color = '#fff'; } else { btnPending.style.background = 'var(--status-pending)'; btnPending.style.color = '#fff'; }
+        bp.style.background = h.status !== 'paid' ? 'var(--status-pending)' : 'transparent';
+        bp.style.color = h.status !== 'paid' ? 'white' : 'var(--status-pending)';
+        bd.style.background = h.status === 'paid' ? 'var(--status-paid)' : 'transparent';
+        bd.style.color = h.status === 'paid' ? 'white' : 'var(--status-paid)';
 
-        btnPending.onclick = () => Core.setStatus(idx, 'pending');
-        btnPaid.onclick = () => Core.setStatus(idx, 'paid');
+        bp.onclick = () => Core.setStatus(idx, 'pending');
+        bd.onclick = () => Core.setStatus(idx, 'paid');
         document.getElementById('modal-download').onclick = () => { this.renderPDF(h); this.save(h.num); };
         document.getElementById('modal-dup').onclick = () => { document.getElementById('archive-modal').style.display='none'; this.open(h.type, h.mode, h); };
         document.getElementById('archive-modal').style.display = 'flex';
     },
 
-    setStatus(idx, status) {
-        this.state.db.history[idx].status = status;
-        this.sync(); this.pushToCloud(false); this.viewArch(idx);
-        if(document.getElementById('arch-list')) this.renderHistory(document.getElementById('win-content'));
-        if(document.getElementById('cli-list')) this.renderClients(document.getElementById('win-content'));
+    async setStatus(idx, status) {
+        const h = this.state.db.history[idx];
+        try { await window.fb.updateDoc(window.fb.doc(window.dbFirebase, "history", h.id || h.num), { status: status }); this.viewArch(idx); } 
+        catch(e) { alert("Erreur cloud."); }
     },
 
-    deleteArch() {
-        if(!confirm("Supprimer définitivement ce document ?")) return;
-        this.state.db.history.splice(this.state.currentArchIdx, 1);
-        this.sync(); this.pushToCloud(false);
-        document.getElementById('archive-modal').style.display = 'none';
+    async deleteArch() {
+        if(!confirm("Supprimer définitivement du Cloud ?")) return;
+        const h = this.state.db.history[this.state.currentArchIdx];
+        try { await window.fb.deleteDoc(window.fb.doc(window.dbFirebase, "history", h.id || h.num)); document.getElementById('archive-modal').style.display = 'none'; this.back(); } 
+        catch(e) { alert("Erreur cloud."); }
+    },
+
+    closeModal(e) { if(e.target.id === 'archive-modal') document.getElementById('archive-modal').style.display = 'none'; },
+
+    renderCorrection(c) {
+        c.innerHTML = `
+            <div class="form-card">
+                <h4>Corriger un document</h4>
+                <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Sélectionnez un document pour l'ouvrir dans l'éditeur.</p>
+                <div class="search-bar" style="margin:0;"><input type="text" placeholder="Rechercher..." oninput="Core.filterCorrection(this.value)"></div>
+            </div>
+            <div class="data-list" id="correction-list"></div>`;
+        this.renderCorrectionList();
+    },
+
+    renderCorrectionList(filter = "") {
+        const list = this.state.db.history.filter(h => h.client.toLowerCase().includes(filter.toLowerCase()) || h.num.toLowerCase().includes(filter.toLowerCase())).reverse();
+        const container = document.getElementById('correction-list');
+        if(!container) return;
+        if(list.length === 0) { container.innerHTML = `<div class="form-card" style="text-align:center; padding:40px; border-style:dashed;">Aucun document.</div>`; return; }
+
+        container.innerHTML = list.map(h => `
+            <div class="data-item" onclick="Core.open('${h.type}', '${h.mode}', ${JSON.stringify(h).replace(/"/g, '&quot;')})" style="border-left: 4px solid var(--primary);">
+                <div style="flex:1;">
+                    <div style="font-weight:700; font-size:15px; margin-bottom:4px;">${h.num}</div>
+                    <div style="font-size:13px; color:var(--text-muted);">${h.client} - ${h.date}</div>
+                </div>
+                <div style="color:var(--primary);">${SVG.editSm}</div>
+            </div>
+        `).join('');
+    },
+    filterCorrection(val) { this.renderCorrectionList(val); },
+
+    renderClasseur(c) {
+        c.innerHTML = `
+            <div class="form-card" style="margin-bottom:30px;">
+                <h4 style="margin:0; border:none; padding:0; color:var(--primary);">Classeur Centralisé</h4>
+                <p style="font-size:13px; color:var(--text-muted); margin-top:8px;">Historique global trié jour par jour.</p>
+            </div>
+            <div id="classeur-container"></div>`;
         
-        // Refresh correct view
-        if(document.getElementById('arch-list')) this.renderHistory(document.getElementById('win-content'));
-        else this.open('CLIENTS');
+        const container = document.getElementById('classeur-container');
+        if(!container) return;
+
+        const days = {};
+        this.state.db.history.forEach(h => { const d = h.date_raw; if(!days[d]) days[d] = []; days[d].push({ sortType: 'doc', time: d, data: h }); });
+        this.state.db.planning.forEach(p => { const d = p.time.split('T')[0]; if(!days[d]) days[d] = []; days[d].push({ sortType: 'rdv', time: p.time, data: p }); });
+        this.state.db.files.forEach(f => { const d = f.date.split('T')[0]; if(!days[d]) days[d] = []; days[d].push({ sortType: 'file', time: f.date, data: f }); });
+
+        const sortedDates = Object.keys(days).sort((a, b) => new Date(b) - new Date(a));
+        if(sortedDates.length === 0) { container.innerHTML = `<div class="form-card" style="text-align:center; border-style:dashed;">Le classeur est vide.</div>`; return; }
+
+        let html = '';
+        sortedDates.forEach(dateStr => {
+            const dateObj = new Date(dateStr);
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const prettyDate = dateObj.toLocaleDateString('fr-FR', options);
+
+            html += `<div class="day-block"><div class="day-header">${prettyDate.charAt(0).toUpperCase() + prettyDate.slice(1)}</div><div class="data-list">`;
+            days[dateStr].sort((a, b) => a.sortType.localeCompare(b.sortType)).forEach(item => {
+                if(item.sortType === 'rdv') {
+                    const timeOnly = new Date(item.data.time).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+                    html += `<div class="data-item" style="border-left: 4px solid #2563eb;"><div style="flex:1;"><div style="margin-bottom:6px;"><span class="classeur-badge badge-rdv">Planning</span> <span style="font-weight:700; font-size:14px; margin-left:8px;">${timeOnly}</span></div><div style="font-weight:600; font-size:15px;">${item.data.task}</div><div style="font-size:13px; color:var(--text-muted); margin-top:4px;">${SVG.pinSm} ${item.data.loc || 'Pas d\'adresse'}</div></div></div>`;
+                } else if (item.sortType === 'file') {
+                    html += `<div class="data-item" style="border-left: 4px solid #8b5cf6;" onclick="window.open('${item.data.url}', '_blank')"><div style="flex:1;"><div style="margin-bottom:6px;"><span class="classeur-badge badge-file">Fichier Importé</span></div><div style="font-weight:600; font-size:15px;">${item.data.name}</div></div><div style="color:var(--text-muted);">${SVG.download}</div></div>`;
+                } else {
+                    const h = item.data; const isPaid = h.status === 'paid'; const bColor = isPaid ? 'var(--status-paid)' : 'var(--status-pending)';
+                    html += `<div class="data-item" style="border-left: 4px solid ${bColor};" onclick="Core.viewArch(${this.state.db.history.indexOf(h)})"><div style="flex:1;"><div style="margin-bottom:6px;"><span class="classeur-badge badge-doc">${h.type}</span> <span style="font-weight:700; font-size:14px; margin-left:8px; color:var(--text-muted);">${h.num}</span></div><div style="font-weight:600; font-size:15px;">${h.client}</div><div style="font-size:13px; color:var(--text-muted); margin-top:4px;">${isPaid ? SVG.check+'Payée' : SVG.wait+'En attente'}</div></div><div style="font-size:16px; font-weight:800; color:var(--text-main);">${h.final.toFixed(2)} €</div></div>`;
+                }
+            });
+            html += `</div></div>`;
+        });
+        container.innerHTML = html;
     },
 
-    closeModal(e) { if(e.target.id === 'archive-modal' || e.target.tagName === 'BUTTON') document.getElementById('archive-modal').style.display = 'none'; },
+    renderImport(c) {
+        c.innerHTML = `
+            <div class="form-card">
+                <h4>Importer un Fichier</h4>
+                <div class="input-group" style="margin-bottom:12px;">
+                    <label>Nom ou Description</label>
+                    <input type="text" id="import-name" placeholder="ex: Kbis, Devis Externe, Photo...">
+                </div>
+                <div class="input-group" style="margin-bottom:16px;">
+                    <label>Fichier</label>
+                    <input type="file" id="import-file" style="padding:40px 20px; text-align:center; border:2px dashed var(--border); cursor:pointer;">
+                </div>
+                <button class="btn" style="width:100%; background:#8b5cf6;" onclick="Core.uploadFile()" id="btn-upload">${SVG.save} Envoyer sur le Cloud</button>
+            </div>
+            <h4 style="margin-bottom:15px; font-size:14px; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Fichiers Centralisés</h4>
+            <div class="data-list" id="files-list">Chargement...</div>`;
+        this.renderFileList();
+    },
 
-    // --- CLIENTS FIX ---
+    renderFileList() {
+        const list = document.getElementById('files-list');
+        if(!list) return;
+        if (this.state.db.files.length === 0) { list.innerHTML = `<div class="form-card" style="text-align:center; padding:30px; border-style:dashed;">Aucun fichier importé.</div>`; return; }
+        
+        list.innerHTML = this.state.db.files.map(f => {
+            const dateStr = new Date(f.date).toLocaleDateString('fr-FR');
+            return `
+            <div class="data-item" style="border-left:4px solid #8b5cf6;">
+                <div style="flex:1;" onclick="window.open('${f.url}', '_blank')">
+                    <div style="font-weight:700; font-size:15px; margin-bottom:4px; word-break:break-word;">${f.name}</div>
+                    <div style="font-size:12px; color:var(--text-muted);">Importé le ${dateStr}</div>
+                </div>
+                <button class="btn btn-outline" style="padding:6px 12px; color:#dc2626; border-color:#dc2626;" onclick="Core.deleteFile('${f.id}', '${f.path}')">${SVG.trash}</button>
+            </div>`;
+        }).join('');
+    },
+
+    async uploadFile() {
+        const fileInput = document.getElementById('import-file');
+        const nameInput = document.getElementById('import-name').value;
+        const btn = document.getElementById('btn-upload');
+        
+        if(!fileInput.files[0] || !nameInput) return alert("Veuillez sélectionner un fichier et lui donner un nom.");
+        const file = fileInput.files[0];
+        btn.innerHTML = SVG.sync + " Envoi en cours..."; btn.disabled = true;
+
+        try {
+            const path = `imports/${Date.now()}_${file.name}`;
+            const storageRef = window.fbStorage.ref(window.storageFirebase, path);
+            const uploadTask = await window.fbStorage.uploadBytesResumable(storageRef, file);
+            const downloadURL = await window.fbStorage.getDownloadURL(uploadTask.ref);
+            
+            await window.fb.addDoc(window.fb.collection(window.dbFirebase, "files"), { name: nameInput, url: downloadURL, path: path, date: new Date().toISOString() });
+            
+            document.getElementById('import-name').value = ""; fileInput.value = "";
+            btn.innerHTML = SVG.save + " Envoyer sur le Cloud"; btn.disabled = false;
+        } catch(e) { alert("Erreur lors de l'envoi."); btn.innerHTML = SVG.save + " Envoyer sur le Cloud"; btn.disabled = false; }
+    },
+
+    async deleteFile(docId, path) {
+        if(!confirm("Supprimer ce fichier définitivement ?")) return;
+        try {
+            const storageRef = window.fbStorage.ref(window.storageFirebase, path);
+            await window.fbStorage.deleteObject(storageRef);
+            await window.fb.deleteDoc(window.fb.doc(window.dbFirebase, "files", docId));
+        } catch(e) { alert("Erreur lors de la suppression."); }
+    },
+
     renderClients(c) {
-        c.innerHTML = `<div class="search-bar"><input placeholder="🔍 Rechercher un client..." oninput="Core.filterCli(this.value)"></div><div id="cli-list"></div>`;
+        c.innerHTML = `<div class="search-bar"><input type="text" placeholder="Rechercher un client..." oninput="Core.filterCli(this.value)"></div><div class="data-list" id="cli-list"></div>`;
         this.renderClientList();
     },
 
     renderClientList(filter = "") {
         const list = this.state.db.clients.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()));
         const container = document.getElementById('cli-list');
-        
-        if(list.length === 0) {
-            container.innerHTML = `<div style="text-align:center; opacity:0.5; padding:20px;">Aucun client trouvé.</div>`;
-            return;
-        }
+        if(list.length === 0) { container.innerHTML = `<div class="form-card" style="text-align:center; padding:40px; border-style:dashed;">Aucun client trouvé.</div>`; return; }
 
-        // IMPORTANT: On n'utilise plus onclick avec string interpolation pour éviter les bugs d'apostrophe
         container.innerHTML = "";
         list.forEach(cli => {
             const el = document.createElement('div');
-            el.className = "card";
-            el.style = "padding:15px; display:flex; justify-content:space-between; cursor:pointer;";
-            el.innerHTML = `<b style="color:var(--text-main);">${cli.name}</b><span style="opacity:0.5; font-size:12px; color:var(--text-sec);">Voir historique →</span>`;
+            el.className = "data-item";
+            el.innerHTML = `<div style="font-weight:600; font-size:15px; word-break:break-word;">${cli.name}</div><div style="font-size:12px; color:var(--text-muted);">Voir dossier</div>`;
             el.onclick = () => Core.viewClientHistory(cli.name);
             container.appendChild(el);
         });
@@ -453,48 +780,241 @@ const Core = {
     viewClientHistory(name) {
         const c = document.getElementById('win-content');
         const docs = this.state.db.history.map((h, i) => ({...h, originalIdx: i})).filter(h => h.client === name).reverse();
-
-        let html = `<button class="btn" style="margin-bottom:15px; padding:10px 20px; font-size:12px; background:transparent; border:1px solid var(--gold); color:var(--text-main);" onclick="Core.open('CLIENTS')">← RETOUR</button>
-            <div class="card"><h4>Historique : ${name}</h4></div><div class="archive-grid">`;
-            
-        if(docs.length === 0) html += `<div style="grid-column:1/-1; text-align:center; opacity:0.5; padding:20px;">Aucun document pour ce client.</div>`;
+        let html = `<button class="btn btn-outline" style="margin-bottom:20px; padding:8px 16px; font-size:13px;" onclick="Core.open('CLIENTS')">${SVG.arrowLeft} Retour</button>
+                    <div class="form-card"><h4>Dossier : ${name}</h4></div><div class="data-list">`;
+        if(docs.length === 0) html += `<div class="form-card" style="text-align:center; border-style:dashed;">Aucune facture pour ce client.</div>`;
         else html += docs.map(h => this.archItem(h, h.originalIdx)).join('');
-        
-        html += `</div>`;
-        c.innerHTML = html;
+        c.innerHTML = html + `</div>`;
     },
-    
     filterCli(val) { this.renderClientList(val); },
 
     renderSettings(c) {
-        c.innerHTML = `<div class="card"><h4>Apparence</h4><div style="display:flex; gap:10px;"><button class="theme-btn" style="background:#D32F2F;" onclick="Core.updateCol('red', '#D32F2F')"></button><button class="theme-btn" style="background:#1976D2;" onclick="Core.updateCol('red', '#1976D2')"></button><button class="theme-btn" style="background:#388E3C;" onclick="Core.updateCol('red', '#388E3C')"></button></div></div><div class="card"><h4>Cloud Sync (Google)</h4><p style="font-size:12px; opacity:0.7; margin-bottom:15px; color:var(--text-sec);">Dernière synchro : ${this.state.lastSync}</p><button class="btn" style="width:100%; background:#27ae60;" onclick="Core.pushToCloud(true)">☁️ SAUVEGARDER MAINTENANT</button><button class="btn" style="width:100%; background:#34495e; margin-top:10px;" onclick="Core.pullFromCloud()">🔄 RESTAURER DEPUIS LE DRIVE</button></div>`;
+        c.innerHTML = `
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <span>Documents Générés</span>
+                    <strong id="stat-docs">${this.state.db.history.length}</strong>
+                </div>
+                <div class="stat-card">
+                    <span>Trajets / RDV</span>
+                    <strong id="stat-trajets">${this.state.db.planning.length}</strong>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <h4>Personnalisation & Affichage</h4>
+                
+                <div class="input-group" style="margin-bottom:16px;">
+                    <label>Couleur Principale</label>
+                    <div style="display:flex; gap:12px; margin-top:8px;">
+                        <div class="theme-btn" style="background:#dc2626; border:none;" onclick="Core.updateCol('red', '#dc2626')"></div>
+                        <div class="theme-btn" style="background:#2563eb; border:none;" onclick="Core.updateCol('red', '#2563eb')"></div>
+                        <div class="theme-btn" style="background:#16a34a; border:none;" onclick="Core.updateCol('red', '#16a34a')"></div>
+                        <div class="theme-btn" style="background:#8b5cf6; border:none;" onclick="Core.updateCol('red', '#8b5cf6')"></div>
+                        <div class="theme-btn" style="background:#f59e0b; border:none;" onclick="Core.updateCol('red', '#f59e0b')"></div>
+                        <div class="theme-btn" style="background:#000000; border:none;" onclick="Core.updateCol('red', '#000000')"></div>
+                    </div>
+                </div>
+
+                <div class="input-group" style="margin-bottom:16px;">
+                    <label>Police d'écriture</label>
+                    <select onchange="Core.changeFont(this.value)">
+                        <option value="Inter" ${this.state.font === 'Inter' ? 'selected' : ''}>Inter (Moderne & Propre)</option>
+                        <option value="Poppins" ${this.state.font === 'Poppins' ? 'selected' : ''}>Poppins (Arrondie & Premium)</option>
+                        <option value="Roboto" ${this.state.font === 'Roboto' ? 'selected' : ''}>Roboto (Classique Google)</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-outline" style="width:100%; margin-top:10px;" onclick="Core.toggleTheme()">${SVG.moon} Basculer Mode Clair / Sombre</button>
+            </div>
+
+            <div class="form-card">
+                <h4>Système Cloud & Sécurité</h4>
+                <button id="btn-sync" class="btn" style="width:100%; background:#10B981; margin-bottom:16px;" onclick="Core.forceSync()">${SVG.sync} Forcer la Synchronisation Cloud</button>
+                <button class="btn btn-outline" style="width:100%; border-color:var(--primary); color:var(--primary);" onclick="Core.logout()">${SVG.lock} Verrouiller l'application</button>
+            </div>`;
     },
 
-    renderAcquit(c) { c.innerHTML = `<div class="card"><h4>Tampon Acquittée</h4><input type="file" id="pdf-up" accept="application/pdf" style="padding:40px; border:2px dashed var(--gold); background:var(--input-bg);"><button class="btn" style="width:100%; margin-top:20px;" onclick="Core.doStamp()">APPLIQUER TAMPON</button></div>`; },
+    renderAcquit(c) { 
+        c.innerHTML = `
+        <div class="form-card">
+            <h4>Tampon "ACQUITTÉE"</h4>
+            <div class="input-group" style="margin-bottom:16px;">
+                <label>Document PDF</label>
+                <input type="file" id="pdf-up" accept="application/pdf" style="padding:40px 20px; text-align:center; border:2px dashed var(--border); cursor:pointer;">
+            </div>
+            <div class="input-group" style="margin-bottom:16px;">
+                <label>Position du tampon</label>
+                <select id="stamp-pos">
+                    <option value="tr">En haut à droite</option>
+                    <option value="br">En bas à droite</option>
+                    <option value="bl">En bas à gauche</option>
+                    <option value="c">Au centre</option>
+                </select>
+            </div>
+            <button class="btn" style="width:100%; margin-top:10px;" onclick="Core.doStamp()">${SVG.check} Appliquer et Télécharger</button>
+        </div>`; 
+    },
     
     async doStamp() {
-        const f=document.getElementById('pdf-up').files[0]; if(!f) return;
-        const r=new FileReader(); r.onload=async function(){
-            const doc=await PDFLib.PDFDocument.load(new Uint8Array(this.result));
-            const page=doc.getPages()[0]; const {width, height}=page.getSize();
-            page.drawText("ACQUITTÉE", { x: width - 180, y: height - 70, size: 26, color: PDFLib.rgb(0.8, 0.1, 0.1), font: await doc.embedFont(PDFLib.StandardFonts.HelveticaBold) });
-            const out=await doc.save(); const l=document.createElement("a"); l.href=URL.createObjectURL(new Blob([out],{type:"application/pdf"})); l.download=`ACQUITTEE.pdf`; l.click();
-        }; r.readAsArrayBuffer(f);
+        const f = document.getElementById('pdf-up').files[0]; 
+        if(!f) return alert("Veuillez sélectionner un document PDF.");
+        const pos = document.getElementById('stamp-pos').value;
+        
+        const r = new FileReader(); 
+        r.onload = async function() {
+            try {
+                const doc = await PDFLib.PDFDocument.load(new Uint8Array(this.result));
+                const page = doc.getPages()[0]; 
+                const {width, height} = page.getSize();
+                
+                let x = width - 180; let y = height - 70;
+                if (pos === 'tr') { x = width - 180; y = height - 70; }
+                else if (pos === 'br') { x = width - 180; y = 50; }
+                else if (pos === 'bl') { x = 50; y = 50; }
+                else if (pos === 'c') { x = width / 2 - 80; y = height / 2; }
+                
+                page.drawText("ACQUITTÉE", { x: x, y: y, size: 26, color: PDFLib.rgb(0.8, 0.1, 0.1), font: await doc.embedFont(PDFLib.StandardFonts.HelveticaBold) });
+                const out = await doc.save(); const l = document.createElement("a"); l.href = URL.createObjectURL(new Blob([out], {type: "application/pdf"})); l.download = `ACQUITTEE_${f.name}`; l.click();
+            } catch(e) { alert("Impossible d'appliquer le tampon."); }
+        }; 
+        r.readAsArrayBuffer(f);
     },
 
-    async pushToCloud(show) {
-        const d = { clients: this.state.db.clients, history: this.state.db.history, colors: this.state.colors };
-        try { await fetch(CLOUD_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(d) }); this.state.lastSync = new Date().toLocaleString(); localStorage.setItem('mse_last_sync', this.state.lastSync); if(show) alert("✅ Données sécurisées sur Google Drive !"); } catch(e) { if(show) alert("❌ Erreur de connexion Cloud"); }
+    renderPlanningList() {
+        const list = document.getElementById('rdv-list');
+        if(!list) return;
+        if (this.state.db.planning.length === 0) { list.innerHTML = `<div class="form-card" style="text-align:center; padding:30px; border-style:dashed;">Aucun rendez-vous prévu.</div>`; return; }
+        
+        list.innerHTML = this.state.db.planning.map(d => {
+            return `
+            <div class="data-item" style="border-left:4px solid var(--primary); display:block; padding-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <span style="font-weight:700; font-size:15px; word-break:break-word;">${d.task}</span>
+                    <span style="font-size:12px; font-weight:600; color:var(--primary); background:var(--bg-body); padding:4px 8px; border-radius:4px; white-space:nowrap;">${new Date(d.time).toLocaleString('fr-FR')}</span>
+                </div>
+                <div style="font-size:13px; color:var(--text-muted); margin-bottom:12px; word-break:break-word;">${SVG.pinSm} ${d.loc || 'Non spécifiée'}</div>
+                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                    <button class="btn btn-outline" style="padding:6px 12px; font-size:12px;" onclick="Core.editRDV('${d.id}')">${SVG.editSm} Modifier</button>
+                    <button class="btn btn-outline" style="padding:6px 12px; font-size:12px; color:#dc2626; border-color:#dc2626;" onclick="Core.deleteRDV('${d.id}')">${SVG.trash}</button>
+                </div>
+            </div>`;
+        }).join('');
     },
 
-    async pullFromCloud() {
-        if(!confirm("Attention : Cela va écraser les données locales par celles du Cloud.")) return;
-        try { const res = await fetch(CLOUD_URL); const data = await res.json(); this.state.db = { clients: data.clients || [], history: data.history || [] }; this.state.colors = data.colors || this.state.colors; this.sync(); location.reload(); } catch(e) { alert("❌ Impossible de récupérer les données."); }
+    async renderPlanning(c) {
+        c.innerHTML = `
+            <div class="form-card">
+                <h4 id="planning-form-title">Nouveau Rendez-vous</h4>
+                <div class="form-grid-2">
+                    <div class="input-group"><label>Intervention</label><input type="text" id="p-task" placeholder="ex: Dépannage Serrure"></div>
+                    <div class="input-group"><label>Date & Heure</label><input type="datetime-local" id="p-time"></div>
+                </div>
+                <div class="input-group" style="margin-bottom:16px;"><label>Adresse Complète (Pour Maps)</label><input type="text" id="p-loc" placeholder="ex: 12 Rue de Paris, 75000"></div>
+                <div style="display:flex; gap:10px;">
+                    <button id="btn-save-rdv" class="btn" style="flex:1;" onclick="Core.saveRDV()">${SVG.save} Ajouter au Planning</button>
+                    <button id="btn-cancel-rdv" class="btn btn-outline" style="display:none;" onclick="Core.cancelEditRDV()">Annuler</button>
+                </div>
+            </div>
+            <h4 style="margin-bottom:15px; font-size:14px; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Planning à venir</h4>
+            <div class="data-list" id="rdv-list">Chargement...</div>`;
+        this.renderPlanningList();
     },
 
-    updateCol(k, v) { this.state.colors[k] = v; localStorage.setItem('mse_colors', JSON.stringify(this.state.colors)); this.applyStyle(); },
-    sync() { localStorage.setItem('mse_clients', JSON.stringify(this.state.db.clients)); localStorage.setItem('mse_history', JSON.stringify(this.state.db.history)); },
-    toggleTheme() { document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+    async saveRDV() {
+        const task = document.getElementById('p-task').value;
+        const loc = document.getElementById('p-loc').value;
+        const time = document.getElementById('p-time').value;
+        if(!task || !time || !loc) return alert("Remplissez tous les champs.");
+        
+        try {
+            if (this.state.currentEditRDV) {
+                await window.fb.updateDoc(window.fb.doc(window.dbFirebase, "planning", this.state.currentEditRDV), { task, loc, time });
+                this.cancelEditRDV();
+            } else {
+                await window.fb.addDoc(window.fb.collection(window.dbFirebase, "planning"), { task, loc, time, user: USER.name });
+                document.getElementById('p-task').value = ""; document.getElementById('p-loc').value = ""; document.getElementById('p-time').value = "";
+            }
+        } catch(e) { alert("Erreur d'enregistrement."); }
+    },
+
+    editRDV(id) {
+        const rdv = this.state.db.planning.find(p => p.id === id);
+        if(!rdv) return;
+        this.state.currentEditRDV = id;
+        document.getElementById('p-task').value = rdv.task;
+        document.getElementById('p-loc').value = rdv.loc;
+        document.getElementById('p-time').value = rdv.time;
+        
+        document.getElementById('planning-form-title').innerText = "Modifier Rendez-vous";
+        document.getElementById('btn-save-rdv').innerHTML = SVG.save + " Mettre à jour";
+        document.getElementById('btn-cancel-rdv').style.display = "block";
+        document.querySelector('.window').scrollTo({ top: 0, behavior: 'smooth' });
+    },
+
+    cancelEditRDV() {
+        this.state.currentEditRDV = null;
+        document.getElementById('p-task').value = ""; document.getElementById('p-loc').value = ""; document.getElementById('p-time').value = "";
+        document.getElementById('planning-form-title').innerText = "Nouveau Rendez-vous";
+        document.getElementById('btn-save-rdv').innerHTML = SVG.save + " Ajouter au Planning";
+        document.getElementById('btn-cancel-rdv').style.display = "none";
+    },
+
+    async deleteRDV(id) {
+        if(!confirm("Supprimer ce rendez-vous ?")) return;
+        try {
+            await window.fb.deleteDoc(window.fb.doc(window.dbFirebase, "planning", id));
+            if (this.state.currentEditRDV === id) this.cancelEditRDV();
+        } catch(e) { alert("Erreur de suppression."); }
+    },
+
+    renderMaps(c) {
+        c.innerHTML = `
+            <div class="form-card">
+                <h4>Optimisation de la tournée</h4>
+                <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Génère l'itinéraire le plus rapide avec les RDVs Cloud d'aujourd'hui.</p>
+                <button class="btn" style="width:100%; background:var(--text-main);" onclick="Core.calcTournee()">Optimiser la tournée</button>
+            </div>
+            <div class="form-card">
+                <h4>Calcul Manuel</h4>
+                <div class="form-grid-2" style="margin-bottom:16px;">
+                    <input type="text" id="route-start" placeholder="Point A (Départ)">
+                    <input type="text" id="route-end" placeholder="Point B (Arrivée)">
+                </div>
+                <button class="btn btn-outline" style="width:100%;" onclick="Core.calcRoute()">Calculer ce trajet</button>
+            </div>
+            <div id="map-container"></div>
+            <div id="route-instructions"></div>`;
+        
+        setTimeout(() => {
+            if (typeof google === 'undefined') { document.getElementById('map-container').innerHTML = "<div style='padding:40px; text-align:center;'>Service de cartographie non disponible.</div>"; return; }
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const mapStyle = isDark ? [{ "elementType": "geometry", "stylers": [{ "color": "#1f2937" }] }, { "elementType": "labels.text.stroke", "stylers": [{ "color": "#1f2937" }] }, { "elementType": "labels.text.fill", "stylers": [{ "color": "#9ca3af" }] }, { "featureType": "road", "elementType": "geometry", "stylers": [{ "color": "#374151" }] }] : [];
+
+            this.map = new google.maps.Map(document.getElementById('map-container'), { center: { lat: 48.8566, lng: 2.3522 }, zoom: 11, styles: mapStyle, disableDefaultUI: true });
+            this.directionsService = new google.maps.DirectionsService();
+            this.directionsRenderer = new google.maps.DirectionsRenderer({ map: this.map });
+            this.directionsRenderer.setPanel(document.getElementById('route-instructions'));
+        }, 300);
+    },
+
+    calcRoute() {
+        const start = document.getElementById('route-start').value; const end = document.getElementById('route-end').value;
+        if(!start || !end) return alert("Saisissez les adresses.");
+        this.directionsService.route({ origin: start, destination: end, travelMode: 'DRIVING' }, (res, status) => { if (status === 'OK') this.directionsRenderer.setDirections(res); });
+    },
+
+    async calcTournee() {
+        if (!this.directionsService) return;
+        try {
+            const today = new Date().toISOString().split('T')[0]; const points = [];
+            this.state.db.planning.forEach(d => { if (d.time.startsWith(today) && d.loc) points.push(d.loc); });
+            if (points.length < 2) return alert("Pas assez de RDV avec adresse aujourd'hui.");
+            
+            const waypoints = points.slice(1, -1).map(loc => ({ location: loc, stopover: true }));
+            this.directionsService.route({ origin: points[0], destination: points[points.length - 1], waypoints: waypoints, optimizeWaypoints: true, travelMode: 'DRIVING' }, (res, status) => { if (status === 'OK') this.directionsRenderer.setDirections(res); });
+        } catch (e) { alert("Erreur d'accès aux données."); }
+    }
 };
 Core.init();
 </script>
