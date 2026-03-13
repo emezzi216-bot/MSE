@@ -1,9 +1,12 @@
 {
-  "name": "MSE",
+  "name": "MSE - Gestion Élite",
   "short_name": "MSE",
+  "description": "Application professionnelle de gestion MSE : facturation, planning cloud et optimisation de trajets.",
+  "id": "com.mse.gestion.app",
   "start_url": "/MSE/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "background_color": "#f3f4f6",
   "theme_color": "#dc2626",
   "icons": [
     {
